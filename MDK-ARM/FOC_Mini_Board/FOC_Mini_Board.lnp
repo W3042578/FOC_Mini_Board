@@ -16,6 +16,7 @@
 "foc_mini_board\usart.o"
 "foc_mini_board\stm32f1xx_it.o"
 "foc_mini_board\stm32f1xx_hal_msp.o"
+"foc_mini_board\oled.o"
 "foc_mini_board\stm32f1xx_hal_gpio_ex.o"
 "foc_mini_board\stm32f1xx_hal_adc.o"
 "foc_mini_board\stm32f1xx_hal_adc_ex.o"
