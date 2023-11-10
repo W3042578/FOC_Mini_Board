@@ -15,14 +15,14 @@ void Current_PID_Init(FOC_PID *foc_pid)
 	foc_pid->Error = 0;
 	foc_pid->Last_Error = 0;
 	
-	foc_pid->Error_Low_Limit = -Motor1.Udc *9459;
-	foc_pid->Error_Upper_Limit = Motor1.Udc * 9459;		//误差上限  9459 = 16384/sqrt(3)
-	foc_pid->Integral_Low_Limit = -Motor1.Udc *9459;
-	foc_pid->Integral_Upper_Limit = Motor1.Udc *9459;
-	foc_pid->Different_Low_Limit = -16384;
-	foc_pid->Different_Upper_Limit = 16384;
-	foc_pid->Output_Low_Limit = -Motor1.Udc *9459;
-	foc_pid->Output_Upper_Limit = Motor1.Udc * 9459;
+	foc_pid->Error_Low_Limit = -Motor1.Udc *200;
+	foc_pid->Error_Upper_Limit = Motor1.Udc * 200;		//误差上限  9459 = 16384/sqrt(3)
+	foc_pid->Integral_Low_Limit = -5000;
+	foc_pid->Integral_Upper_Limit = 5000;
+	foc_pid->Different_Low_Limit = -5000;
+	foc_pid->Different_Upper_Limit = 5000;
+	foc_pid->Output_Low_Limit = -Motor1.Udc *500;
+	foc_pid->Output_Upper_Limit = Motor1.Udc * 500;
 	
 	Loop_Time_Count = 0;
 }
@@ -34,7 +34,7 @@ void Speed_PID_Init(FOC_PID *foc_pid)
 	
 	foc_pid->Error = 0;
 	foc_pid->Last_Error = 0;
-	
+	 
 	foc_pid->Error_Low_Limit = -600;
 	foc_pid->Error_Upper_Limit = 600;
 	foc_pid->Integral_Low_Limit = -2000;

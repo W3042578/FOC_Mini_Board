@@ -200,7 +200,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
-
+#include "main.h"
 /** @addtogroup STM32F1xx_HAL_Driver
   * @{
   */
@@ -1884,6 +1884,7 @@ error:
   return errorcode;
 }
 
+
 /**
   * @brief  Transmit and Receive an amount of data in non-blocking mode with DMA.
   * @param  hspi pointer to a SPI_HandleTypeDef structure that contains
@@ -2017,7 +2018,9 @@ HAL_StatusTypeDef HAL_SPI_TransmitReceive_DMA(SPI_HandleTypeDef *hspi, uint8_t *
   }
   /* Enable the SPI Error Interrupt Bit */
   __HAL_SPI_ENABLE_IT(hspi, (SPI_IT_ERR));
-
+	//开始DMA发送前数据时拉低NSS片选脚，尽可能减短发送拉低片选信号到实际发送数据的时间
+	//参考https://blog.csdn.net/chenyuanlidejiyi/article/details/121639160
+	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_RESET);
   /* Enable Tx DMA Request */
   SET_BIT(hspi->Instance->CR2, SPI_CR2_TXDMAEN);
 

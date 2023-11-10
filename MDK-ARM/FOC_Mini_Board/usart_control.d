@@ -1,5 +1,5 @@
-foc_mini_board\usart_control.o: usart_control.c
-foc_mini_board\usart_control.o: usart_control.h
+foc_mini_board\usart_control.o: Application\usart_control.c
+foc_mini_board\usart_control.o: Application\usart_control.h
 foc_mini_board\usart_control.o: ../Inc/main.h
 foc_mini_board\usart_control.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 foc_mini_board\usart_control.o: ../Inc/stm32f1xx_hal_conf.h
@@ -33,7 +33,8 @@ foc_mini_board\usart_control.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_ha
 foc_mini_board\usart_control.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 foc_mini_board\usart_control.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 foc_mini_board\usart_control.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
-foc_mini_board\usart_control.o: ../MDK-ARM/modbus.h
+foc_mini_board\usart_control.o: ./Application/modbus.h
 foc_mini_board\usart_control.o: ../Inc/main.h
+foc_mini_board\usart_control.o: ../Inc/hal_my.h
 foc_mini_board\usart_control.o: ../Inc/tim.h
-foc_mini_board\usart_control.o: object_commicate.h
+foc_mini_board\usart_control.o: Application\object_commicate.h

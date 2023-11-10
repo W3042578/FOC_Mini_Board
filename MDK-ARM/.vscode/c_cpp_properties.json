@@ -10,6 +10,9 @@
                 "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\Drivers\\CMSIS\\Include",
                 "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\MDK-ARM\\FOC_Mini_Board",
                 "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\MDK-ARM",
+                "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\MDK-ARM\\Algorithm",
+                "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\MDK-ARM\\Application",
+                "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\MDK-ARM\\SSD1306",
                 "D:\\keil\\ARM\\ARMCC\\include",
                 "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\Src",
                 "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\Drivers\\STM32F1xx_HAL_Driver\\Src"

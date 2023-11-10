@@ -31,3 +31,7 @@ foc_mini_board\stm32f1xx_hal_adc_ex.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32
 foc_mini_board\stm32f1xx_hal_adc_ex.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 foc_mini_board\stm32f1xx_hal_adc_ex.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 foc_mini_board\stm32f1xx_hal_adc_ex.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
+foc_mini_board\stm32f1xx_hal_adc_ex.o: ../Inc/main.h
+foc_mini_board\stm32f1xx_hal_adc_ex.o: ./Application/modbus.h
+foc_mini_board\stm32f1xx_hal_adc_ex.o: ../Inc/main.h
+foc_mini_board\stm32f1xx_hal_adc_ex.o: ../Inc/hal_my.h

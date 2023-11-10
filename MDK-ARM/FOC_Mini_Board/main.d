@@ -1,4 +1,4 @@
-foc_mini_board\main.o: ../Src/main.c
+foc_mini_board\main.o: ..\Src\main.c
 foc_mini_board\main.o: ../Inc/main.h
 foc_mini_board\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 foc_mini_board\main.o: ../Inc/stm32f1xx_hal_conf.h
@@ -32,8 +32,9 @@ foc_mini_board\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h
 foc_mini_board\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 foc_mini_board\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 foc_mini_board\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
-foc_mini_board\main.o: ../MDK-ARM/modbus.h
+foc_mini_board\main.o: ./Application/modbus.h
 foc_mini_board\main.o: ../Inc/main.h
+foc_mini_board\main.o: ../Inc/hal_my.h
 foc_mini_board\main.o: ../Inc/adc.h
 foc_mini_board\main.o: ../Inc/dma.h
 foc_mini_board\main.o: ../Inc/i2c.h
@@ -42,8 +43,8 @@ foc_mini_board\main.o: ../Inc/tim.h
 foc_mini_board\main.o: ../Inc/usart.h
 foc_mini_board\main.o: ../Inc/gpio.h
 foc_mini_board\main.o: D:\keil\ARM\ARM_Compiler_5.06u7\Bin\..\include\stdio.h
-foc_mini_board\main.o: ../MDK-ARM/foc.h
-foc_mini_board\main.o: ../MDK-ARM/usart_control.h
-foc_mini_board\main.o: ../MDK-ARM/sin_cos.h
-foc_mini_board\main.o: ../MDK-ARM/object_commicate.h
-foc_mini_board\main.o: ../MDK-ARM/control_loop.h
+foc_mini_board\main.o: ./Algorithm/foc.h
+foc_mini_board\main.o: ./Application/usart_control.h
+foc_mini_board\main.o: ./Algorithm/sin_cos.h
+foc_mini_board\main.o: ./Application/object_commicate.h
+foc_mini_board\main.o: ./Algorithm/control_loop.h

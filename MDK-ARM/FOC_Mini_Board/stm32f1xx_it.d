@@ -32,11 +32,12 @@ foc_mini_board\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal
 foc_mini_board\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 foc_mini_board\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 foc_mini_board\stm32f1xx_it.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
-foc_mini_board\stm32f1xx_it.o: ../MDK-ARM/modbus.h
+foc_mini_board\stm32f1xx_it.o: ./Application/modbus.h
 foc_mini_board\stm32f1xx_it.o: ../Inc/main.h
+foc_mini_board\stm32f1xx_it.o: ../Inc/hal_my.h
 foc_mini_board\stm32f1xx_it.o: ../Inc/stm32f1xx_it.h
 foc_mini_board\stm32f1xx_it.o: D:\keil\ARM\ARM_Compiler_5.06u7\Bin\..\include\stdio.h
 foc_mini_board\stm32f1xx_it.o: ../Inc/adc.h
-foc_mini_board\stm32f1xx_it.o: ../MDK-ARM/foc.h
+foc_mini_board\stm32f1xx_it.o: ./Algorithm/foc.h
 foc_mini_board\stm32f1xx_it.o: ../Inc/spi.h
-foc_mini_board\stm32f1xx_it.o: ../MDK-ARM/usart_control.h
+foc_mini_board\stm32f1xx_it.o: ./Application/usart_control.h

@@ -67,6 +67,16 @@ union _Error_Message
 		}bits;
 };
 
+union _Work_Status
+{
+		uint16_t All;
+		struct
+		{
+			uint8_t Encoder_Current_Offest:1;//编码器和电流获取修正值状态
+			
+			
+		}bits;	
+};
 //通讯变量数目
 extern uint16_t Commicate_Data_All_Number;
 extern const commicate_code Commicate_Code[];
@@ -75,12 +85,9 @@ extern const commicate_code Commicate_Code[];
 extern	_Control_Word Control_Data; 
 extern	_Control_Loop	Control_Loop;
 extern	union _Error_Message Error_Message;
+extern  union _Work_Status Work_Stauts;
 
 
-
-//通讯变量测试
-extern uint16_t test_one;
-extern uint16_t test_two;
 
 
 uint16_t Get_Communicte_Data_Number(void);

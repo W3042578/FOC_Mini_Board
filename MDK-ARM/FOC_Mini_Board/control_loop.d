@@ -1,5 +1,5 @@
-foc_mini_board\control_loop.o: control_loop.c
-foc_mini_board\control_loop.o: control_loop.h
+foc_mini_board\control_loop.o: Algorithm\control_loop.c
+foc_mini_board\control_loop.o: Algorithm\control_loop.h
 foc_mini_board\control_loop.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 foc_mini_board\control_loop.o: ../Inc/stm32f1xx_hal_conf.h
 foc_mini_board\control_loop.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
@@ -34,8 +34,9 @@ foc_mini_board\control_loop.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal
 foc_mini_board\control_loop.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 foc_mini_board\control_loop.o: D:\keil\ARM\ARM_Compiler_5.06u7\Bin\..\include\math.h
 foc_mini_board\control_loop.o: ../Inc/main.h
-foc_mini_board\control_loop.o: ../MDK-ARM/modbus.h
+foc_mini_board\control_loop.o: ./Application/modbus.h
 foc_mini_board\control_loop.o: ../Inc/main.h
-foc_mini_board\control_loop.o: foc.h
+foc_mini_board\control_loop.o: ../Inc/hal_my.h
+foc_mini_board\control_loop.o: Algorithm\foc.h
 foc_mini_board\control_loop.o: ../Inc/spi.h
-foc_mini_board\control_loop.o: usart_control.h
+foc_mini_board\control_loop.o: ./Application/usart_control.h

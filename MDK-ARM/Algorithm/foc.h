@@ -26,7 +26,7 @@ typedef struct _FOC_MOTOR
 	int8_t Udc;									//母线电压
 	int32_t Ud,Uq;
 	int32_t Ualph,Ubeta;
-	int16_t Ia,Ib,Ic;
+	int16_t Ia,Ib;
 	int16_t Ia_Offect,Ib_Offect;
 	int16_t Ialph,Ibeta;
 	int16_t Id,Iq;
@@ -62,6 +62,8 @@ typedef struct _FOC_MOTOR
 
 //电机结构体变量
 extern FOC_Motor Motor1;
+extern uint16_t Tx_Encoder[2];
+extern uint16_t Rx_Encoder[2];
 
 void FOC_Motor_Init(FOC_Motor *motor);
 uint16_t Get_Angle_MT6813(FOC_Motor *motor);

@@ -1,4 +1,4 @@
-foc_mini_board\modbus.o: modbus.c
+foc_mini_board\modbus.o: Application\modbus.c
 foc_mini_board\modbus.o: ../Inc/main.h
 foc_mini_board\modbus.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 foc_mini_board\modbus.o: ../Inc/stm32f1xx_hal_conf.h
@@ -32,8 +32,9 @@ foc_mini_board\modbus.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h
 foc_mini_board\modbus.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 foc_mini_board\modbus.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 foc_mini_board\modbus.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
-foc_mini_board\modbus.o: ../MDK-ARM/modbus.h
+foc_mini_board\modbus.o: ./Application/modbus.h
 foc_mini_board\modbus.o: ../Inc/main.h
+foc_mini_board\modbus.o: ../Inc/hal_my.h
 foc_mini_board\modbus.o: D:\keil\ARM\ARM_Compiler_5.06u7\Bin\..\include\string.h
-foc_mini_board\modbus.o: object_commicate.h
-foc_mini_board\modbus.o: usart_control.h
+foc_mini_board\modbus.o: Application\object_commicate.h
+foc_mini_board\modbus.o: Application\usart_control.h

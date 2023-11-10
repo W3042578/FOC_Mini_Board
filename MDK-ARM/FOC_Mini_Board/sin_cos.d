@@ -1,4 +1,4 @@
-foc_mini_board\sin_cos.o: sin_cos.c
+foc_mini_board\sin_cos.o: Algorithm\sin_cos.c
 foc_mini_board\sin_cos.o: ../Inc/main.h
 foc_mini_board\sin_cos.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 foc_mini_board\sin_cos.o: ../Inc/stm32f1xx_hal_conf.h
@@ -32,6 +32,7 @@ foc_mini_board\sin_cos.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.
 foc_mini_board\sin_cos.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 foc_mini_board\sin_cos.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 foc_mini_board\sin_cos.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
-foc_mini_board\sin_cos.o: ../MDK-ARM/modbus.h
+foc_mini_board\sin_cos.o: ./Application/modbus.h
 foc_mini_board\sin_cos.o: ../Inc/main.h
-foc_mini_board\sin_cos.o: sin_cos.h
+foc_mini_board\sin_cos.o: ../Inc/hal_my.h
+foc_mini_board\sin_cos.o: Algorithm\sin_cos.h

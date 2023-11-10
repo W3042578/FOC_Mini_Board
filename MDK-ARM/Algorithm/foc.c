@@ -9,6 +9,7 @@
 #include "usart_control.h"
 #include "control_loop.h"
 #include "object_commicate.h"
+#include "hal_my.h"
 
 //FOC_Motor 结构体变量初始化
 //7极对数
@@ -21,7 +22,7 @@
 void FOC_Motor_Init(FOC_Motor *motor)
 {
 	motor->Polar = 11;
-	motor->Ts = 1480;
+	motor->Ts = 2130;//16k频率  满额2249  119*2的采样时间
 	motor->Udc = 12;
 	motor->Last_Encoder = 0;
 	motor->Ts_Limit = motor->Ts ;
@@ -52,13 +53,16 @@ void Inverse_Park_Transform(FOC_Motor *motor)
 //参考自 https://blog.csdn.net/qq_41610710/article/details/120512746
 void SVPWM(FOC_Motor *motor)
 {
-	//幅值限制，避免过调制不成圆形,0.9375为考虑电流检测时，上下桥均有导通允许采样考虑	
-	motor->Uref = (motor->Ualph * motor->Ualph + motor->Ubeta * motor->Ubeta)>>14;
-	if(motor->Uref > 0.33 * ((motor->Udc * motor->Udc)<<14))
-	{
-		motor->Ualph = (motor->Ualph * motor->Udc *motor->Udc)/motor->Uref;//正常限制调制圆应该是开根号取比例，此处节省计算使用平方取完比例会略小
-		motor->Ubeta = (motor->Ubeta * motor->Udc *motor->Udc)/motor->Uref;
-	}
+	//Tx与Ty已有过调制限制，此处弃用
+	//幅值限制，避免过调制不成圆形,参考电压为 sqrt(3)/2 * 2/3 *Udc	= sqrt(3)*Udc/3
+	//由三角形余弦定理  给出调制限制 六边形内切圆  
+	//统一以 1024Dec:1V 作为标幺计算   
+	// motor->Uref = (motor->Ualph * motor->Ualph + motor->Ubeta * motor->Ubeta)>>14;
+	// if(motor->Uref > ((motor->Udc * motor->Udc)<<14))
+	// {
+	// 	motor->Ualph = (motor->Ualph * motor->Udc *motor->Udc)/motor->Uref;//正常限制调制圆应该是开根号取比例，此处节省计算使用平方取完比例会略小
+	// 	motor->Ubeta = (motor->Ubeta * motor->Udc *motor->Udc)/motor->Uref;
+	// }
 	
 	//扇区判断
 	motor->U1 = motor->Ubeta;
@@ -80,6 +84,7 @@ void SVPWM(FOC_Motor *motor)
 	motor->Sector_Add = motor->Sa + (motor->Sb<<1) + (motor->Sc<<2);
 	
 	//计算矢量作用时间,注意motor->Tx，motor->Ty先后发生对应的电压矢量
+	//！！改用定时器最大计数值进行计算，标幺化
 	motor->m32 =(1774 * motor->Ts/motor->Udc) >>10;// motor->Udc 没有放大，1774/1024=sqrt(3) 将m放大14位使m与U1,U2,U3同放大单位
 	switch(motor->Sector_Add)
 	{
@@ -119,7 +124,7 @@ void SVPWM(FOC_Motor *motor)
 			motor->Ty = 0;
 			break;
 	}
-	if((motor->Tx + motor->Ty)>motor->Ts_Limit)
+	if((motor->Tx + motor->Ty)>motor->Ts_Limit)//调制限制 相似三角
 	{
 		motor->temp16 =motor->Tx + motor->Ty;
 		motor->Tx = motor->Tx * motor->Ts_Limit / motor->temp16;
@@ -171,40 +176,30 @@ void Set_Motor_Channel_Time(FOC_Motor *motor)
 {
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor->Ta);
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor->Tb);
-	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor->Tc);
-	
+	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor->Tc);	
 }
 
 //获取编码器角度值
 //单位：编码值 2~14   14位编码器
+//！！改进要求DMA传输  尽可能缩短通讯时间  作编码器角度迟滞补偿
 uint16_t Get_Angle_MT6813(FOC_Motor *motor)
 {
 	uint16_t Angle;
 	uint16_t Angle_Transfer[2];
-	uint16_t Tx_Data[2];
-	uint8_t Rx_Data[2];
-	uint8_t * Tx_Data1 = (uint8_t *)&Tx_Data[0];
-	uint8_t * Tx_Data2 = (uint8_t *)&Tx_Data[1];
-	Tx_Data[0] = 0x8300;//MT6813读取寄存器地址，高位在前先发送，注意16位数据
-	Tx_Data[1] = 0X8400;//MT6813读取寄存器地址，高位在前先发送
-	//第一个寄存器数据
-	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_RESET); //SPI片选脚置低
-	HAL_SPI_Transmit(&hspi1,Tx_Data1,1,10);
-	HAL_SPI_Receive(&hspi1,&Rx_Data[0],1,10);
-	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET);
-	//第二个寄存器数据
-	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_RESET);
-	HAL_SPI_Transmit(&hspi1,Tx_Data2,1,10);
-	HAL_SPI_Receive(&hspi1,&Rx_Data[1],1,10);
-	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET);
-	
-//	Transfer1 = Rx_Data[0];
+	HAL_SPI_TransmitReceive_DMA(&hspi1,(uint8_t*)Tx_Encoder,(uint8_t*)Rx_Encoder,2);   //数据发送接占用较多时间，实际时间需要控制在 62.5/2 - 6usADC  = 25us内  
+//	HAL_SPI_TransmitReceive_DMA(&hspi1,&Tx_Encoder[2],&Rx_Encoder[2],2);
+	Rx_Encoder[0] = Rx_Encoder[0] << 8;
+	Rx_Encoder[1] = Rx_Encoder[1] >> 8;
+	Transfer1[0] = Rx_Encoder[0];
+	Transfer1[1] = Rx_Encoder[1];
+
 	//两组数据合并得出编码值,并给出编码器磁强度状态信号：1为磁场强度不足，0为正常工作
-	Angle_Transfer[0] = (((uint16_t)Rx_Data[0]) << 6) & 0x3FC0;   //数据左移6位
+	Angle_Transfer[0] = ((uint16_t)Rx_Encoder[0]) >> 2;   //数据左移6位
 	(*motor).Encoder_Tag =(uint8_t)((0x0002 & Rx_Data[1]) >>1);  		//获取第二位磁状态
-	Angle_Transfer[1] = (((uint16_t)Rx_Data[1]) >> 2) & 0x003F;			//数据左移2位
+	Angle_Transfer[1] = ((uint16_t)Rx_Encoder[1]) >> 2;			//数据左移2位
 	Angle = Angle_Transfer[0] + Angle_Transfer[1];
 	
+	Transfer1[2] = Angle & 0x3FFF;//14位编码器输出范围限制
 	return Angle;
 }
 //获取编码器修正值
@@ -271,7 +266,7 @@ void ADC_Current_Offest(FOC_Motor *motor)
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
 	
-	HAL_Delay(100);
+	HAL_Delay(1000);
 	//平均减小误差
 	for(uint8_t i = 1;i<=Number_ADC_Offect;i++)
 		{
@@ -304,7 +299,7 @@ void Get_Electrical_Angle(FOC_Motor *motor)
 		motor->Encoder = motor->Encoder - motor->Encoder_Offest;
 	//获取修正机械角度对应的电气角度（单位：度数）
 	motor->Mechanical_Angle = (360*motor->Encoder)>>14;
-	motor->Elecrical_Angle = (motor->Polar * motor->Mechanical_Angle)%360;
+	motor->Elecrical_Angle = (motor->Polar * motor->Mechanical_Angle)%360;//丢失编码器精度，角度应该到分
 	//由角度值获取对应sin、cos乘以4096值
 	motor->Sin_Angle = Get_Sin(motor->Elecrical_Angle);
 	motor->Cos_Angle = Get_Cos(motor->Elecrical_Angle);
@@ -329,7 +324,7 @@ void Get_Electrical_Angle(FOC_Motor *motor)
 //根据控制字模式选择工作模式和工作电流、电压、速度、位置要求，并判断是否使能
 void FOC_Control(FOC_Motor *motor)
 {
-	Get_Electrical_Angle(motor);
+	
 	switch(Control_Data.Work_Model)
 	{
 		case 0x00:																			//开环控制

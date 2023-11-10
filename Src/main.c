@@ -35,6 +35,7 @@
 #include "usart_control.h"
 #include "object_commicate.h"
 #include "control_loop.h"
+#include "hal_my.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -63,10 +64,11 @@ uint16_t Loop_Time_Count;
 uint8_t Tx_Data[TX_BUFF_LONG];					//定义串口接受和发送缓冲区长度
 uint8_t Rx_Data[RX_BUFF_LONG];
 
-
+uint16_t Tx_Encoder[2] = {0x8300,0x0000};  //定义6813编码器收发数据 burst模式
+uint16_t Rx_Encoder[2];
 
 //编码器获取数据查看验证
-//uint16_t Transfer1;
+uint16_t Transfer1[3];
 //uint16_t Angle_Transfer[2];
 /* USER CODE END PV */
 
@@ -179,37 +181,23 @@ int main(void)
 	//使能串口空闲中断
 	__HAL_UART_ENABLE_IT(&huart1,UART_IT_IDLE);
 	
-	Control_Data.Work_Model = 01;
+	//初始状态
+	Control_Data.Work_Model = 0;
+	Control_Data.Enable = 1;
+	Control_Data.Open_Loop_Voltage = 0;
 	
+	//开启cc4比较通道触发adc注入采样
+	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
+	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		if(Control_Data.Enable_Buffer != Control_Data.Enable)
-		{
-			if(Control_Data.Enable)
-			{
-				HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_SET);//使能drv8313
-				//开启cc4比较通道触发adc注入采样
-				HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
-				HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
-				HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
-				HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
-			}
-			else
-			{
-				HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_RESET);//关闭使能drv8313
-				HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_4);
-				HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_3);
-				HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
-				HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
-        Motor1.Speed_Filter = 0;
-        Motor1.Speed_Filter_Loop = 0;//退出使能状态清除速度滤波器值
-			}	
-			Control_Data.Enable_Buffer = Control_Data.Enable;
-		}	
+			
 //		printf("%d,%d\n",Motor1.Ia,Motor1.Ib);  //使用printf打印需要关闭串口1的空闲中断和dma传输，printf重定向串口1就是使用串口1进行简单发送接受
     /* USER CODE END WHILE */
 
@@ -272,12 +260,34 @@ void SystemClock_Config(void)
 //ADC注入采样完成回调函数
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	//获取a,b相电流采样值  反相增益所以加负号  开环给零电压测试
-	Motor1.Ia = -(HAL_ADCEx_InjectedGetValue(&hadc1,ADC_INJECTED_RANK_1) - Motor1.Ia_Offect);
-	Motor1.Ib = -(HAL_ADCEx_InjectedGetValue(&hadc2,ADC_INJECTED_RANK_1) - Motor1.Ib_Offect);
-	
-	//进行FOC控制
-	FOC_Control(&Motor1);
+	if(hadc == &hadc2)
+	{
+		//当此采样数据用于下次数据甚至下下次数据更新，具体看计算时间，控制在约25us内可以在下次执行，超出则只能在下下次执行
+		//角度获取与电流采样同周期
+		//获取a,b相电流采样值  反相增益所以加负号  开环给零电压测试
+		Motor1.Ia = -(HAL_ADCEx_InjectedGetValue(&hadc1,ADC_INJECTED_RANK_1) - Motor1.Ia_Offect);
+		Motor1.Ib = -(HAL_ADCEx_InjectedGetValue(&hadc2,ADC_INJECTED_RANK_1) - Motor1.Ib_Offect);
+		
+		//获取电角度
+		Get_Electrical_Angle(&Motor1);
+		//判断工作状态决定是否使能mos管工作
+		if(Control_Data.Enable_Buffer != Control_Data.Enable)
+		{
+				if(Control_Data.Enable)
+				{
+					HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_SET);//使能drv8313
+				}
+				else
+				{
+					HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_RESET);//关闭使能drv8313
+					Motor1.Speed_Filter = 0;
+					Motor1.Speed_Filter_Loop = 0;//退出使能状态清除速度滤波器值
+				}	
+				Control_Data.Enable_Buffer = Control_Data.Enable;
+		}
+		//进行FOC控制
+		FOC_Control(&Motor1);
+	}
 }
 //1ms中断回调函数
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -286,7 +296,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		//计算速度 1ms编码器变化数值  区分正负
     //与速度环计算速度方式保持一致  速度分区正负  由运动方向控制
-		Motor1.Encoder_Angle = 16384 - Get_Angle_MT6813(&Motor1);
+//		Motor1.Encoder_Angle = 16384 - Get_Angle_MT6813(&Motor1);
     //保证读取编码器值为正
     if(Motor1.Encoder_Angle - Motor1.Encoder_Offest < 0)
 		  Motor1.Encoder_Angle = Motor1.Encoder_Angle - Motor1.Encoder_Offest + 16384;
@@ -309,6 +319,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		Motor1.Speed_Filter = (Motor1.Speed_Filter + 3 * Motor1.Encoder_Speed_Angle)>>2;
     //此次速度作为下一次的过往速度
 		Motor1.Last_Encoder = Motor1.Encoder_Angle;
+		
+		//对外界指令进行处理  1ms处理一次
+		//响应编码器与电流重新修正
+		if(Control_Data.Encoder_Offect_Process == 1)
+		{
+			if(Control_Data.Enable_Buffer == 0) //判断此时控制器没有使能才进行校正
+			{
+				
+				Encoder_Offest(&Motor1);//编码器校正
+				ADC_Current_Offest(&Motor1);//零电流采样校正
+				Control_Data.Encoder_Offect_Process = 0;
+			}
+		}
+		
+		
 	}	
 }
 

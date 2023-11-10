@@ -32,6 +32,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "modbus.h"
+#include "hal_my.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -99,7 +100,7 @@ void Error_Handler(void);
 void uart_idleback(UART_HandleTypeDef *huart);	//串口空闲回调中断函数 具体定义放在usart.c
 
 //变量用于编码器通讯角度获取
-//extern uint16_t Transfer1;
+extern uint16_t Transfer1[3];
 //extern uint16_t Angle_Transfer[2];
 
 

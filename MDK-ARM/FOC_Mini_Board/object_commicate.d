@@ -1,4 +1,4 @@
-foc_mini_board\object_commicate.o: object_commicate.c
+foc_mini_board\object_commicate.o: Application\object_commicate.c
 foc_mini_board\object_commicate.o: ../Inc/main.h
 foc_mini_board\object_commicate.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 foc_mini_board\object_commicate.o: ../Inc/stm32f1xx_hal_conf.h
@@ -32,10 +32,11 @@ foc_mini_board\object_commicate.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx
 foc_mini_board\object_commicate.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 foc_mini_board\object_commicate.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 foc_mini_board\object_commicate.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
-foc_mini_board\object_commicate.o: ../MDK-ARM/modbus.h
+foc_mini_board\object_commicate.o: ./Application/modbus.h
 foc_mini_board\object_commicate.o: ../Inc/main.h
-foc_mini_board\object_commicate.o: object_commicate.h
-foc_mini_board\object_commicate.o: foc.h
+foc_mini_board\object_commicate.o: ../Inc/hal_my.h
+foc_mini_board\object_commicate.o: Application\object_commicate.h
+foc_mini_board\object_commicate.o: ./Algorithm/foc.h
 foc_mini_board\object_commicate.o: ../Inc/spi.h
-foc_mini_board\object_commicate.o: usart_control.h
-foc_mini_board\object_commicate.o: control_loop.h
+foc_mini_board\object_commicate.o: ./Application/usart_control.h
+foc_mini_board\object_commicate.o: ./Algorithm/control_loop.h
