@@ -54,8 +54,8 @@ void HAL_MY_DMA_IRQHandler(DMA_HandleTypeDef *hdma)
 		
     /* Process Unlocked */
     __HAL_UNLOCK(hdma);
-
 	
+		HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET);//拉高片选引脚信号，结束传输
 		
     if(hdma->XferCpltCallback != NULL)
     {

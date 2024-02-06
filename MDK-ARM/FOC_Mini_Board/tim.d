@@ -1,6 +1,6 @@
-foc_mini_board\tim.o: ../Src/tim.c
-foc_mini_board\tim.o: ../Inc/tim.h
-foc_mini_board\tim.o: ../Inc/main.h
+foc_mini_board\tim.o: Infrastructure\tim.c
+foc_mini_board\tim.o: Infrastructure\tim.h
+foc_mini_board\tim.o: Infrastructure\main.h
 foc_mini_board\tim.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 foc_mini_board\tim.o: ../Inc/stm32f1xx_hal_conf.h
 foc_mini_board\tim.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
@@ -33,6 +33,3 @@ foc_mini_board\tim.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h
 foc_mini_board\tim.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 foc_mini_board\tim.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 foc_mini_board\tim.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
-foc_mini_board\tim.o: ./Application/modbus.h
-foc_mini_board\tim.o: ../Inc/main.h
-foc_mini_board\tim.o: ../Inc/hal_my.h

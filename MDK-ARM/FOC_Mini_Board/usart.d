@@ -1,8 +1,7 @@
-foc_mini_board\usart.o: ../Src/usart.c
+foc_mini_board\usart.o: Infrastructure\usart.c
 foc_mini_board\usart.o: D:\keil\ARM\ARM_Compiler_5.06u7\Bin\..\include\stdio.h
 foc_mini_board\usart.o: D:\keil\ARM\ARM_Compiler_5.06u7\Bin\..\include\string.h
-foc_mini_board\usart.o: ../Inc/usart.h
-foc_mini_board\usart.o: ../Inc/main.h
+foc_mini_board\usart.o: ./Application/Function/modbus.h
 foc_mini_board\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 foc_mini_board\usart.o: ../Inc/stm32f1xx_hal_conf.h
 foc_mini_board\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
@@ -35,6 +34,6 @@ foc_mini_board\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h
 foc_mini_board\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 foc_mini_board\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 foc_mini_board\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
-foc_mini_board\usart.o: ./Application/modbus.h
 foc_mini_board\usart.o: ../Inc/main.h
-foc_mini_board\usart.o: ../Inc/hal_my.h
+foc_mini_board\usart.o: Infrastructure\usart.h
+foc_mini_board\usart.o: Infrastructure\main.h

@@ -3,7 +3,6 @@
 
 #include "stm32f1xx_hal.h"
 
-int16_t Get_Sin(uint16_t x);
-int16_t Get_Cos(uint16_t x);
-
+extern short SIN_COS_TABLE[512];
+	
 #endif

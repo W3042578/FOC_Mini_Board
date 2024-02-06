@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2023 STMicroelectronics.
+  * Copyright (c) 2024 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -22,11 +22,6 @@
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "stdio.h"
-#include "adc.h"
-#include "foc.h"
-#include "modbus.h"
-#include "hal_my.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -218,14 +213,11 @@ void SysTick_Handler(void)
 void DMA1_Channel2_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Channel2_IRQn 0 */
-//	HAL_MY_DMA_IRQHandler(&hdma_spi1_rx);
+
   /* USER CODE END DMA1_Channel2_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_spi1_rx);
-//  /* USER CODE BEGIN DMA1_Channel2_IRQn 1 */
-//	//拉高Nss片选引脚信号，减少完成传输后SPI信号等待时间
-//		//参考https://blog.csdn.net/chenyuanlidejiyi/article/details/121639160
-//		//此处为一个DMA完成拉高，故需要判断需要多少个DMA完成次数后拉高信号
-		HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET);//拉高片选引脚信号，结束传输
+  /* USER CODE BEGIN DMA1_Channel2_IRQn 1 */
+
   /* USER CODE END DMA1_Channel2_IRQn 1 */
 }
 
@@ -334,21 +326,10 @@ void TIM2_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-	
+
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
-
-	//进行空闲中断处理
-    if(USART1 == huart1.Instance)// 判断是否是串口1                                
-    {		
-				// 判断是否是空闲中断
-        if(RESET != __HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE))   
-        {	 
-            __HAL_UART_CLEAR_IDLEFLAG(&huart1); // 清除空闲中断标志（否则会一直不断进入中断）                   
-            uart_idleback(&huart1); 						// 调用空闲中断处理函数                      
-        }
-		}
 
   /* USER CODE END USART1_IRQn 1 */
 }

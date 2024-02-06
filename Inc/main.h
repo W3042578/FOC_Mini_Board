@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2023 STMicroelectronics.
+  * Copyright (c) 2024 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -31,8 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "modbus.h"
-#include "hal_my.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -43,8 +42,6 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 
-//extern uint8_t Tx_Data_uart[2];
-//extern uint8_t * Rx_Data_usart;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -60,8 +57,12 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define Test2_Pin GPIO_PIN_1
+#define Test2_GPIO_Port GPIOA
 #define Fault_Check_Pin GPIO_PIN_2
 #define Fault_Check_GPIO_Port GPIOA
+#define Test1_Pin GPIO_PIN_3
+#define Test1_GPIO_Port GPIOA
 #define SPI_CS_Pin GPIO_PIN_4
 #define SPI_CS_GPIO_Port GPIOA
 #define U_ADC_Pin GPIO_PIN_0
@@ -94,25 +95,6 @@ void Error_Handler(void);
 #define Key_4_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-#define RX_BUFF_LONG  30 												//接受缓冲区数据长度
-#define TX_BUFF_LONG  30												//发送缓冲区数据长度
-#define ModBus
-void uart_idleback(UART_HandleTypeDef *huart);	//串口空闲回调中断函数 具体定义放在usart.c
-
-//变量用于编码器通讯角度获取
-extern uint16_t Transfer1[3];
-//extern uint16_t Angle_Transfer[2];
-
-
-
-//电流采样变量
-extern uint32_t ADC_Data[2];
-
-
-//串口接受发送
-extern uint8_t Tx_Data[30];
-extern uint8_t Rx_Data[RX_BUFF_LONG];
-
 
 /* USER CODE END Private defines */
 

@@ -1,6 +1,6 @@
-foc_mini_board\i2c.o: ../Src/i2c.c
-foc_mini_board\i2c.o: ../Inc/i2c.h
-foc_mini_board\i2c.o: ../Inc/main.h
+foc_mini_board\i2c.o: Infrastructure\i2c.c
+foc_mini_board\i2c.o: Infrastructure\i2c.h
+foc_mini_board\i2c.o: Infrastructure\main.h
 foc_mini_board\i2c.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 foc_mini_board\i2c.o: ../Inc/stm32f1xx_hal_conf.h
 foc_mini_board\i2c.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
@@ -33,6 +33,3 @@ foc_mini_board\i2c.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h
 foc_mini_board\i2c.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 foc_mini_board\i2c.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 foc_mini_board\i2c.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
-foc_mini_board\i2c.o: ./Application/modbus.h
-foc_mini_board\i2c.o: ../Inc/main.h
-foc_mini_board\i2c.o: ../Inc/hal_my.h

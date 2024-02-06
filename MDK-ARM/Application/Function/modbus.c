@@ -1,8 +1,13 @@
 #include "main.h"
 #include "modbus.h"
 #include "string.h"
+#include "parameter.h"
 #include "object_commicate.h"
-#include "usart_control.h"
+#include "usart.h"
+
+#include "stm32f1xx_hal_dma.h"
+#include "stm32f1xx_hal_def.h"
+
 //查表方式实现Modbus校验
 static const uint8_t Modbus_CRC_Hig[] = {
 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
@@ -54,10 +59,13 @@ static const uint8_t Modbus_CRC_Low[] = {
 0x41, 0x81, 0x80, 0x40
 };
 
-uint8_t Modbus_Length_In;								//接受到的一帧Modbus数据长度，有多少个byte
-MODBUS Modbus;													//Modbus数据处理结构体
-uint8_t Modbus_Buffer[30];							//Modbus发送缓冲区长度
+uint8_t Tx_Data[TX_BUFF_LONG];					//定义串口接受和发送缓冲区长度
+uint8_t Rx_Data[RX_BUFF_LONG];
+uint8_t 	Modbus_Length_In;								//接受到的一帧Modbus数据长度，有多少个byte
+MODBUS 		Modbus;													//Modbus数据处理结构体
+uint8_t		Modbus_Buffer[30];							//Modbus发送缓冲区长度
 uint16_t	Modbus_Length_Out;
+
 
 //接受不定长数据：串口接受数据，一位时间内没有接受到数据触发空闲中断，空闲中断对DMA获取数据进行处理
 //输入参数:接受到的串口数据指针:data_in		串口数据长度:length_in		输出发送数据指针:data_out   

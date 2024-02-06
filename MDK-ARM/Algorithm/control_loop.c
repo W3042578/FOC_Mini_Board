@@ -1,110 +1,145 @@
 #include "control_loop.h"
+
 #include "math.h"
 #include "main.h"
 #include "foc.h"
 
-//PID调参输出只针对具体Ud,Uq，无需考虑矢量算法部分
-//PID参数初始化
-//电流环PID输出为Ud，Uq且最大为16384*Udc
-void Current_PID_Init(FOC_PID *foc_pid)
-{
-	foc_pid->Kp = 10;
-	foc_pid->Ki = 10;
-	foc_pid->Kd = 10;
-	
-	foc_pid->Error = 0;
-	foc_pid->Last_Error = 0;
-	
-	foc_pid->Error_Low_Limit = -Motor1.Udc *200;
-	foc_pid->Error_Upper_Limit = Motor1.Udc * 200;		//误差上限  9459 = 16384/sqrt(3)
-	foc_pid->Integral_Low_Limit = -5000;
-	foc_pid->Integral_Upper_Limit = 5000;
-	foc_pid->Different_Low_Limit = -5000;
-	foc_pid->Different_Upper_Limit = 5000;
-	foc_pid->Output_Low_Limit = -Motor1.Udc *500;
-	foc_pid->Output_Upper_Limit = Motor1.Udc * 500;
-	
-	Loop_Time_Count = 0;
-}
-void Speed_PID_Init(FOC_PID *foc_pid)
-{
-	foc_pid->Kp = 10;
-	foc_pid->Ki = 10;
-	foc_pid->Kd = 10;
-	
-	foc_pid->Error = 0;
-	foc_pid->Last_Error = 0;
-	 
-	foc_pid->Error_Low_Limit = -600;
-	foc_pid->Error_Upper_Limit = 600;
-	foc_pid->Integral_Low_Limit = -2000;
-	foc_pid->Integral_Upper_Limit = 2000;
-	foc_pid->Different_Low_Limit = -1000;
-	foc_pid->Different_Upper_Limit = 1000;
-	foc_pid->Output_Low_Limit = -2048;
-	foc_pid->Output_Upper_Limit = 2048;
-}
-void Position_PID_Init(FOC_PID *foc_pid)
-{
-	foc_pid->Kp = 4;
-	foc_pid->Ki = 0;
-	foc_pid->Kd = 5;
-	
-	foc_pid->Error = 0;
-	foc_pid->Last_Error = 0;
-	
-	foc_pid->Error_Low_Limit = -8192;
-	foc_pid->Error_Upper_Limit = 8192;
-	foc_pid->Integral_Low_Limit = 0;
-	foc_pid->Integral_Upper_Limit = 0;
-	foc_pid->Different_Low_Limit = -1000;
-	foc_pid->Different_Upper_Limit = 1000;
-	foc_pid->Output_Low_Limit = -600;
-	foc_pid->Output_Upper_Limit = 600;
-}
 
+//定义控制环全局结构体
+_Control_Loop	Control_Loop;
+_PID_Control	Current_Q_PID,Current_D_PID,Speed_PI,Position_PI;	
 
-//PID控制
+//并联式PID控制  
 //参考https://blog.csdn.net/qq_38833931/article/details/80630960
-void PID_Control(FOC_PID* foc_pid)
+//实际只用PI 需要添加抗积分饱和
+void PID_Control_Deal(_PID_Control * PID_Control)
 {
-	foc_pid->Error = foc_pid->Expect - foc_pid->Feed_Back;
-	foc_pid->Integral = foc_pid->Integral + foc_pid->Error;
-	foc_pid->Different = foc_pid->Error - foc_pid->Last_Error;
+	uint32_t Integral_Data;
 	
+	PID_Control->Error = PID_Control->Expect - PID_Control->Feedback;
+	PID_Control->Integral_Sum = PID_Control->Integral_Sum + PID_Control->Error;
+
+	PID_Control->Proportion_Sum = PID_Control->Proportion * PID_Control->Error;
+	Integral_Data = PID_Control->Integral * PID_Control->Integral_Sum;
+	PID_Control->Difference_Sum = PID_Control->Difference * (PID_Control->Error - PID_Control->Last_Error);
 	//误差限幅
-	if(foc_pid->Error>foc_pid->Error_Upper_Limit)
-		foc_pid->Error = foc_pid->Error_Upper_Limit;
-	if(foc_pid->Error<foc_pid->Error_Low_Limit)
-		foc_pid->Error = foc_pid->Error_Low_Limit;
+	if(PID_Control->Proportion_Sum > PID_Control->)
+		PID_Control->Error = PID_Control->Error_Limit;
+	else if(PID_Control->Error *PID_Control->Kp < -PID_Control->Error_Limit)
+		PID_Control->Error = -PID_Control->Error_Limit;
+	else
+		PID_Control->Error = PID_Control->Error *PID_Control->Kp;
 	//积分限幅
-	if(foc_pid->Integral>foc_pid->Integral_Upper_Limit)
-		foc_pid->Integral = foc_pid->Integral_Upper_Limit;
-	if(foc_pid->Integral<foc_pid->Integral_Low_Limit)
-		foc_pid->Integral =foc_pid->Integral_Low_Limit;
-	//差分限幅
-	if(foc_pid->Different>foc_pid->Different_Upper_Limit)
-		foc_pid->Different = foc_pid->Different_Upper_Limit;
-	if(foc_pid->Different<foc_pid->Different_Low_Limit)
-		foc_pid->Different = foc_pid->Different_Low_Limit;
-	//PID输出
-	foc_pid->Output = foc_pid->Kp*foc_pid->Error + foc_pid->Ki * foc_pid->Integral + foc_pid->Kd * foc_pid->Different;
+	if(PID_Control->Integral > PID_Control->Integral_Limit)
+		PID_Control->Integral = PID_Control->Integral_Limit;
+	else if(PID_Control->Integral < -PID_Control->Integral_Limit)
+		PID_Control->Integral = PID_Control->Integral_Limit;
+	//PI输出
+	PID_Control->Output = PID_Control->Error + PID_Control->Integral;
 	
 	//输出限幅  积分快速反馈  限饱和
-	if(foc_pid->Output>foc_pid->Output_Upper_Limit)
+	if(PID_Control->Output > PID_Control->Output_Limit)
+	{
+		PID_Control->Output = PID_Control->Output_Limit;
+		if(PID_Control->Output_Limit >= PID_Control->Error)
+			PID_Control->Integral = PID_Control->Output_Limit - PID_Control->Error;
+		else
+			PID_Control->Integral = 0;
+	}
+	if(PID_Control->Output < -PID_Control->Output_Limit)
 		{
-			foc_pid->Output = foc_pid->Output_Upper_Limit;
-			foc_pid->Integral = foc_pid->Output_Upper_Limit - foc_pid->Kp * foc_pid->Error - foc_pid->Kp * foc_pid->Kd * foc_pid->Different;
+			PID_Control->Output = -PID_Control->Output_Limit;
+			if(PID_Control->Output_Limit <= PID_Control->Error)
+				PID_Control->Integral = PID_Control->Output_Limit - PID_Control->Error;
+			else
+				PID_Control->Integral = 0;
 		}
-	if(foc_pid->Output<foc_pid->Output_Low_Limit)
-		{
-			foc_pid->Output = foc_pid->Output_Low_Limit;
-			foc_pid->Integral = foc_pid->Output_Low_Limit + foc_pid->Kp * foc_pid->Error + foc_pid->Kp * foc_pid->Kd * foc_pid->Different;
-
-		}
-	//当前误差为下一次的过去误差
-	foc_pid->Last_Error = foc_pid->Error;
 }
+
+//PID结构体参数初始化
+void PID_Control_Init(_PID_Control *PID)
+{
+	PID->Proportion = 0;
+	PID->Integral = 0;
+	PID->Difference = 0;
+	PID->Antiback = 0;
+	
+	PID->Error = 0;
+	PID->Last_Error = 0;
+	PID->Feedback = 0;
+	PID->Expect = 0;
+	PID->Feedforward = 0;
+	
+	PID->Proportion_Sum = 0;
+	PID->Integral_Sum = 0;
+	PID->Difference_Sum = 0;
+	PID->Output_Sum = 0;
+	
+	PID->Proportion_Limit = 0;
+	PID->Integral_Limit = 0;
+	PID->Difference_Limit = 0;
+}
+
+//PID控制环具体参数初始化
+void Control_Loop_Init(_Control_Loop *Loop)
+{
+	Loop->Target_Current = 0;
+	Loop->Target_Speed = 0;
+	Loop->Target_Position = 0;
+	
+	Loop->Current_Q_Proportion = 50;
+	Loop->Current_Q_Integral = 1;
+	Loop->Current_Q_Difference = 0;
+	
+	Loop->Current_D_Proportion = 50;
+	Loop->Current_D_Integral = 1;
+	Loop->Current_D_Difference = 0;
+	
+	Loop->Speed_Proportion = 25;
+	Loop->Speed_Integral = 1;
+
+	Loop->Position_Proportion = 10;
+	Loop->Position_Integral = 0;
+	Loop->Position_Feedforward = 1;
+	
+	Loop->Current_Q_Output_Limit = 1.5 * 2048;
+	Loop->Current_D_Output_Limit = 1 * 2048;
+	Loop->Speed_Output_Limit = 0;
+	Loop->Position_Output_Limit = 0;
+}
+
+//1ms中断更新PID结构体中数据
+void PID_Control_Update(void)
+{
+	//电流Iq PID
+	Current_Q_PID.Proportion = Control_Loop.Current_Q_Proportion;
+	Current_Q_PID.Integral = Control_Loop.Current_Q_Integral;
+	Current_Q_PID.Difference = Control_Loop.Current_Q_Difference;
+	Current_Q_PID.Integral_Limit = Control_Loop.Current_Q_Output_Limit;
+	Current_Q_PID.Proportion_Limit = Control_Loop.Current_Q_Output_Limit;
+	Current_Q_PID.Difference_Limit = Control_Loop.Current_Q_Output_Limit>>1;
+	//电流Id PID
+	Current_D_PID.Proportion = Control_Loop.Current_D_Proportion;
+	Current_D_PID.Integral = Control_Loop.Current_D_Integral;
+	Current_D_PID.Difference = Control_Loop.Current_D_Difference;
+	Current_D_PID.Integral_Limit = Control_Loop.Current_D_Output_Limit;
+	Current_D_PID.Proportion_Limit = Control_Loop.Current_D_Output_Limit;
+	Current_D_PID.Difference_Limit = Control_Loop.Current_D_Output_Limit>>1;
+	
+	//速度环 PI
+	Speed_PI.Proportion = Control_Loop.Speed_Proportion;
+	Speed_PI.Integral = Control_Loop.Speed_Integral;
+	Speed_PI.Integral_Limit = Control_Loop.Speed_Output_Limit;
+	Speed_PI.Proportion_Limit = Control_Loop.Speed_Output_Limit;
+	
+	//位置环 PI+前馈
+	Position_PI.Proportion = Control_Loop.Position_Proportion;
+	Position_PI.Integral = Control_Loop.Position_Integral;
+	Position_PI.Integral_Limit = Control_Loop.Position_Output_Limit;
+	Position_PI.Proportion_Limit = Control_Loop.Position_Output_Limit;
+	Position_PI.Feedforward = Control_Loop.Position_Feedforward;
+}
+
 
 
 

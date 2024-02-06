@@ -5,7 +5,8 @@
 #include "stdint.h"
 #include "main.h"
 
-
+#define RX_BUFF_LONG  30 												//接受缓冲区数据长度
+#define TX_BUFF_LONG  30												//发送缓冲区数据长度
 #define Slave_ID 0x01    			//定义从机ID
 
 //Modbus协议： ID号--ID   功能码--Function_Code  起始地址——Start_Address   寄存器数——Register_Number  字节数——Byte_Number  读取一个内容——Read_Data   
@@ -55,6 +56,9 @@ extern uint8_t Modbus_Length_In;
 extern uint16_t Modbus_Length_Out;
 extern MODBUS Modbus;
 extern uint8_t Modbus_Buffer[30];
+//串口接受发送
+extern uint8_t Tx_Data[TX_BUFF_LONG];
+extern uint8_t Rx_Data[RX_BUFF_LONG];
 
 uint8_t Modbus_Process(uint8_t *data_in,uint8_t length_in,uint8_t *data_out,uint16_t* length_out);
 uint16_t Modbus_CRC_Data(uint8_t *data,uint16_t length);

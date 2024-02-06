@@ -2,6 +2,13 @@
     "files.associations": {
         "main.h": "c",
         "foc.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "encoder.h": "c",
+        "stdio.h": "c",
+        "usart_control.h": "c",
+        "usart.h": "c",
+        "stm32f1xx_hal_dma.h": "c",
+        "stm32f1xx_hal_def.h": "c",
+        "object_commicate.h": "c"
     }
 }

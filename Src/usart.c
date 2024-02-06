@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2023 STMicroelectronics.
+  * Copyright (c) 2024 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -16,8 +16,6 @@
   *
   ******************************************************************************
   */
-#include "stdio.h"
-#include "string.h"
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
@@ -55,7 +53,7 @@ void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
-	
+
   /* USER CODE END USART1_Init 2 */
 
 }
@@ -161,34 +159,5 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
-
-//空闲中断处理函数
-void uart_idleback(UART_HandleTypeDef *huart)
-{
-	uint8_t remain; 						//定义变量储存DMA剩余传输位
-	//停止本次DMA传输
-	HAL_UART_DMAStop(&huart1);
-	
-	//获取DMA未接受到的数据位
-	remain = __HAL_DMA_GET_COUNTER(&hdma_usart1_rx);
-	//接受数据的长度等于缓冲区总长减去剩余长度
-	Modbus_Length_In = RX_BUFF_LONG - remain;
-	
-	//将接受到的数组复制到缓冲区  memcpy函数在string.h头文件下
-	memcpy(Modbus_Buffer,Rx_Data,Modbus_Length_In);	
-	
-	//清空接受数组内容  memset函数在string.h头文件下
-	memset(Rx_Data,0,Modbus_Length_In);
-
-	
-	//Modbus协议处理
-	if(Modbus_Process(Modbus_Buffer,Modbus_Length_In,Tx_Data,&Modbus_Length_Out) == 1)//判断Modbus进程是否正常
-	{
-		//根据处理结果发送数据给主机
-		HAL_UART_Transmit_DMA(&huart1,Tx_Data,Modbus_Length_Out); //5位分别为 ID位 功能码  字节数位  高低两位校验码
-	}
-	//数据处理结束后重新开始DMA传输
-	HAL_UART_Receive_DMA(&huart1,(uint8_t *)&Rx_Data,RX_BUFF_LONG);
-}
 
 /* USER CODE END 1 */
