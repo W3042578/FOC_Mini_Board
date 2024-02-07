@@ -16,6 +16,7 @@
 //定义全局变量
 uint16_t	Encoder_Offset_Delay;	//编码器初始角度对齐延迟
 uint16_t	Number_Offest_Count;	//编码器累加实际次数
+uint8_t		Last_Work_Model;	//上一次的工作模式
 
 //获取编码器角度并转换为电角度
 void Encoder_To_Electri_Angle(FOC_Motor *motor)
@@ -140,6 +141,9 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 //函数工作在FOC电流环中
 void Model_Control(FOC_Motor *motor)
 {
+	//PWM使能输出情况下不允许更改工作模式
+	if((Last_Work_Model != Control_Word.Work_Model) && Control_Word.PWM_Enable ==1)
+		Control_Word.Work_Model = Last_Work_Model;
 	//根据控制字判断工作环
 	switch(Control_Word.Work_Model)
 	{	
@@ -241,6 +245,8 @@ void Model_Control(FOC_Motor *motor)
 //			Error_Message.bits.Control_Loop_Error = 1;
 		break;
 	}
+	//保存上一次控制模式
+	Last_Work_Model = Control_Word.Work_Model;
 }
 
 //PWM使能控制
