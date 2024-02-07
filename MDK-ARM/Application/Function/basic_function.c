@@ -16,7 +16,7 @@
 //定义全局变量
 uint16_t	Encoder_Offset_Delay;	//编码器初始角度对齐延迟
 uint16_t	Number_Offest_Count;	//编码器累加实际次数
-
+uint8_t		Loop_count;		//环路计数，内环运行频率必须大于外环，否则环路震荡
 //获取编码器角度并转换为电角度
 void Encoder_To_Electri_Angle(FOC_Motor *motor)
 {
@@ -187,12 +187,12 @@ void Model_Control(FOC_Motor *motor)
 		//位置环模式：PID控制相对位置闭环输出
 		case 6:
 			
-		break;
+		
 		
 		//速度环模式：PID控制速度闭环输出
 		case 5:
-			
-		break;
+			if
+		
 			
 		//电流环模式：PID控制电流Iq、Id闭环输出
 		case 4:
