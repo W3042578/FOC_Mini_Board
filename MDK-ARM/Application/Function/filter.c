@@ -3,19 +3,20 @@
 #include "sin_cos.h"
 
 
-//¶ş½×°ÍÌØÎÖ·òµÍÍ¨ÂË²¨Æ÷²ÎÊı
+//äºŒé˜¶å·´ç‰¹æ²ƒå¤«ä½é€šæ»¤æ³¢å™¨å‚æ•°
 static int32_t  fr,ohm,c;
 static int32_t 	b0,b1,b2,a1,a2;
 static int32_t	data_delay[3];
 
-//ÎŞ¸¡µãÓ²¼ş¼ÓËÙ£¬×÷¶¨µãÊı×ª»¯´¦Àí
-//²Î¿¼https://zhuanlan.zhihu.com/p/357619650
+
+//æ— æµ®ç‚¹ç¡¬ä»¶åŠ é€Ÿï¼Œä½œå®šç‚¹æ•°è½¬åŒ–å¤„ç†
+//å‚è€ƒhttps://zhuanlan.zhihu.com/p/357619650
 void Filter_Init(void)
 {
-	fr = cutoff_freq * 4096 / sample_freq;//ÕûĞÎÊı¾İ·Å´ó4096´¦Àí
-	//tan()=sin()/cos()  *4096¶¨µãÊı¾İ±ÜÃâÊı¾İ¶ªÊ§
+	fr = cutoff_freq * 4096 / sample_freq;//æ•´å½¢æ•°æ®æ”¾å¤§4096å¤„ç†
+	//tan()=sin()/cos()  *4096å®šç‚¹æ•°æ®é¿å…æ•°æ®ä¸¢å¤±
 	ohm = SIN_COS_TABLE[fr>>4] / SIN_COS_TABLE[((fr>>4)+128)&0x1ff] * 4096;
-	c = 4096 + 1.414 * ohm + ((ohm * ohm)>>12);//c Ò²ÊÇ*4096
+	c = 4096 + 1.414 * ohm + ((ohm * ohm)>>12);//c ä¹Ÿæ˜¯*4096
 	
 	b0 = ohm * ohm / c;
 	b1 = 2 * b0;
@@ -24,7 +25,7 @@ void Filter_Init(void)
 	a2 = 4096 * (4096 - 1.414 * ohm + ((ohm * ohm)>>12)) / c;
 }
 
-//int32_t data ÊäÈëĞèÒªÂË²¨µÄÊı¾İ Êı¾İ1£º4096 ĞèÒª·Å´ó4096±¶ºóÊäÈë
+//int32_t data è¾“å…¥éœ€è¦æ»¤æ³¢çš„æ•°æ® æ•°æ®1ï¼š4096 éœ€è¦æ”¾å¤§4096å€åè¾“å…¥
 int32_t Butterworth_Second(int32_t data)
 {
 	int32_t output;
