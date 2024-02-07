@@ -96,10 +96,9 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 
-void uart_idleback(UART_HandleTypeDef *huart);	//串口空闲回调中断函数 具体定义放在usart.c
+void uart_idleback(UART_HandleTypeDef *huart);	//涓插彛绌洪棽鍥炶皟涓柇鍑芥暟 鍏蜂綋瀹氫箟鏀惧湪usart.c
 
-
-//电流采样变量
+//鐢垫祦閲囨牱鍙橀噺
 extern uint32_t ADC_Data[2];
 
 /* USER CODE END Private defines */
