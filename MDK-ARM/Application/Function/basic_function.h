@@ -8,27 +8,29 @@
 #include "stdint.h"
 #include "foc.h"
 
-//¹¦ÄÜ²ã&µ×²ã½»»¥
-//Ö÷Òª´æ·Å³öÓÚ¹¦ÄÜ²ãĞèÒª¶Ôµ×²ãĞŞ¸ÄµÄº¯Êı
+//åŠŸèƒ½å±‚&åº•å±‚äº¤äº’
+//ä¸»è¦å­˜æ”¾å‡ºäºåŠŸèƒ½å±‚éœ€è¦å¯¹åº•å±‚ä¿®æ”¹çš„å‡½æ•°
 
-//½Ç¶È×ª»»
+//è§’åº¦è½¬æ¢
 void Encoder_To_Electri_Angle(FOC_Motor *motor);
 
-//³õÊ¼ĞŞÕı
+//åˆå§‹ä¿®æ­£
 void Get_Initial_Angle_Offest(FOC_Motor *motor);
 void ADC_Current_Offest(FOC_Motor *motor);
 
-//²¹³¥
+//è¡¥å¿
 void Dead_Time_Compensate(FOC_Motor *motor);
 
-//Ä£Ê½¿ØÖÆ
+//æ¨¡å¼æ§åˆ¶
 void Model_Control(FOC_Motor *motor);
 
-//Ê¹ÄÜ¿ØÖÆÂß¼­
+//ä½¿èƒ½æ§åˆ¶é€»è¾‘
 void Enable_Logic_Control(void);
 
-//STM32 HAL ÈıÏàPWM±È½ÏÖµÉèÖÃ
+//STM32 HAL ä¸‰ç›¸PWMæ¯”è¾ƒå€¼è®¾ç½®
 void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor);
 
+//1msä¸­æ–­å›è°ƒå‡½æ•°
+void Interrupt_1MS(void);
 #endif
 
