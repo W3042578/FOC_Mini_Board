@@ -58,15 +58,15 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t ADC_Data[2];					//ADC²ÉÑùDMA´¢´æÊý¾ÝµØÖ·
+uint32_t ADC_Data[2];					//ADCé‡‡æ ·DMAå‚¨å­˜æ•°æ®åœ°å€
 
 
 
-//»·Â·Éè¼ÆÖÐ£¬ 
-//»·Â·¼ä±ÈÀý×îÐ¡Îª2£¬±£Ö¤¿ØÖÆ»·Â·ÎÈ¶¨
+//çŽ¯è·¯è®¾è®¡ä¸­ï¼Œ 
+//çŽ¯è·¯é—´æ¯”ä¾‹æœ€å°ä¸º2ï¼Œä¿è¯æŽ§åˆ¶çŽ¯è·¯ç¨³å®š
 
 
-//±àÂëÆ÷»ñÈ¡Êý¾Ý²é¿´ÑéÖ¤
+//ç¼–ç å™¨èŽ·å–æ•°æ®æŸ¥çœ‹éªŒè¯
 uint16_t Transfer1[3];
 //uint16_t Angle_Transfer[2];
 /* USER CODE END PV */
@@ -80,16 +80,16 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-//ÖØ¶¨Ïòc¿âº¯Êýprintfµ½´®¿ÚDEBUG_USART£¬ÖØ¶¨Ïòºó¿ÉÊ¹ÓÃprintfº¯Êý
+//é‡å®šå‘cåº“å‡½æ•°printfåˆ°ä¸²å£DEBUG_USARTï¼Œé‡å®šå‘åŽå¯ä½¿ç”¨printfå‡½æ•°
 int fputc(int ch, FILE *f)
 {
-	/* ·¢ËÍÒ»¸ö×Ö½ÚÊý¾Ýµ½´®¿ÚDEBUG_USART */
+	/* å‘é€ä¸€ä¸ªå­—èŠ‚æ•°æ®åˆ°ä¸²å£DEBUG_USART */
 	HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 1000);	
 	
 	return (ch);
 }
  
-//ÖØ¶¨Ïòc¿âº¯Êýscanfµ½´®¿ÚDEBUG_USART£¬ÖØÐ´Ïòºó¿ÉÊ¹ÓÃscanf¡¢getcharµÈº¯Êý
+//é‡å®šå‘cåº“å‡½æ•°scanfåˆ°ä¸²å£DEBUG_USARTï¼Œé‡å†™å‘åŽå¯ä½¿ç”¨scanfã€getcharç­‰å‡½æ•°
 int fgetc(FILE *f)
 {		
 	int ch;
@@ -136,44 +136,44 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 	
-	//Ð£×¼ADC²ÉÑù
-	//Í¬²½×¢Èë²ÉÑùÖÐÐè½«adcÄ£Ê½ÉèÖÃÎªÁ¬Ðø²ÉÑùÄ£Ê½²Å¿ÉÒÔÊ¹ÓÃ£¬ÈÔÐè¶Ô¹æÔò×é½øÐÐ²¿·ÖÅäÖÃ£¬Èç¹æÔò²ÉÑù´¥·¢£¬²ÉÑùÊý£¬Êý¾Ý¶ÔÆë·½Ê½
-	//Í¬²½×¢Èë²ÉÑùÖÐadc1ÎªÖ÷²ÉÑùÆ÷£¬adc2Îª´ÓÅäÖÃÆ÷£¬Òò´Ë´¥·¢adc1¼´¿É´¥·¢adc2
+	//æ ¡å‡†ADCé‡‡æ ·
+	//åŒæ­¥æ³¨å…¥é‡‡æ ·ä¸­éœ€å°†adcæ¨¡å¼è®¾ç½®ä¸ºè¿žç»­é‡‡æ ·æ¨¡å¼æ‰å¯ä»¥ä½¿ç”¨ï¼Œä»éœ€å¯¹è§„åˆ™ç»„è¿›è¡Œéƒ¨åˆ†é…ç½®ï¼Œå¦‚è§„åˆ™é‡‡æ ·è§¦å‘ï¼Œé‡‡æ ·æ•°ï¼Œæ•°æ®å¯¹é½æ–¹å¼
+	//åŒæ­¥æ³¨å…¥é‡‡æ ·ä¸­adc1ä¸ºä¸»é‡‡æ ·å™¨ï¼Œadc2ä¸ºä»Žé…ç½®å™¨ï¼Œå› æ­¤è§¦å‘adc1å³å¯è§¦å‘adc2
 	HAL_ADCEx_Calibration_Start(&hadc1);
 	HAL_ADCEx_Calibration_Start(&hadc2);
 
-	//¿ªÆô¹æÔò×é³£¹æ²ÉÑù
+	//å¼€å¯è§„åˆ™ç»„å¸¸è§„é‡‡æ ·
 	HAL_ADC_Start(&hadc2); 
 	HAL_ADC_Start(&hadc1);
 
-  //¿ªÆô×¢Èë×é²ÉÑù£¬×¢Òâ×¢Èë²ÉÑù¿ØÖÆÖÐ¶ÏµÄ´¦Àíº¯ÊýÖÐ»á¹Ø±Õ×¢ÈëÖÐ¶ÏÊ¹ÄÜÎ»
+  	//å¼€å¯æ³¨å…¥ç»„é‡‡æ ·ï¼Œæ³¨æ„æ³¨å…¥é‡‡æ ·æŽ§åˆ¶ä¸­æ–­çš„å¤„ç†å‡½æ•°ä¸­ä¼šå…³é—­æ³¨å…¥ä¸­æ–­ä½¿èƒ½ä½
 	HAL_ADCEx_InjectedStart(&hadc1);
 	HAL_ADCEx_InjectedStart_IT(&hadc2);
 
-  //Í¬²½dualÄ£Ê½Îª¶àÄ£Ê½²ÉÑù£¬Í¬²½¹æÔò²ÉÑùÐèÒª¿ªÆôDMA£¬×¢Èë²ÉÑù½¨Á¢ÔÚÍ¬²½²ÉÑù»ù´¡ÉÏ
+ 	 //åŒæ­¥dualæ¨¡å¼ä¸ºå¤šæ¨¡å¼é‡‡æ ·ï¼ŒåŒæ­¥è§„åˆ™é‡‡æ ·éœ€è¦å¼€å¯DMAï¼Œæ³¨å…¥é‡‡æ ·å»ºç«‹åœ¨åŒæ­¥é‡‡æ ·åŸºç¡€ä¸Š
 	HAL_ADCEx_MultiModeStart_DMA(&hadc1,ADC_Data,2);
 	
-		//¿ªÆôcc4±È½ÏÍ¨µÀ´¥·¢adc×¢Èë²ÉÑù
+		//å¼€å¯cc4æ¯”è¾ƒé€šé“è§¦å‘adcæ³¨å…¥é‡‡æ ·
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
 //	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 //	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
 //	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
 
-	//¶¨Ê±Æ÷2¿ªÆô1msÖÐ¶Ï
+	//å®šæ—¶å™¨2å¼€å¯1msä¸­æ–­
 	HAL_TIM_Base_Start_IT(&htim2);
-	//¿ªÆô´®¿ÚDMA·¢ËÍºÍ½ÓÊÜ
+	//å¼€å¯ä¸²å£DMAå‘é€å’ŒæŽ¥å—
 	HAL_UART_Receive_DMA(&huart1,(uint8_t *)&Rx_Data,RX_BUFF_LONG);
 
-	//Ê¹ÄÜ´®¿Ú¿ÕÏÐÖÐ¶Ï
+	//ä½¿èƒ½ä¸²å£ç©ºé—²ä¸­æ–­
 	__HAL_UART_ENABLE_IT(&huart1,UART_IT_IDLE);
 	
-	//²ÎÊý³õÊ¼»¯
+	//å‚æ•°åˆå§‹åŒ–
 	Parameter_Init();
 	
-	//»ñÈ¡Á½ÏàµçÁ÷²ÉÑùÐÞÕýÖµ
+	//èŽ·å–ä¸¤ç›¸ç”µæµé‡‡æ ·ä¿®æ­£å€¼
 	ADC_Current_Offest(&Motor1);
 
-	//µãµÆ
+	//ç‚¹ç¯
 	HAL_GPIO_WritePin(LED_ERR_GPIO_Port, LED_ERR_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_Status_GPIO_Port, LED_Status_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LED_RUN_GPIO_Port, LED_RUN_Pin, GPIO_PIN_RESET);
@@ -186,7 +186,7 @@ int main(void)
   while (1)
   {
 			
-//		printf("%d,%d\n",Motor1.Ia,Motor1.Ib);  //Ê¹ÓÃprintf´òÓ¡ÐèÒª¹Ø±Õ´®¿Ú1µÄ¿ÕÏÐÖÐ¶ÏºÍdma´«Êä£¬printfÖØ¶¨Ïò´®¿Ú1¾ÍÊÇÊ¹ÓÃ´®¿Ú1½øÐÐ¼òµ¥·¢ËÍ½ÓÊÜ
+//		printf("%d,%d\n",Motor1.Ia,Motor1.Ib);  //ä½¿ç”¨printfæ‰“å°éœ€è¦å…³é—­ä¸²å£1çš„ç©ºé—²ä¸­æ–­å’Œdmaä¼ è¾“ï¼Œprintfé‡å®šå‘ä¸²å£1å°±æ˜¯ä½¿ç”¨ä¸²å£1è¿›è¡Œç®€å•å‘é€æŽ¥å—
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -245,18 +245,18 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-//ADC×¢Èë²ÉÑùÍê³É»Øµ÷º¯Êý
+//ADCæ³¨å…¥é‡‡æ ·å®Œæˆå›žè°ƒå‡½æ•°
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	
-		// HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_SET);//»·Â·Ö´ÐÐÖÜÆÚ²âÊÔ
+		// HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_SET);//çŽ¯è·¯æ‰§è¡Œå‘¨æœŸæµ‹è¯•
 
     	
-    //±àÂëÆ÷·½ÏòÅÐ¶Ï
-//    if(Work_Status.bits.Direction_Encoder == 1 && Work_Status.bits.Offest_Encoder == 0)//·½ÏòÅÐ¶ÏÔÚÁãÎ»Ð£Õýºó
+    //ç¼–ç å™¨æ–¹å‘åˆ¤æ–­
+//    if(Work_Status.bits.Direction_Encoder == 1 && Work_Status.bits.Offest_Encoder == 0)//æ–¹å‘åˆ¤æ–­åœ¨é›¶ä½æ ¡æ­£åŽ
 //    {
-//      //¶ÔÇ°½øºó½Ç¶È±àÂëÆ÷ÖµÀÛ¼ÓÇóÆ½¾ù
-//      //Ç°ºó±àÂëÆ÷Öµ¶Ô±ÈÅÐ¶Ï·½ÏòÊÇ·ñÏàÍ¬
+//      //å¯¹å‰è¿›åŽè§’åº¦ç¼–ç å™¨å€¼ç´¯åŠ æ±‚å¹³å‡
+//      //å‰åŽç¼–ç å™¨å€¼å¯¹æ¯”åˆ¤æ–­æ–¹å‘æ˜¯å¦ç›¸åŒ
 //      encoder1.Encoder_Direction_Position = encoder1.Encoder_Direction_Position + encoder1.Encoder_Angle;
 //      Number_Encoder_Direction = Number_Encoder_Direction - 1;
 //      if(Number_Encoder_Direction < 0)
@@ -266,9 +266,9 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
 //        if (encoder1.Encoder_Direction_Position < encoder1.Encoder_Offest_Data)
 //        {
 //          if(encoder1.Encoder_Offest_Data - encoder1.Encoder_Direction_Position < 32768)
-//            encoder1.Encoder_Direction = 1;//·´Ïò
+//            encoder1.Encoder_Direction = 1;//åå‘
 //          else
-//            encoder1.Encoder_Direction = 0;//Í¬Ïò
+//            encoder1.Encoder_Direction = 0;//åŒå‘
 //        }
 //        else
 //        {
@@ -278,41 +278,39 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
 //            encoder1.Encoder_Direction = 1;
 //        }
 //      }
-//      Motor1.Direction = encoder1.Encoder_Direction;//¶àÖµ¸³Óè·½±ã¶àµç»úÉèÖÃ
+//      Motor1.Direction = encoder1.Encoder_Direction;//å¤šå€¼èµ‹äºˆæ–¹ä¾¿å¤šç”µæœºè®¾ç½®
 //    }
 
-		//»ñÈ¡a,bÏàµçÁ÷²ÉÑùÖµ  ¿ª»·¸øÁãµçÑ¹²âÊÔ Àë¿ªµç»ú·½ÏòÎª¸º
+		//èŽ·å–a,bç›¸ç”µæµé‡‡æ ·å€¼  å¼€çŽ¯ç»™é›¶ç”µåŽ‹æµ‹è¯• ç¦»å¼€ç”µæœºæ–¹å‘ä¸ºè´Ÿ
 		Motor1.Ia = -(HAL_ADCEx_InjectedGetValue(&hadc1,ADC_INJECTED_RANK_1) - Motor1.Ia_Offect);
 		Motor1.Ib = -(HAL_ADCEx_InjectedGetValue(&hadc2,ADC_INJECTED_RANK_1) - Motor1.Ib_Offect);
 		
 
-		//PWMÊ¹ÄÜ¿ØÖÆ
+		//PWMä½¿èƒ½æŽ§åˆ¶
 		Enable_Logic_Control();
 		
-		//½øÐÐFOC¿ØÖÆ
+		//è¿›è¡ŒFOCæŽ§åˆ¶
 		FOC_Control(&Motor1);
 		
-		//STM32 HAL ÈýÏàPWM±È½ÏÖµÉèÖÃ
+		//STM32 HAL ä¸‰ç›¸PWMæ¯”è¾ƒå€¼è®¾ç½®
 		STM32_HAL_PWM_SET_Compare(&Motor1);
 		
-		//³õÊ¼½ÇÐ£×¼,ÀÛ¼ÓÇóºÍ
+		//åˆå§‹è§’æ ¡å‡†,ç´¯åŠ æ±‚å’Œ
 		Get_Initial_Angle_Offest(&Motor1);
 		
-		//ÔÚÍ¬²½×¢ÈëÖÐ¶Ï»Øµ÷ÖÐhal¿âÄ¬ÈÏ¹Ø±Õ¸ÃÖÐ¶ÏÊ¹ÄÜ£¬Òò´ËÔÚÖ´ÐÐÍê×¢ÈëÖÐ¶ÏºóÔÙ´Î´ò¿ªÖÐ¶ÏÊ¹ÄÜ
+		//åœ¨åŒæ­¥æ³¨å…¥ä¸­æ–­å›žè°ƒä¸­halåº“é»˜è®¤å…³é—­è¯¥ä¸­æ–­ä½¿èƒ½ï¼Œå› æ­¤åœ¨æ‰§è¡Œå®Œæ³¨å…¥ä¸­æ–­åŽå†æ¬¡æ‰“å¼€ä¸­æ–­ä½¿èƒ½
 		__HAL_ADC_ENABLE_IT(&hadc1, ADC_IT_JEOC);
 		
-		// HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_RESET); //»·Â·Ö´ÐÐÖÜÆÚ²âÊÔ
+		// HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_RESET); //çŽ¯è·¯æ‰§è¡Œå‘¨æœŸæµ‹è¯•
 
 }
-//1msÖÐ¶Ï»Øµ÷º¯Êý Íâ²¿ÊäÈëÊä³öÊý¾Ý¡¢ÎÂ¶È±£»¤¡¢µç»ú×´Ì¬±£»¤´¦Àí£¨½ö×÷¿ØÖÆÎ»´¦Àí£¬¾ßÌåÖ´ÐÐÔÚËû´¦£©
+//1msä¸­æ–­å›žè°ƒå‡½æ•° 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if(htim == &htim2)
 	{
-		//¼ÆËãËÙ¶È 1ms±àÂëÆ÷±ä»¯ÊýÖµ  Çø·ÖÕý¸º ÐèÒªÂË²¨
-    encoder1.Encoder_Speed_Angle  = encoder1.Encode_Position - encoder1.Encoder_Speed_Angle_Buffer;
-    encoder1.Encoder_Speed_Angle_Buffer = encoder1.Encode_Position;
-		
+		//1msä¸­æ–­å›žè°ƒå‡½æ•°
+		Interrupt_1MS();
 	}	
 }
 
