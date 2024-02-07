@@ -16,7 +16,7 @@
 //定义全局变量
 uint16_t	Encoder_Offset_Delay;	//编码器初始角度对齐延迟
 uint16_t	Number_Offest_Count;	//编码器累加实际次数
-uint8_t		Loop_count;		//环路计数，内环运行频率必须大于外环，否则环路震荡
+
 //获取编码器角度并转换为电角度
 void Encoder_To_Electri_Angle(FOC_Motor *motor)
 {
@@ -186,13 +186,34 @@ void Model_Control(FOC_Motor *motor)
 		
 		//位置环模式：PID控制相对位置闭环输出
 		case 6:
-			
+			//快速对4取余，速度环频率为电流环0.25倍
+			if((Control_Loop.Loop_Count & 0x04) == 0)
+			{
+				//相对位置回馈
+				Position_PI.Feedback = motor->Iq;
+				//目标速度 单位：
+				Position_PI.Feedback = Control_Loop.Target_Position;
+				//PI计算
+				PID_Control_Deal(Position_PI);
+				//输出控制电流
+				Control_Loop.Target_Q_Current = Position_PI.Output_Sum;
+			}
 		
-		
+
 		//速度环模式：PID控制速度闭环输出
 		case 5:
-			if
-		
+			//快速对2取余，速度环频率为电流环一半
+			if((Control_Loop.Loop_Count & 0x02) == 0)
+			{
+				//速度回馈
+				Speed_PI.Feedback = motor->Iq;
+				//目标速度 单位：
+				Speed_PI.Feedback = Control_Loop.Target_Speed;
+				//PI计算
+				PID_Control_Deal(Speed_PI);
+				//输出控制电流
+				Control_Loop.Target_Q_Current = Speed_PI.Output_Sum;
+			}
 			
 		//电流环模式：PID控制电流Iq、Id闭环输出
 		case 4:
@@ -208,6 +229,11 @@ void Model_Control(FOC_Motor *motor)
 			//输出控制电压
 			motor->Uq = Current_Q_PID.Output_Sum;
 			motor->Ud = Current_D_PID.Output_Sum;
+
+			//环路计数累加
+			Control_Loop.Loop_Count ++;
+			if(Control_Loop.Loop_Count > 4)
+				Control_Loop.Loop_Count = 0;
 		break;
 			
 		//默认0模式，不做输出
