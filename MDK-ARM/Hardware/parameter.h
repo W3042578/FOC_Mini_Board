@@ -21,7 +21,7 @@ typedef  struct
 	uint8_t		Open_Loop_Voltage;	//开环电压
 	uint8_t 	Max_Voltage;		//最大电压限制
 	uint8_t		Angle_Initial_Voltage;	//编码器线性校正和初始位置置零Ud电压
-	uint8_t   	Number_Angle_Offest;		//初始角校正累加次数= 2的n次方
+	uint8_t   	Number_Angle_Offest;	//初始角校正累加次数= 2的n次方
 	uint8_t		Clear_Position;		//重置当前位置为0
 
 	uint8_t		Duty_Model_A;		//占空比模式三相输入值
