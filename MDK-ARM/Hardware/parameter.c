@@ -71,9 +71,6 @@ void Parameter_Init(void)
 	//modbus通讯数据初始化
 	Commicate_Data_Init();
 	
-	//控制环参数初始化
-	Control_Loop_Init(&Control_Loop);
-	
 	//控制字初始化
 	Control_Word_Init(&Control_Word);
 	
