@@ -87,6 +87,7 @@ void Control_Loop_Init(_Control_Loop *Loop)
 	Loop->Target_D_Current = 0;
 	Loop->Target_Speed = 0;
 	Loop->Target_Position = 0;
+	Loop->Loop_Count = 0;
 	
 	Loop->Current_Q_Proportion = 50;
 	Loop->Current_Q_Integral = 1;
