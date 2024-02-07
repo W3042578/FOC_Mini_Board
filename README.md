@@ -33,20 +33,36 @@ Hardware包含硬件和底层的参数配置
 Infrastructure包含底层文件配置，从CubeMx中底层代码生成后部分修改拷贝过来
 
 8010 gimbal motor FOC control program
+
 Using MT6813 encoder to obtain absolute position value through SPI communication
+
 Implementing Modbus RTU communication through UART serial port
+
 Current loop 16K, speed loop 8K, position loop 4K
+
 STM32F103C8T6 main control, development environment keil
+
 Basic idea:
 Timer counting triggers ADC sampling, ADC sampling completes triggering callback function for FOC operation, updating the duty cycle count values of three MOSFETs
+
 Start the program to forcefully drag the calibration motor to align with the alpha axis
+
 ADC injection sampling for dual bridge current acquisition
+
 STM32 configuration timer 1, channel 4 triggers ADC sampling, and the FOC control function is placed in the ADC sampling completion callback function
+
 Fixed point number operation+shift+table lookup to improve program running speed
+
 The specific configuration of the underlying layer can be found in the STM32CubeMX file FOC_ Mini_ Board.ioc
+
 The Keil project startup file is in the MDK-ARM file
+
 The main files are divided into four categories: Algorithm, Application, Hardware, and Infrastructure
+
 Among them, Algorithm includes basic FOC algorithm, PID control loop, and angle sine and cosine lookup table
+
 Application includes encoder SPI communication, serial port modbus communication, filtering, and communication variable dictionary (not used in usartself-control file and SSD1306)
+
 Hardware includes hardware and underlying parameter configurations
+
 Infrastructure includes underlying file configurations, which are partially modified and copied from CubeMx after generating the underlying code
