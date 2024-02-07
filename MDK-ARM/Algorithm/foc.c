@@ -12,41 +12,41 @@
 
 
 
-//¶¨Òåµç»ú½á¹¹ÌåMotor1
+//å®šä¹‰ç”µæœºç»“æž„ä½“Motor1
 FOC_Motor Motor1;		
 
-//±àÂëÆ÷ÊäÈëÊý¾ÝÍ³Ò»Îª16Î»£¬½øÐÐ²é±í
-//µçÁ÷12Î»²ÉÑù£¬1AÊäÈë¶ÔÓ¦2048,1VµçÑ¹¿ØÖÆÎª2048,±£³Öµ¥Î»Í³Ò»
-//µçÁ÷Clark±ä»» µÈ·ùÖµ±ä»»
+//ç¼–ç å™¨è¾“å…¥æ•°æ®ç»Ÿä¸€ä¸º16ä½ï¼Œè¿›è¡ŒæŸ¥è¡¨
+//ç”µæµ12ä½é‡‡æ ·ï¼Œ1Aè¾“å…¥å¯¹åº”2048,1Vç”µåŽ‹æŽ§åˆ¶ä¸º2048,ä¿æŒå•ä½ç»Ÿä¸€
+//ç”µæµClarkå˜æ¢ ç­‰å¹…å€¼å˜æ¢
 void Clark_Transform(FOC_Motor *motor)
 {
 	motor->Ialph = motor->Ia;
 	motor->Ibeta = (591 * motor->Ia + 1182 * motor->Ib)>>10;//591/1024=sqrt(3)/3
 }
 
-//µçÁ÷Park±ä»»
+//ç”µæµParkå˜æ¢
 void Park_Transform(FOC_Motor *motor)
 {
-	//³ýÒÔ4096ÒòÎª½Ç¶ÈÖµÊÇ³ËÒÔ4096ºóµÄÕûÊýÖµ
+	//é™¤ä»¥4096å› ä¸ºè§’åº¦å€¼æ˜¯ä¹˜ä»¥4096åŽçš„æ•´æ•°å€¼
 	motor->Iq = (motor->Ibeta * motor->Cos_Angle - motor->Ialph * motor->Sin_Angle)>>12;
 	motor->Id = (motor->Ibeta * motor->Sin_Angle + motor->Ialph * motor->Cos_Angle)>>12;
 } 	
 
-//µçÑ¹Inverse Park±ä»»
+//ç”µåŽ‹Inverse Parkå˜æ¢
 void Inverse_Park_Transform(FOC_Motor *motor)
 {
-	//³ýÒÔ4096ÒòÎª½Ç¶ÈÖµÊÇ³ËÒÔ4096ºóµÄÕûÊýÖµ
+	//é™¤ä»¥4096å› ä¸ºè§’åº¦å€¼æ˜¯ä¹˜ä»¥4096åŽçš„æ•´æ•°å€¼
 	motor->Ualph = (motor->Ud * motor->Cos_Angle - motor->Uq * motor->Sin_Angle)>>12; 
 	motor->Ubeta = (motor->Ud * motor->Sin_Angle + motor->Uq * motor->Cos_Angle)>>12;
 }
 
-//SVPWM¼ÆËãÈýÏàPWMÊ±¼äÊä³ö±ÈÀý
-//4096Îª100%Õ¼¿Õ±ÈÊä³ö±êçÛ
-//ÔØ²¨ÆµÂÊ = ¿ª¹Ø¹Ü´ò¿ª¹Ø±ÕÆµÂÊ£¨SVPWM 7¶ÎÊ½£©  »ù²¨ÆµÂÊ = µç»ú×ªËÙ/£¨60/¼«¶ÔÊý£©  Ò»°ãÔØ²¨ÆµÂÊ£º»ù²¨ÆµÂÊ = 10 £º1
+//SVPWMè®¡ç®—ä¸‰ç›¸PWMæ—¶é—´è¾“å‡ºæ¯”ä¾‹
+//4096ä¸º100%å ç©ºæ¯”è¾“å‡ºæ ‡å¹º
+//è½½æ³¢é¢‘çŽ‡ = å¼€å…³ç®¡æ‰“å¼€å…³é—­é¢‘çŽ‡ï¼ˆSVPWM 7æ®µå¼ï¼‰  åŸºæ³¢é¢‘çŽ‡ = ç”µæœºè½¬é€Ÿ/ï¼ˆ60/æžå¯¹æ•°ï¼‰  ä¸€èˆ¬è½½æ³¢é¢‘çŽ‡ï¼šåŸºæ³¢é¢‘çŽ‡ = 10 ï¼š1
 void SVPWM(FOC_Motor *motor)
 {
-	uint8_t N_Sector;//ÉÈÇøÅÐ¶Ï×ª»»¼ÆÊýÖµ
-	//ÉÈÇøÅÐ¶Ï
+	uint8_t N_Sector;//æ‰‡åŒºåˆ¤æ–­è½¬æ¢è®¡æ•°å€¼
+	//æ‰‡åŒºåˆ¤æ–­
 	motor->U1 = motor->Ubeta;
 	motor->U2 = (3547 * motor->Ualph - 2048 * motor->Ubeta) >>12;  // 3547/4096=sqrt(3)/2
 	motor->U3 = (-3547 * motor->Ualph - 2048 * motor->Ubeta) >>12;
@@ -64,7 +64,7 @@ void SVPWM(FOC_Motor *motor)
 	else
 		motor->Sc=0;
 	N_Sector = motor->Sa + (motor->Sb<<1) + (motor->Sc<<2);
-	//ÉÈÇøµçÑ¹×÷ÓÃÁ¿¼ÆËã
+	//æ‰‡åŒºç”µåŽ‹ä½œç”¨é‡è®¡ç®—
 	switch(N_Sector)
 	{
 		case 1: 
@@ -101,78 +101,78 @@ void SVPWM(FOC_Motor *motor)
 			motor->Sector = 0;
 			motor->Tx = 0;
 			motor->Ty = 0;
-			break;
+		break;
 	}
-	//Tx,Ty×ª»»ÎªÊ±¼ä±ÈÀý£¬Ê¹ÓÃTs±íÊ¾¸¡µã1
-	motor->Tx = (motor->Tx * 1774 / motor->Udc) >> 9; //1774>>10=1774/1024=sqrt(3) Tx°´2048*Êµ¼ÊµçÑ¹Öµ¸øÈë,UdcÍ¬±ÈÀý·Å´ó2048,4096*sqrt(3)*Tx/Udc*2048
+	//Tx,Tyè½¬æ¢ä¸ºæ—¶é—´æ¯”ä¾‹ï¼Œä½¿ç”¨Tsè¡¨ç¤ºæµ®ç‚¹1
+	motor->Tx = (motor->Tx * 1774 / motor->Udc) >> 9; //1774>>10=1774/1024=sqrt(3) TxæŒ‰2048*å®žé™…ç”µåŽ‹å€¼ç»™å…¥,UdcåŒæ¯”ä¾‹æ”¾å¤§2048,4096*sqrt(3)*Tx/Udc*2048
 	motor->Ty = (motor->Ty * 1774 / motor->Udc) >> 9;
-	//Á½ÏàÁÚÊ¸Á¿×÷ÓÃÊ±¼äÏÞÖÆ£¬¹ýµ÷ÖÆÏÞÖÆ»òÕßÈõ´ÅMTPA
-	if((motor->Tx + motor->Ty) > 3932)//µ÷ÖÆÏÞÖÆ 4096Îª1  0.96 * 4096 = 3932  ÏÞÖÆÂúÊä³ö£¬Áô³ö²ÉÑùÊ±¼ä
+	//ä¸¤ç›¸é‚»çŸ¢é‡ä½œç”¨æ—¶é—´é™åˆ¶ï¼Œè¿‡è°ƒåˆ¶é™åˆ¶æˆ–è€…å¼±ç£MTPA
+	if((motor->Tx + motor->Ty) > 3932)//è°ƒåˆ¶é™åˆ¶ 4096ä¸º1  0.96 * 4096 = 3932  é™åˆ¶æ»¡è¾“å‡ºï¼Œç•™å‡ºé‡‡æ ·æ—¶é—´
 	{
 		uint32_t data_32 = motor->Tx + motor->Ty;
 		motor->Tx = motor->Tx * 3932 / data_32;
 		motor->Ty = motor->Ty * 3932 / data_32;
 	}
-	//½«±ÈÀý×ªÎªÓÉTs¼ÆÊýÖµ±íÊ¾
+	//å°†æ¯”ä¾‹è½¬ä¸ºç”±Tsè®¡æ•°å€¼è¡¨ç¤º
 	motor->Tx = (motor->Tx * motor->Ts) >> 12;
 	motor->Ty = (motor->Ty * motor->Ts) >> 12;
 }
 
-//T0¡¢Tx¡¢Ty±ÈÀý·ÖÅäÈýÏàPWM¼ÆÊýÖµ
+//T0ã€Txã€Tyæ¯”ä¾‹åˆ†é…ä¸‰ç›¸PWMè®¡æ•°å€¼
 void PWM_Time_Count(FOC_Motor *motor)
 {
-	//Õ¼¿Õ±ÈÄ£Ê½ÈýÏàPWMÖ±½Ó°´ÕÕ¸øÈëÖµ¼ÆËãÊä³ö±È½ÏÖµ
+	//å ç©ºæ¯”æ¨¡å¼ä¸‰ç›¸PWMç›´æŽ¥æŒ‰ç…§ç»™å…¥å€¼è®¡ç®—è¾“å‡ºæ¯”è¾ƒå€¼
 	if(Control_Word.Work_Model == 2)
 	{
 		motor->Ta = 2.56 *(((100 - Control_Word.Duty_Model_A) * motor->Ts)>>8);
 		motor->Tb = 2.56 *(((100 - Control_Word.Duty_Model_B) * motor->Ts)>>8);
 		motor->Tc = 2.56 *(((100 - Control_Word.Duty_Model_C) * motor->Ts)>>8);
 	}
-	//·ÇÕ¼¿Õ±ÈÄ£Ê½ÈýÏà¸ù¾ÝTx,Ty¼ÆËãPWMÊä³ö±È½ÏÖµ
+	//éžå ç©ºæ¯”æ¨¡å¼ä¸‰ç›¸æ ¹æ®Tx,Tyè®¡ç®—PWMè¾“å‡ºæ¯”è¾ƒå€¼
 	else
 	{
-		//T0²»Ò»¶¨ÐèÒªµÈÓÚT7£¬·¢²¨·½Ê½ºÍÐ³²¨³É·ÖÓëTHDÏà¹Ø  https://blog.csdn.net/weixin_51553819/article/details/121856985
-		//È¡T0 = T7 Ôò £¨Tx + Ty£©/2 ±ØÔÚPWM 50% Êä³öµãÉÏ 
+		//T0ä¸ä¸€å®šéœ€è¦ç­‰äºŽT7ï¼Œå‘æ³¢æ–¹å¼å’Œè°æ³¢æˆåˆ†ä¸ŽTHDç›¸å…³  https://blog.csdn.net/weixin_51553819/article/details/121856985
+		//å–T0 = T7 åˆ™ ï¼ˆTx + Tyï¼‰/2 å¿…åœ¨PWM 50% è¾“å‡ºç‚¹ä¸Š 
 		switch(motor->Sector)
 		{
 			case 1:
-				motor->Ta = (motor->Ts - motor->Tx - motor->Ty)>>1;//³¤
-				motor->Tb = (motor->Ts + motor->Tx - motor->Ty)>>1;//ÖÐ
-				motor->Tc =	(motor->Ts + motor->Tx + motor->Ty)>>1;//¶Ì
+				motor->Ta = (motor->Ts - motor->Tx - motor->Ty)>>1;//é•¿
+				motor->Tb = (motor->Ts + motor->Tx - motor->Ty)>>1;//ä¸­
+				motor->Tc = (motor->Ts + motor->Tx + motor->Ty)>>1;//çŸ­
 			break;
 			case 2:
-				motor->Ta = (motor->Ts + motor->Tx - motor->Ty)>>1;//ÖÐ
-				motor->Tb = (motor->Ts - motor->Tx - motor->Ty)>>1;//³¤
-				motor->Tc = (motor->Ts + motor->Tx + motor->Ty)>>1;//¶Ì
+				motor->Ta = (motor->Ts + motor->Tx - motor->Ty)>>1;//ä¸­
+				motor->Tb = (motor->Ts - motor->Tx - motor->Ty)>>1;//é•¿
+				motor->Tc = (motor->Ts + motor->Tx + motor->Ty)>>1;//çŸ­
 			break;
 			case 3:
-				motor->Ta = (motor->Ts + motor->Tx + motor->Ty)>>1;//¶Ì
-				motor->Tb = (motor->Ts - motor->Tx - motor->Ty)>>1;//³¤
-				motor->Tc = (motor->Ts + motor->Tx - motor->Ty)>>1;//ÖÐ
+				motor->Ta = (motor->Ts + motor->Tx + motor->Ty)>>1;//çŸ­
+				motor->Tb = (motor->Ts - motor->Tx - motor->Ty)>>1;//é•¿
+				motor->Tc = (motor->Ts + motor->Tx - motor->Ty)>>1;//ä¸­
 			break;
 			case 4:
-				motor->Ta = (motor->Ts + motor->Tx + motor->Ty)>>1;//¶Ì
-				motor->Tb = (motor->Ts + motor->Tx - motor->Ty)>>1;//ÖÐ
-				motor->Tc = (motor->Ts - motor->Tx - motor->Ty)>>1;//³¤
+				motor->Ta = (motor->Ts + motor->Tx + motor->Ty)>>1;//çŸ­
+				motor->Tb = (motor->Ts + motor->Tx - motor->Ty)>>1;//ä¸­
+				motor->Tc = (motor->Ts - motor->Tx - motor->Ty)>>1;//é•¿
 			break;
 			case 5:
-				motor->Ta = (motor->Ts + motor->Tx - motor->Ty)>>1;//ÖÐ
-				motor->Tb = (motor->Ts + motor->Tx + motor->Ty)>>1;//¶Ì
-				motor->Tc = (motor->Ts - motor->Tx - motor->Ty)>>1;//³¤
+				motor->Ta = (motor->Ts + motor->Tx - motor->Ty)>>1;//ä¸­
+				motor->Tb = (motor->Ts + motor->Tx + motor->Ty)>>1;//çŸ­
+				motor->Tc = (motor->Ts - motor->Tx - motor->Ty)>>1;//é•¿
 			break;
 			case 6:
-				motor->Ta = (motor->Ts - motor->Tx - motor->Ty)>>1;//³¤
-				motor->Tb = (motor->Ts + motor->Tx + motor->Ty)>>1;//¶Ì
-				motor->Tc = (motor->Ts + motor->Tx - motor->Ty)>>1;//ÖÐ
+				motor->Ta = (motor->Ts - motor->Tx - motor->Ty)>>1;//é•¿
+				motor->Tb = (motor->Ts + motor->Tx + motor->Ty)>>1;//çŸ­
+				motor->Tc = (motor->Ts + motor->Tx - motor->Ty)>>1;//ä¸­
 			break;
 			default:
-				motor->Ta = motor->Ts >>1;//Ä¬ÈÏÊä³ö50%Õ¼¿Õ±È
+				motor->Ta = motor->Ts >>1;//é»˜è®¤è¾“å‡º50%å ç©ºæ¯”
 				motor->Tb = motor->Ts >>1;
 				motor->Tc = motor->Ts >>1;
-				break;
+			break;
 		}
 	}
-	//±ÜÃâ0PWMÊä³öÊ±¶¨Ê±Æ÷Ä£¿é¹¤×÷²»Õý³£
+	//é¿å…0PWMè¾“å‡ºæ—¶å®šæ—¶å™¨æ¨¡å—å·¥ä½œä¸æ­£å¸¸
 	if(motor->Ta == 0)
 		motor->Ta = 1;
 	if(motor->Tb == 0)
@@ -180,20 +180,20 @@ void PWM_Time_Count(FOC_Motor *motor)
 	if(motor->Tc == 0)
 		motor->Tc = 1;
 }
-//»ù±¾FOC¿ØÖÆ
+//åŸºæœ¬FOCæŽ§åˆ¶
 void FOC_Control(FOC_Motor *motor)
 { 
-	//»ñÈ¡µç½Ç¶È
+	//èŽ·å–ç”µè§’åº¦
 	Encoder_To_Electri_Angle(motor);
-	//»ñÈ¡·´À¡µçÁ÷Iq,Id
+	//èŽ·å–åé¦ˆç”µæµIq,Id
 	Clark_Transform(motor);
 	Park_Transform(motor);
 	
-	//Ä£Ê½´¦Àí
+	//æ¨¡å¼å¤„ç†
 	Model_Control(motor);
-	if(Control_Word.Work_Model >= 4)//±Õ»·²ÅÊ¹ÓÃ·´park±ä»»
+	if(Control_Word.Work_Model >= 4)//é—­çŽ¯æ‰ä½¿ç”¨åparkå˜æ¢
 		Inverse_Park_Transform(motor);
-	if(Control_Word.Work_Model != 2)//2Ä£Ê½ÎªÕ¼¿Õ±ÈÄ£Ê½£¬²»ÐèÒªSVPWM¼ÆËãÈýÏàÕ¼¿Õ±È
+	if(Control_Word.Work_Model != 2)//2æ¨¡å¼ä¸ºå ç©ºæ¯”æ¨¡å¼ï¼Œä¸éœ€è¦SVPWMè®¡ç®—ä¸‰ç›¸å ç©ºæ¯”
 		SVPWM(motor);
 	PWM_Time_Count(motor);
 }	
