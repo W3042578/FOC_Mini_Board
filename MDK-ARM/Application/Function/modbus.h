@@ -5,23 +5,23 @@
 #include "stdint.h"
 #include "main.h"
 
-#define RX_BUFF_LONG  30 												//½ÓÊÜ»º³åÇøÊı¾İ³¤¶È
-#define TX_BUFF_LONG  30												//·¢ËÍ»º³åÇøÊı¾İ³¤¶È
-#define Slave_ID 0x01    			//¶¨Òå´Ó»úID
+#define RX_BUFF_LONG  30 	//æ¥å—ç¼“å†²åŒºæ•°æ®é•¿åº¦
+#define TX_BUFF_LONG  30	//å‘é€ç¼“å†²åŒºæ•°æ®é•¿åº¦
+#define Slave_ID 0x01    	//å®šä¹‰ä»æœºID
 
-//ModbusĞ­Òé£º IDºÅ--ID   ¹¦ÄÜÂë--Function_Code  ÆğÊ¼µØÖ·¡ª¡ªStart_Address   ¼Ä´æÆ÷Êı¡ª¡ªRegister_Number  ×Ö½ÚÊı¡ª¡ªByte_Number  ¶ÁÈ¡Ò»¸öÄÚÈİ¡ª¡ªRead_Data   
-//»ñÈ¡µÄĞ£ÑéÂë¡ª¡ªCRC_RX_Data		×ÔÉí¼ÆËãµÄĞ£ÑéÂë¡ª¡ªCRC_Self_Data		Ğ´ÈëÒ»¸öÄÚÈİ¡ª¡ªWrite_Data		Ğ´ÈëÊ®¸öÄÚÈİ¡ª¡ªWrite_TEN_Data[10]
-//Êı¾İÖ¡°üº¬×Ö½Ú³¤¶È¡ª¡ªModbus_Length	
+//Modbusåè®®ï¼š IDå·--ID   åŠŸèƒ½ç --Function_Code  èµ·å§‹åœ°å€â€”â€”Start_Address   å¯„å­˜å™¨æ•°â€”â€”Register_Number  å­—èŠ‚æ•°â€”â€”Byte_Number  è¯»å–ä¸€ä¸ªå†…å®¹â€”â€”Read_Data   
+//è·å–çš„æ ¡éªŒç â€”â€”CRC_RX_Data è‡ªèº«è®¡ç®—çš„æ ¡éªŒç â€”â€”CRC_Self_Data	å†™å…¥ä¸€ä¸ªå†…å®¹â€”â€”Write_Data		å†™å…¥åä¸ªå†…å®¹â€”â€”Write_TEN_Data[10]
+//æ•°æ®å¸§åŒ…å«å­—èŠ‚é•¿åº¦â€”â€”Modbus_Length	
 union Modbus_CRC
 {
 	uint16_t ALL;
 	struct
 	{
 		uint8_t  low;
-		uint8_t  high;    //¸ßÎ»ÔÚÏÂ
+		uint8_t  high;    //é«˜ä½åœ¨ä¸‹
 	}nchar;
 };
-//¶¨Òå8Î»Óë16Î»Êı×é¹²ÓÃÊı¾İµÄ½ÓÊÜÇø
+//å®šä¹‰8ä½ä¸16ä½æ•°ç»„å…±ç”¨æ•°æ®çš„æ¥å—åŒº
 union Modbus_Transfer_Data
 {
 	uint16_t ALL;
@@ -34,29 +34,29 @@ union Modbus_Transfer_Data
 
 typedef struct
 {
-	uint8_t		ID;																							//modbusÍ¨Ñ¶ID
-	uint8_t		Function_Code;																	//modbus¹¦ÄÜÂë
-	uint16_t	Start_Address;																	//¿ªÊ¼µØÖ·
-	uint16_t	Register_Number;																//¼Ä´æÆ÷¸öÊı
-	uint8_t		Byte_Number;																		//×Ö½Ú¸öÊı
-	union 	Modbus_Transfer_Data 	Read_Data_Array[10];				//¶ÁÊı¾İÊı×é
-	union 	Modbus_Transfer_Data 	Write_Data_Array[10];				//Ğ´Êı¾İÊı×é
-	uint8_t 	Read_To_Send[20];																//¶ÁÈ¡ÓÃÓÚ·¢ËÍµÄÊı¾İ
-	union 	Modbus_CRC  	CRC_RX_Data;												//½ÓÊÜµ½µÄĞ£ÑéÂë
-	union 	Modbus_CRC  	CRC_Self_Data;											//ÒÔ½ÓÊÜÊı¾İ¼ÆËãµÃµ½µÄĞ£ÑéÂë
-	union 	Modbus_CRC		CRC_TX_Data;												//×¼±¸·¢ËÍµÄĞ£ÑéÂë
-	uint8_t		Error;																					//modbus´íÎó±êÖ¾
-	uint16_t	Write_Data;																			//Ğ´ÈëÒ»¸öÊı¾İÓÃ
-	uint8_t		Const_Columns_Number;														//»ñÈ¡µ±Ç°²Ù×÷Êı¾İÁĞÊı
+	uint8_t		ID;					//modbusé€šè®¯ID
+	uint8_t		Function_Code;				//modbusåŠŸèƒ½ç 
+	uint16_t	Start_Address;				//å¼€å§‹åœ°å€
+	uint16_t	Register_Number;			//å¯„å­˜å™¨ä¸ªæ•°
+	uint8_t		Byte_Number;				//å­—èŠ‚ä¸ªæ•°
+	union 	Modbus_Transfer_Data 	Read_Data_Array[10];	//è¯»æ•°æ®æ•°ç»„
+	union 	Modbus_Transfer_Data 	Write_Data_Array[10];	//å†™æ•°æ®æ•°ç»„
+	uint8_t 	Read_To_Send[20];			//è¯»å–ç”¨äºå‘é€çš„æ•°æ®
+	union 	Modbus_CRC  	CRC_RX_Data;			//æ¥å—åˆ°çš„æ ¡éªŒç 
+	union 	Modbus_CRC  	CRC_Self_Data;			//ä»¥æ¥å—æ•°æ®è®¡ç®—å¾—åˆ°çš„æ ¡éªŒç 
+	union 	Modbus_CRC		CRC_TX_Data;		//å‡†å¤‡å‘é€çš„æ ¡éªŒç 
+	uint8_t		Error;					//modbusé”™è¯¯æ ‡å¿—
+	uint16_t	Write_Data;				//å†™å…¥ä¸€ä¸ªæ•°æ®ç”¨
+	uint8_t		Const_Columns_Number;			//è·å–å½“å‰æ“ä½œæ•°æ®åˆ—æ•°
 	uint8_t		Test;
 }MODBUS;
 
-//ModbusÍ¨Ñ¶
+//Modbusé€šè®¯
 extern uint8_t Modbus_Length_In;
 extern uint16_t Modbus_Length_Out;
 extern MODBUS Modbus;
 extern uint8_t Modbus_Buffer[30];
-//´®¿Ú½ÓÊÜ·¢ËÍ
+//ä¸²å£æ¥å—å‘é€
 extern uint8_t Tx_Data[TX_BUFF_LONG];
 extern uint8_t Rx_Data[RX_BUFF_LONG];
 
