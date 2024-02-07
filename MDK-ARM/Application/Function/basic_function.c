@@ -10,30 +10,30 @@
 #include "basic_function.h"
 
 
-//¹¦ÄÜ²ã&µ×²ã½»»¥
-//Ö÷Òª´æ·Å³öÓÚ¹¦ÄÜ²ãĞèÒª¶Ôµ×²ãĞŞ¸ÄµÄº¯Êı
+//åŠŸèƒ½å±‚&åº•å±‚äº¤äº’
+//ä¸»è¦å­˜æ”¾å‡ºäºåŠŸèƒ½å±‚éœ€è¦å¯¹åº•å±‚ä¿®æ”¹çš„å‡½æ•°
 
 
 uint16_t Interrupt_Delay,Number_Offest_Count;
 
-//»ñÈ¡±àÂëÆ÷½Ç¶È²¢×ª»»Îªµç½Ç¶È
+//è·å–ç¼–ç å™¨è§’åº¦å¹¶è½¬æ¢ä¸ºç”µè§’åº¦
 void Encoder_To_Electri_Angle(FOC_Motor *motor)
 {
 	uint16_t electri_angle;
 	uint32_t offest_angle;
 	
-	//½Ç¶È»ñÈ¡ÓëµçÁ÷²ÉÑùÍ¬ÖÜÆÚ
-	Encoder_Data_Deal(&encoder1); //»ñÈ¡±àÂëÆ÷½Ç¶È£¬ËÙ¶È£¬Î»ÖÃ
-	Start_Encoder_GET(&encoder1); //¿ªÆô±àÂëÆ÷DMA£¬»ñÈ¡ÏÂÒ»´ÎÊ¹ÓÃ½Ç¶È
+	//è§’åº¦è·å–ä¸ç”µæµé‡‡æ ·åŒå‘¨æœŸ
+	Encoder_Data_Deal(&encoder1); //è·å–ç¼–ç å™¨è§’åº¦ï¼Œé€Ÿåº¦ï¼Œä½ç½®
+	Start_Encoder_GET(&encoder1); //å¼€å¯ç¼–ç å™¨DMAï¼Œè·å–ä¸‹ä¸€æ¬¡ä½¿ç”¨è§’åº¦
 	
 	
-	//µç»úÔ­µãÎ»ÖÃ¶ÔÆëalphaÖá
+	//ç”µæœºåŸç‚¹ä½ç½®å¯¹é½alphaè½´
 	if(encoder1.Encoder_Angle < motor->Initial_Angle_Offset)
 			offest_angle = encoder1.Encoder_Angle - motor->Initial_Angle_Offset + 65535;
 	else
 			offest_angle = encoder1.Encoder_Angle - motor->Initial_Angle_Offset;
 	
-	//µç»úËÙ¶È²¹³¥¼ÆËãÓÃ½Ç¶È
+	//ç”µæœºé€Ÿåº¦è¡¥å¿è®¡ç®—ç”¨è§’åº¦
 	if(motor->Speed_Angle > 0)
 	{
 		offest_angle = offest_angle + motor->Speed_Angle;
@@ -47,41 +47,41 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 		else
 			offest_angle = offest_angle - motor->Speed_Angle;
 	}
-	//Ê¹ÓÃÓëÔËËã¿ìËÙÈ¡Óà t % 2`(n) µÈ¼ÛÓÚ t & (2`(n) - 1)
-	//²Î¿¼https://blog.csdn.net/lonyw/article/details/80519652
+	//ä½¿ç”¨ä¸è¿ç®—å¿«é€Ÿå–ä½™ t % 2`(n) ç­‰ä»·äº t & (2`(n) - 1)
+	//å‚è€ƒhttps://blog.csdn.net/lonyw/article/details/80519652
 	electri_angle = (motor->Polar * offest_angle) & 0xFFFE;
-	//²é±í»ñÈ¡µç½Ç¶È¶ÔÓ¦Èı½Çº¯ÊıÖµ
+	//æŸ¥è¡¨è·å–ç”µè§’åº¦å¯¹åº”ä¸‰è§’å‡½æ•°å€¼
 	motor->Sin_Angle = SIN_COS_TABLE[(electri_angle >> 7)];
 	motor->Cos_Angle = SIN_COS_TABLE[((electri_angle >> 7)+128) & 0x1ff];
 }
 
-//±àÂëÆ÷Ğ£×¼ 
-//»ñÈ¡±àÂëÆ÷¶ÔÓ¦alphaÖáÁãÎ»ĞŞÕı½Ç¶ÈÖµ
-//Õı·´×ª±àÂëÆ÷»ñÈ¡ÏßĞÔ»¯²é±í²¹³¥Êı¾İ²¢ÅĞ¶Ï±àÂëÆ÷·½ÏòÓëqÖáÕı·½ÏòÊÇ·ñÒ»ÖÂ
-//»ñÈ¡ÁãÎ»ÖÃ½Ç¶ÈĞŞÕıÖµ
+//ç¼–ç å™¨æ ¡å‡† 
+//è·å–ç¼–ç å™¨å¯¹åº”alphaè½´é›¶ä½ä¿®æ­£è§’åº¦å€¼
+//æ­£åè½¬ç¼–ç å™¨è·å–çº¿æ€§åŒ–æŸ¥è¡¨è¡¥å¿æ•°æ®å¹¶åˆ¤æ–­ç¼–ç å™¨æ–¹å‘ä¸qè½´æ­£æ–¹å‘æ˜¯å¦ä¸€è‡´
+//è·å–é›¶ä½ç½®è§’åº¦ä¿®æ­£å€¼
 void Get_Initial_Angle_Offest(FOC_Motor *motor)
 {
-	//±àÂëÆ÷ÁãÎ»Ğ£Õı
-	if(Control_Word.Work_Model == 1 && Work_Status.bits.Angle_Offest != 0)//ÅĞ¶Ï¹¤×÷Ä£Ê½1ÇÒÎªÁãÎ»Ğ£×¼×´Ì¬½øÈëĞ£×¼
+	//ç¼–ç å™¨é›¶ä½æ ¡æ­£
+	if(Control_Word.Work_Model == 1 && Work_Status.bits.Angle_Offest != 0)//åˆ¤æ–­å·¥ä½œæ¨¡å¼1ä¸”ä¸ºé›¶ä½æ ¡å‡†çŠ¶æ€è¿›å…¥æ ¡å‡†
 	{
-		if(Interrupt_Delay > 0)	//Interrupt_Delay·ÇÁã¼õµ½Áã
+		if(Interrupt_Delay > 0)	//Interrupt_Delayéé›¶å‡åˆ°é›¶
 			Interrupt_Delay --;
-		else										//Interrupt_DelayÎªÁãºó½øĞĞ±àÂëÆ÷ÀÛ¼Ó¼ÆÊı¹¤×÷£¬ÀÛ¼ÓÖ¸¶¨´ÎÊı
+		else										//Interrupt_Delayä¸ºé›¶åè¿›è¡Œç¼–ç å™¨ç´¯åŠ è®¡æ•°å·¥ä½œï¼Œç´¯åŠ æŒ‡å®šæ¬¡æ•°
 		{
 			motor->Initial_Angle_Offset = motor->Initial_Angle_Offset + encoder1.Encoder_Angle;
 			Number_Offest_Count --;
 		}
-		if(Number_Offest_Count == 0)//Ö¸¶¨´ÎÊıÀÛ¼ÓºóÆ½¾ù»ñµÃÁãÎ»Ğ£×¼Öµ
+		if(Number_Offest_Count == 0)//æŒ‡å®šæ¬¡æ•°ç´¯åŠ åå¹³å‡è·å¾—é›¶ä½æ ¡å‡†å€¼
 		{
 			motor->Initial_Angle_Offset = motor->Initial_Angle_Offset >> (Control_Word.Number_Angle_Offest);
-			Control_Word.Work_Model = 0;			//Ğ£ÕıÍê³ÉÍË³öĞ£ÕıÄ£Ê½²¢¹Ø±ÕPWMÊ¹ÄÜ
+			Control_Word.Work_Model = 0;			//æ ¡æ­£å®Œæˆé€€å‡ºæ ¡æ­£æ¨¡å¼å¹¶å…³é—­PWMä½¿èƒ½
 			Control_Word.PWM_Enable = 0;
-			Work_Status.bits.Angle_Offest = 0;//±àÂëÆ÷Ğ£ÕıÎ»ÇåÁã ÔÊĞíÏÂÒ»´Î½øÈëÁãÎ»Ğ£×¼
+			Work_Status.bits.Angle_Offest = 0;//ç¼–ç å™¨æ ¡æ­£ä½æ¸…é›¶ å…è®¸ä¸‹ä¸€æ¬¡è¿›å…¥é›¶ä½æ ¡å‡†
 		}
 	}
 }
 
-//»ñÈ¡Á½ÏàµçÁ÷²ÉÑùĞŞÕıÖµ  °üº¬Æ«ÖÃµçÑ¹
+//è·å–ä¸¤ç›¸ç”µæµé‡‡æ ·ä¿®æ­£å€¼  åŒ…å«åç½®ç”µå‹
 void ADC_Current_Offest(FOC_Motor *motor)
 {
 	uint32_t Add_ADC_Offect_U,Add_ADC_Offect_V;
@@ -89,7 +89,7 @@ void ADC_Current_Offest(FOC_Motor *motor)
 	Work_Status.bits.Offest_Current = 1;
 	Add_ADC_Offect_U = Add_ADC_Offect_V = 0;
 	Number_ADC_Offect = 32;
-	motor->Ia_Offect = 0;				//Ğ£×¼ÖµÖÃÁã£¬±ÜÃâ²ÉÑù»Øµ÷º¯ÊıÖĞĞŞÕıÖµÓ°ÏìÖ±½Ó²ÉµÃµÄÊı¾İ
+	motor->Ia_Offect = 0;				//æ ¡å‡†å€¼ç½®é›¶ï¼Œé¿å…é‡‡æ ·å›è°ƒå‡½æ•°ä¸­ä¿®æ­£å€¼å½±å“ç›´æ¥é‡‡å¾—çš„æ•°æ®
 	motor->Ib_Offect = 0;
 	
 	motor->Ualph = 0;//Ualph = 0V
@@ -99,7 +99,7 @@ void ADC_Current_Offest(FOC_Motor *motor)
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor->Tb);
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor->Tc);	
 	
-	//Ê¹ÄÜdrv8313
+	//ä½¿èƒ½drv8313
 	HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_SET);	
 	
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
@@ -108,11 +108,11 @@ void ADC_Current_Offest(FOC_Motor *motor)
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
 	
 	HAL_Delay(1000);
-	//Æ½¾ù¼õĞ¡Îó²î
+	//å¹³å‡å‡å°è¯¯å·®
 	for(uint8_t i = 1;i<=Number_ADC_Offect;i++)
 		{
 			Add_ADC_Offect_U = Add_ADC_Offect_U - motor->Ia;
-			Add_ADC_Offect_V = Add_ADC_Offect_V - motor->Ib;//´Ë´¦ÀÛ¼ÓÊ¹ÓÃ¸ººÅ¿¼ÂÇµ½Ğ£×¼Ê±»ñÈ¡µÄÊıÖµÊÇ¸ºÊı
+			Add_ADC_Offect_V = Add_ADC_Offect_V - motor->Ib;//æ­¤å¤„ç´¯åŠ ä½¿ç”¨è´Ÿå·è€ƒè™‘åˆ°æ ¡å‡†æ—¶è·å–çš„æ•°å€¼æ˜¯è´Ÿæ•°
 			HAL_Delay(2);
 		}
 	motor->Ia_Offect = Add_ADC_Offect_U >> 5;
@@ -120,22 +120,21 @@ void ADC_Current_Offest(FOC_Motor *motor)
 	motor->Ia = motor->Ib =0;	
 }
 
-//µç»ú¿ØÖÆËÀÇø²¹³¥
+//ç”µæœºæ§åˆ¶æ­»åŒºè¡¥å¿
 void Dead_Time_Compensate(FOC_Motor *motor)
 {
-	//¸ù¾İ»ØÀ¡µçÁ÷¼«ĞÔÅĞ¶ÏSVPWMÉú³ÉÈıÏàÕ¼¿Õ±ÈÕı¸ºÊ±¼ä²¹³¥
+	//æ ¹æ®å›é¦ˆç”µæµææ€§åˆ¤æ–­SVPWMç”Ÿæˆä¸‰ç›¸å ç©ºæ¯”æ­£è´Ÿæ—¶é—´è¡¥å¿
 	
-
 }
 
-//¹¤×÷Ä£Ê½¿ØÖÆ
-//º¯Êı¹¤×÷ÔÚFOCµçÁ÷»·ÖĞ
+//å·¥ä½œæ¨¡å¼æ§åˆ¶
+//å‡½æ•°å·¥ä½œåœ¨FOCç”µæµç¯ä¸­
 void Model_Control(FOC_Motor *motor)
 {
-	//¸ù¾İ¿ØÖÆ×ÖÅĞ¶Ï¹¤×÷»·
+	//æ ¹æ®æ§åˆ¶å­—åˆ¤æ–­å·¥ä½œç¯
 	switch(Control_Word.Work_Model)
 	{	
-		//Ğ£ÕıÄ£Ê½£º³õÊ¼½Ç¶ÈĞ£ÕıºÍ±àÂëÆ÷ÏßĞÔ²¹³¥
+		//æ ¡æ­£æ¨¡å¼ï¼šåˆå§‹è§’åº¦æ ¡æ­£å’Œç¼–ç å™¨çº¿æ€§è¡¥å¿
 		case 1:
 			motor->Ualph = 2048 * Control_Word.Angle_Initial_Voltage;//Ualph = 3V
 			motor->Ubeta = 0;
@@ -148,9 +147,9 @@ void Model_Control(FOC_Motor *motor)
 			}
 			break;
 		
-		//Õ¼¿Õ±ÈÄ£Ê½£º°´ÕÕÉèÖÃÊä³öÖ¸¶¨µ¥ÏàÂú¶îÕ¼¿Õ±È£¨¿¼ÂÇ²ÉÑù×î´ó98%£©
+		//å ç©ºæ¯”æ¨¡å¼ï¼šæŒ‰ç…§è®¾ç½®è¾“å‡ºæŒ‡å®šå•ç›¸æ»¡é¢å ç©ºæ¯”ï¼ˆè€ƒè™‘é‡‡æ ·æœ€å¤§98%ï¼‰
 		case 2:
-			//¶ÔÊäÈëÕ¼¿Õ±ÈÊıÖµ×÷ÏŞÖÆ
+			//å¯¹è¾“å…¥å ç©ºæ¯”æ•°å€¼ä½œé™åˆ¶
 			if(Control_Word.Duty_Model_A > 96)
 			{
 				Control_Word.Duty_Model_A = 96;
@@ -165,82 +164,82 @@ void Model_Control(FOC_Motor *motor)
 			}
 			break;
 		
-		//µçÑ¹¿ª»·Ä£Ê½£º°´ÕÕÉèÖÃµÄUq¡¢UdµçÑ¹¿ª»·¿ØÖÆ
+		//ç”µå‹å¼€ç¯æ¨¡å¼ï¼šæŒ‰ç…§è®¾ç½®çš„Uqã€Udç”µå‹å¼€ç¯æ§åˆ¶
 		case 3:
 			motor->Ud = 0;
 			motor->Uq = Control_Word.Open_Loop_Voltage * 2048;
 			break;
 		
-		//ËÙ¶È»·Ä£ÄâÎŞ¸Ğ¿ØÖÆ£ºÄ£ÄâËÙ¶ÈÔö¼Ó¿ØÖÆËÙ¶È¿ª»·Êä³ö
+		//é€Ÿåº¦ç¯æ¨¡æ‹Ÿæ— æ„Ÿæ§åˆ¶ï¼šæ¨¡æ‹Ÿé€Ÿåº¦å¢åŠ æ§åˆ¶é€Ÿåº¦å¼€ç¯è¾“å‡º
 		case 7:
 			
 			break;
 		
-		//Î»ÖÃ»·Ä£Ê½£ºPID¿ØÖÆÏà¶ÔÎ»ÖÃ±Õ»·Êä³ö
+		//ä½ç½®ç¯æ¨¡å¼ï¼šPIDæ§åˆ¶ç›¸å¯¹ä½ç½®é—­ç¯è¾“å‡º
 		case 6:
 			
 			break;
 		
-		//ËÙ¶È»·Ä£Ê½£ºPID¿ØÖÆËÙ¶È±Õ»·Êä³ö
+		//é€Ÿåº¦ç¯æ¨¡å¼ï¼šPIDæ§åˆ¶é€Ÿåº¦é—­ç¯è¾“å‡º
 		case 5:
 			
 		  break;
 			
-		//µçÁ÷»·Ä£Ê½£ºPID¿ØÖÆµçÁ÷Iq¡¢Id±Õ»·Êä³ö
+		//ç”µæµç¯æ¨¡å¼ï¼šPIDæ§åˆ¶ç”µæµIqã€Idé—­ç¯è¾“å‡º
 		case 4:
 			
 			break;
 
-		//Ä¬ÈÏ0Ä£Ê½£¬²»×öÊä³ö
+		//é»˜è®¤0æ¨¡å¼ï¼Œä¸åšè¾“å‡º
 		default:
 //			Error_Message.bits.Control_Loop_Error = 1;
 			break;
 	}
 }
 
-//PWMÊ¹ÄÜ¿ØÖÆ
+//PWMä½¿èƒ½æ§åˆ¶
 void Enable_Logic_Control(void)
 {
-	//½ô¼±Í£Ö¹´¥·¢¡¢Í£Ö¹PWMÊä³ö²¢¹Ø±ÕÇı¶¯Ä£¿é¹¤×÷
+	//ç´§æ€¥åœæ­¢è§¦å‘ã€åœæ­¢PWMè¾“å‡ºå¹¶å…³é—­é©±åŠ¨æ¨¡å—å·¥ä½œ
 	if(Control_Word.Energency_Stop == 1)
 	{
-		//¹Ø±ÕÇı¶¯Ä£¿é
+		//å…³é—­é©±åŠ¨æ¨¡å—
 		HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_RESET);
-		//¹Ø±ÕÈıÏàPWMÊä³ö
+		//å…³é—­ä¸‰ç›¸PWMè¾“å‡º
 		HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
 		HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
 		HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_3);
-		//PWMÊ¹ÄÜ×´Ì¬ÖÃ0
+		//PWMä½¿èƒ½çŠ¶æ€ç½®0
 		Work_Status.bits.Enable_Status = 0;
 	}
 	else
 	{
 		if(Control_Word.PWM_Enable == 1)
 		{
-			//¿ªÆôÈıÏàPWMÊä³ö
+			//å¼€å¯ä¸‰ç›¸PWMè¾“å‡º
 			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
 			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
-			//Ê¹ÄÜÇı¶¯Ä£¿é
+			//ä½¿èƒ½é©±åŠ¨æ¨¡å—
 			HAL_GPIO_WritePin(Power_Reset_GPIO_Port,Power_Reset_Pin,GPIO_PIN_SET);
-			//PWMÊ¹ÄÜ×´Ì¬ÖÃ1
+			//PWMä½¿èƒ½çŠ¶æ€ç½®1
 			Work_Status.bits.Enable_Status = 1;
 		}
 		else
 		{
-			//¹Ø±ÕÇı¶¯Ä£¿é
+			//å…³é—­é©±åŠ¨æ¨¡å—
 			HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_RESET);
-			//¹Ø±ÕÈıÏàPWMÊä³ö
+			//å…³é—­ä¸‰ç›¸PWMè¾“å‡º
 			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
 			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
 			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_3);
-			//PWMÊ¹ÄÜ×´Ì¬ÖÃ0
+			//PWMä½¿èƒ½çŠ¶æ€ç½®0
 			Work_Status.bits.Enable_Status = 0;
 		}
 	}
 }
 
-//STM32 HAL ÈıÏàPWM±È½ÏÖµÉèÖÃ
+//STM32 HAL ä¸‰ç›¸PWMæ¯”è¾ƒå€¼è®¾ç½®
 void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
 {
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor->Ta);
