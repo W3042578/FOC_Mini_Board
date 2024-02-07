@@ -11,7 +11,7 @@ _PID_Control	Current_Q_PID,Current_D_PID,Speed_PI,Position_PI;
 
 //并联式PID控制  
 //参考https://blog.csdn.net/qq_38833931/article/details/80630960
-//实际只用PI 需要添加抗积分饱和
+//实际只用PI 并联式抗积分饱和
 void PID_Control_Deal(_PID_Control * PID_Control)
 {
 	uint32_t Integral_Data;
@@ -19,9 +19,9 @@ void PID_Control_Deal(_PID_Control * PID_Control)
 	PID_Control->Error = PID_Control->Expect - PID_Control->Feedback;
 	PID_Control->Integral_Sum = PID_Control->Integral_Sum + PID_Control->Error;
 
-	PID_Control->Proportion_Sum = PID_Control->Proportion * PID_Control->Error;
-	Integral_Data = PID_Control->Integral * PID_Control->Integral_Sum;
-	PID_Control->Difference_Sum = PID_Control->Difference * (PID_Control->Error - PID_Control->Last_Error);
+	PID_Control->Proportion_Sum = PID_Control->Proportion * PID_Control->Error;   //Kp * Error
+	Integral_Data = PID_Control->Integral * PID_Control->Integral_Sum;		//Ki * Integral
+	PID_Control->Difference_Sum = PID_Control->Difference * (PID_Control->Error - PID_Control->Last_Error); //Kd * Difference
 	//误差限幅
 	if(PID_Control->Proportion_Sum > PID_Control->)
 		PID_Control->Error = PID_Control->Error_Limit;
