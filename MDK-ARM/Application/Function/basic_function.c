@@ -24,15 +24,15 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 	uint32_t offest_angle;
 	
 	//角度获取与电流采样同周期
-	Encoder_Data_Deal(&encoder1); //获取编码器角度，速度，位置
-	Start_Encoder_GET(&encoder1); //开启编码器DMA，获取下一次使用角度
+	Encoder_Data_Deal(&Encoder1); //获取编码器角度，速度，位置
+	Start_Encoder_GET(&Encoder1); //开启编码器DMA，获取下一次使用角度
 	
 	
 	//电机原点位置对齐alpha轴
-	if(encoder1.Encoder_Angle < motor->Initial_Angle_Offset)
-			offest_angle = encoder1.Encoder_Angle - motor->Initial_Angle_Offset + 65535;
+	if(Encoder1.Encoder_Angle < motor->Initial_Angle_Offset)
+			offest_angle = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset + 65535;
 	else
-			offest_angle = encoder1.Encoder_Angle - motor->Initial_Angle_Offset;
+			offest_angle = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset;
 	
 	//电机速度补偿计算用角度
 	if(motor->Speed_Angle > 0)
@@ -77,7 +77,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 			Encoder_Offset_Delay --;
 		else	//Encoder_Offset_Delay为零后进行编码器累加计数工作，累加指定次数
 		{
-			motor->Initial_Angle_Offset = motor->Initial_Angle_Offset + encoder1.Encoder_Angle;
+			motor->Initial_Angle_Offset = motor->Initial_Angle_Offset + Encoder1.Encoder_Angle;
 			Number_Offest_Count --;
 		}
 		if(Number_Offest_Count == 0)//指定次数累加后平均获得零位校准值
