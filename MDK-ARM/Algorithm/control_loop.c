@@ -109,7 +109,7 @@ void Control_Loop_Init(_Control_Loop *Loop)
 	Loop->Position_Output_Limit = 0;
 }
 
-//1ms中断更新PID结构体中数据
+//1ms中断更新PID结构体数据
 void PID_Control_Update(void)
 {
 	//电流Iq PID
