@@ -190,7 +190,7 @@ void Model_Control(FOC_Motor *motor)
 			if((Control_Loop.Loop_Count & 0x04) == 0)
 			{
 				//相对位置回馈
-				Position_PI.Feedback = motor->Iq;
+				Position_PI.Feedback = Encoder1.Encode_Position;
 				//目标速度 单位：
 				Position_PI.Feedback = Control_Loop.Target_Position;
 				//PI计算
