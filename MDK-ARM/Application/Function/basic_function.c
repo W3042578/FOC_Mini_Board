@@ -254,6 +254,11 @@ void Model_Control(FOC_Motor *motor)
 				Control_Loop.Loop_Count = 0;
 				//考虑到编码器给出为绝对值位置信号，速度的求解需要结合时间，将编码器速度计算放在控制环路中
 				Encoder1.Encoder_1MS_Speed = Encoder1.Encode_Position - Last_Encoder_Position;
+				//编码器速度范围限制
+				if(Encoder1.Encoder_1MS_Speed > 8388608)
+					Encoder1.Encoder_1MS_Speed = Encoder1.Encoder_1MS_Speed - 16777216;
+				if(Encoder1.Encoder_1MS_Speed < -8388608)
+					Encoder1.Encoder_1MS_Speed = Encoder1.Encoder_1MS_Speed + 16777216;
 				//更新过去1ms时间编码器位置
 				Last_Encoder_Position = Encoder1.Encode_Position;
 			}
