@@ -3,22 +3,22 @@
 
 #include "main.h"
 
-//Ë÷Òı		×ÓË÷Òı		Êı¾İbyteÎ»Êı		Í¨Ñ¸±äÁ¿±äÁ¿µØÖ·		±äÁ¿×î´óÖµ		±äÁ¿×îĞ¡Öµ		µ÷ÓÃº¯ÊıÖ¸Õë
+//ç´¢å¼•		å­ç´¢å¼•		æ•°æ®byteä½æ•°		é€šè¿…å˜é‡å˜é‡åœ°å€		å˜é‡æœ€å¤§å€¼		å˜é‡æœ€å°å€¼		è°ƒç”¨å‡½æ•°æŒ‡é’ˆ
 
-//¶¨Òå½á¹¹Ìå
+//å®šä¹‰ç»“æ„ä½“
 typedef  struct
 {
 	uint16_t	Index;
-	uint8_t	Sub_Index;
-	uint8_t	Data_Type;
-	void* 	Commicate_Pointor;
+	uint8_t		Sub_Index;
+	uint8_t		Data_Type;
+	void* 		Commicate_Pointor;
 	uint16_t	Max;
 	uint16_t	Min;
 	uint16_t	(*Callback) (uint8_t Use_Sub_Index);
 }commicate_code;
 
 
-//Í¨Ñ¶±äÁ¿ÊıÄ¿
+//é€šè®¯å˜é‡æ•°ç›®
 extern uint16_t Commicate_Data_All_Number;
 extern const commicate_code Commicate_Code[];
 
