@@ -756,8 +756,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\Algorithm\sin_cos.c</PathWithFileName>
-      <FilenameWithoutPath>sin_cos.c</FilenameWithoutPath>
+      <PathWithFileName>.\Algorithm\table.c</PathWithFileName>
+      <FilenameWithoutPath>table.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

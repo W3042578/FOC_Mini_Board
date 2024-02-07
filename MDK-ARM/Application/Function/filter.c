@@ -1,6 +1,6 @@
 #include "filter.h"
 #include "stdint.h"
-#include "sin_cos.h"
+#include "table.h"
 
 
 //二阶巴特沃夫低通滤波器参数

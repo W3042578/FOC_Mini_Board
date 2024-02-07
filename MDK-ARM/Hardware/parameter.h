@@ -71,7 +71,7 @@ union _Work_Status
 extern	_Control_Word Control_Word; 
 extern	union _Error_Message Error_Message;
 extern  union _Work_Status Work_Status;
-extern int16_t Number_Encoder_Offest,Number_Encoder_Direction;
+extern int16_t Number_Encoder_Direction;
 
 //变量用于编码器通讯角度获取 测试验证用
 extern uint16_t Transfer1[3];

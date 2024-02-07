@@ -9,6 +9,7 @@
         "usart.h": "c",
         "stm32f1xx_hal_dma.h": "c",
         "stm32f1xx_hal_def.h": "c",
-        "object_commicate.h": "c"
+        "object_commicate.h": "c",
+        "modbus.h": "c"
     }
 }

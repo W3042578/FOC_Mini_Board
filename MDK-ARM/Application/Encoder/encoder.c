@@ -10,15 +10,16 @@
 
 //本文件针对不同编码器作输入转换，最终输入给16位绝对值角度、速度、相对多圈位置数据
 
+_Encoder Encoder1;
 
 //MT6813 14位绝对值编码器
 uint16_t Tx_Encoder[2] = {0x8300,0x0000};  //定义6813编码器收发数据 burst模式
 uint16_t Rx_Encoder[2];
-Encoder Encoder1;
+
 
 //开始编码器数据的获取
 //编码器数据DMA传输，进入电流注入采样中断后先取出上一次角度数据然后开始本次角度DMA获取
-void Start_Encoder_GET(Encoder *encoder)
+void Start_Encoder_GET(_Encoder *encoder)
 {
 	if(encoder->Type == 1)//SPI通讯编码器
 	{
@@ -31,7 +32,7 @@ void Start_Encoder_GET(Encoder *encoder)
 
 //由编码器数据计算编码器速度并进行位置计数
 //判断有无多圈角度数据
-void Encoder_Data_Deal(Encoder *encoder)
+void Encoder_Data_Deal(_Encoder *encoder)
 {
     uint16_t    Angle_Single,Angle_Multi;
     uint16_t    Angle_Transfer;

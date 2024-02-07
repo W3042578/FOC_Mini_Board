@@ -18,7 +18,7 @@ union Modbus_CRC
 	struct
 	{
 		uint8_t  low;
-		uint8_t  high;    //高位在下
+		uint8_t  high;	//高位在下
 	}nchar;
 };
 //定义8位与16位数组共用数据的接受区
@@ -34,7 +34,7 @@ union Modbus_Transfer_Data
 
 typedef struct
 {
-	uint8_t		ID;					//modbus通讯ID
+	uint8_t		ID;							//modbus通讯ID
 	uint8_t		Function_Code;				//modbus功能码
 	uint16_t	Start_Address;				//开始地址
 	uint16_t	Register_Number;			//寄存器个数
@@ -42,12 +42,12 @@ typedef struct
 	union 	Modbus_Transfer_Data 	Read_Data_Array[10];	//读数据数组
 	union 	Modbus_Transfer_Data 	Write_Data_Array[10];	//写数据数组
 	uint8_t 	Read_To_Send[20];			//读取用于发送的数据
-	union 	Modbus_CRC  	CRC_RX_Data;			//接受到的校验码
-	union 	Modbus_CRC  	CRC_Self_Data;			//以接受数据计算得到的校验码
-	union 	Modbus_CRC		CRC_TX_Data;		//准备发送的校验码
-	uint8_t		Error;					//modbus错误标志
-	uint16_t	Write_Data;				//写入一个数据用
-	uint8_t		Const_Columns_Number;			//获取当前操作数据列数
+	union 	Modbus_CRC  	CRC_RX_Data;	//接受到的校验码
+	union 	Modbus_CRC  	CRC_Self_Data;	//以接受数据计算得到的校验码
+	union 	Modbus_CRC		CRC_TX_Data;	//准备发送的校验码
+	uint8_t		Error;						//modbus错误标志
+	uint16_t	Write_Data;					//写入一个数据用
+	uint8_t		Const_Columns_Number;		//获取当前操作数据列数
 	uint8_t		Test;
 }MODBUS;
 

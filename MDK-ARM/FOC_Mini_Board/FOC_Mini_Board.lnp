@@ -26,7 +26,7 @@
 "foc_mini_board\filter.o"
 "foc_mini_board\control_loop.o"
 "foc_mini_board\foc.o"
-"foc_mini_board\sin_cos.o"
+"foc_mini_board\table.o"
 "foc_mini_board\adc.o"
 "foc_mini_board\dma.o"
 "foc_mini_board\gpio.o"

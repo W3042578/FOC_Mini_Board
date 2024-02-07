@@ -5,7 +5,7 @@
 #include "foc.h"
 #include "parameter.h"
 #include "control_loop.h"
-#include "sin_cos.h"
+#include "table.h"
 #include "encoder.h"
 #include "basic_function.h"
 
@@ -16,8 +16,9 @@
 //定义全局变量
 uint16_t	Encoder_Offset_Delay;	//编码器初始角度对齐延迟
 uint16_t	Number_Offest_Count;	//编码器累加实际次数
-uint8_t		Last_Work_Model;	//上一次的工作模式
+uint8_t		Last_Work_Model;		//上一次的工作模式
 int32_t		Last_Encoder_Position;	//上一次编码器胡相对位置
+int32_t		Last_1MS_Speed;			//上一次1ms编码器位置计算得速度
 
 //获取编码器角度并转换为电角度
 void Encoder_To_Electri_Angle(FOC_Motor *motor)
@@ -147,7 +148,7 @@ void Model_Control(FOC_Motor *motor)
 	{
 		if(Control_Word.PWM_Enable == 1)//PWM使能输出情况下不允许更改工作模式
 			Control_Word.Work_Model = Last_Work_Model;
-		else//PWM非使能允许模式切换，但需要清零各PID器中的积分量
+		else							//PWM非使能允许模式切换，但需要清零各PID器中的积分量
 		{
 			Current_Q_PID.Integral_Sum = 0;
 			Current_D_PID.Integral_Sum = 0;
@@ -210,7 +211,7 @@ void Model_Control(FOC_Motor *motor)
 				//目标速度 单位：dec(编码器单个数值单位)
 				Position_PI.Feedback = Control_Loop.Target_Position;
 				//PI计算
-				PID_Control_Deal(Position_PI);
+				PID_Control_Deal(&Position_PI);
 				//输出控制电流
 				Control_Loop.Target_Q_Current = Position_PI.Output_Sum;
 			}
@@ -226,7 +227,7 @@ void Model_Control(FOC_Motor *motor)
 				//目标速度 单位：rpm
 				Speed_PI.Feedback = Control_Loop.Target_Speed;
 				//PI计算
-				PID_Control_Deal(Speed_PI);
+				PID_Control_Deal(&Speed_PI);
 				//输出控制电流
 				Control_Loop.Target_Q_Current = Speed_PI.Output_Sum;
 			}
@@ -240,8 +241,8 @@ void Model_Control(FOC_Motor *motor)
 			Current_Q_PID.Expect = Control_Loop.Target_Q_Current;
 			Current_D_PID.Expect = Control_Loop.Target_D_Current;
 			//PID计算
-			PID_Control_Deal(Current_Q_PID);
-			PID_Control_Deal(Current_D_PID);
+			PID_Control_Deal(&Current_Q_PID);
+			PID_Control_Deal(&Current_D_PID);
 			//输出控制电压
 			motor->Uq = Current_Q_PID.Output_Sum;
 			motor->Ud = Current_D_PID.Output_Sum;
@@ -254,8 +255,12 @@ void Model_Control(FOC_Motor *motor)
 				Control_Loop.Loop_Count = 0;
 				//考虑到编码器给出为绝对值位置信号，速度的求解需要结合时间，将编码器速度计算放在控制环路中
 				Encoder1.Encoder_1MS_Speed = Encoder1.Encode_Position - Last_Encoder_Position;
-				//更新过去1ms时间编码器位置
+				//编码器速度范围限制,超出限制以上一次速度代替
+				if((Encoder1.Encoder_1MS_Speed > 16384) || (Encoder1.Encoder_1MS_Speed < -16384))
+					Encoder1.Encoder_1MS_Speed = Last_1MS_Speed;
+				//更新过去1ms时间编码器位置、1ms编码器速度
 				Last_Encoder_Position = Encoder1.Encode_Position;
+				Last_1MS_Speed = Encoder1.Encoder_1MS_Speed;
 			}
 		break;
 			

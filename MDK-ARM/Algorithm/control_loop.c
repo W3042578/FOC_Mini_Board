@@ -6,7 +6,10 @@
 
 //定义控制环全局结构体
 _Control_Loop	Control_Loop;
-_PID_Control	Current_Q_PID,Current_D_PID,Speed_PI,Position_PI;	
+_PID_Control	Current_Q_PID;
+_PID_Control	Current_D_PID;
+_PID_Control	Speed_PI;
+_PID_Control	Position_PI;	
 
 //并联式PID控制  
 //参考https://blog.csdn.net/qq_38833931/article/details/80630960

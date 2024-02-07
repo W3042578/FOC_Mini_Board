@@ -30,7 +30,7 @@
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
 #include "foc.h"
-#include "sin_cos.h"
+#include "table.h"
 #include "modbus.h"
 #include "usart_control.h"
 #include "object_commicate.h"
