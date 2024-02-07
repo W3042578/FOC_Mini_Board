@@ -13,7 +13,7 @@ typedef struct _Encoder
 	uint16_t	Encoder_Angle;				//编码器16位值
 	uint16_t	Encoder_Angle_Buffer;			//编码器上一次值
 	int32_t		Encode_Position;			//编码器位置数据，包含多圈计数
-	int16_t 	Encoder_Speed_Angle;			//1ms编码器速度
+	int16_t 	Encoder_1MS_Speed;			//1ms编码器速度
 	int16_t 	Speed_Filter;				//编码器速度滤波控制位
 	uint32_t 	Encoder_Offest_Data;		        //编码器修正值
 	uint8_t		Encoder_Direction;			//编码器方向，与q轴方向相同为0，相反为1
