@@ -9,35 +9,35 @@
 
 typedef struct _FOC_MOTOR
 {
-	uint8_t Polar;								//¼«¶ÔÊı
-	uint16_t Ts;								//ÄâºÏSVPWMµçÑ¹²Î¿¼Ê¸Á¿ÖÜÆÚ
+	uint8_t	 	Polar;			//æå¯¹æ•°
+	uint16_t 	Ts;			//æ‹ŸåˆSVPWMç”µå‹å‚è€ƒçŸ¢é‡å‘¨æœŸ
 	
-	int8_t Udc;									//Ä¸ÏßµçÑ¹
-	int32_t Ud,Uq;
-	int32_t Ualph,Ubeta;
-	int16_t Ia,Ib;
-	int16_t Ia_Offect,Ib_Offect;
-	int16_t Ialph,Ibeta;
-	int16_t Id,Iq;
-	uint32_t Umax;							//pwmÊä³öÎŞ·¨ÊµÏÖ100%Õ¼¿Õ±È
-	uint32_t Uref;							//UalphºÍUbetaÖ±½Ó¸ø³öµÄºÏ³ÉµçÑ¹Æ½·½Öµ
-	int32_t U1,U2,U3,m32;					//ÈıÏàÏßÉÏµçÑ¹×´Ì¬
-	uint8_t Sa,Sb,Sc;
-	int32_t Tx,Ty;
-	uint8_t Sector;		//ÉÈÇø
+	int8_t 		Udc;			//æ¯çº¿ç”µå‹
+	int32_t 	Ud,Uq;
+	int32_t 	Ualph,Ubeta;
+	int16_t 	Ia,Ib;
+	int16_t 	Ia_Offect,Ib_Offect;
+	int16_t 	Ialph,Ibeta;
+	int16_t 	Id,Iq;
+	uint32_t 	Umax;			//pwmè¾“å‡ºæ— æ³•å®ç°100%å ç©ºæ¯”
+	uint32_t 	Uref;			//Ualphå’ŒUbetaç›´æ¥ç»™å‡ºçš„åˆæˆç”µå‹å¹³æ–¹å€¼
+	int32_t 	U1,U2,U3,m32;		//ä¸‰ç›¸çº¿ä¸Šç”µå‹çŠ¶æ€
+	uint8_t 	Sa,Sb,Sc;
+	int32_t 	Tx,Ty;			
+	uint8_t 	Sector;			//æ‰‡åŒº
 		
-	uint32_t Mechanical_Angle;				//»úĞµ½Ç¶È
-	uint32_t Elecrical_Angle;				//µçÆø½Ç¶È
-	uint32_t Initial_Angle_Offset;	//ÆğÊ¼Î»ÖÃĞŞÕı½Ç£¬¶ÔÆëalphaÖá
-	int32_t	 Speed_Angle;						//×ªËÙ²¹³¥½Ç¶È
-	int16_t Sin_Angle;						//µç½Ç¶Èsin¡¢cosÖµ
-	int16_t Cos_Angle;
-	int32_t Ta,Tb,Tc;						//ÈıÏà·ÖÅäÉÏÇÅ´ò¿ªÊ±¼ä£¨1£ºÉÏÇÅ´ò¿ª£¬ÏÂÇÅ¹Ø±Õ£¬0£ºÏÂÇÅ´ò¿ª£¬ÉÏÇÅ¹Ø±Õ£©
+	uint32_t	Mechanical_Angle;	//æœºæ¢°è§’åº¦
+	uint32_t 	Elecrical_Angle;	//ç”µæ°”è§’åº¦
+	uint32_t 	Initial_Angle_Offset;	//èµ·å§‹ä½ç½®ä¿®æ­£è§’ï¼Œå¯¹é½alphaè½´
+	int32_t		Speed_Angle;		//è½¬é€Ÿè¡¥å¿è§’åº¦
+	int16_t 	Sin_Angle;		//ç”µè§’åº¦sinã€coså€¼
+	int16_t 	Cos_Angle;
+	int32_t 	Ta,Tb,Tc;		//ä¸‰ç›¸åˆ†é…ä¸Šæ¡¥æ‰“å¼€æ—¶é—´ï¼ˆ1ï¼šä¸Šæ¡¥æ‰“å¼€ï¼Œä¸‹æ¡¥å…³é—­ï¼Œ0ï¼šä¸‹æ¡¥æ‰“å¼€ï¼Œä¸Šæ¡¥å…³é—­ï¼‰
 	
-	uint8_t Direction;						//µç»ú¹¤×÷·½Ïò
+	uint8_t Direction;		//ç”µæœºå·¥ä½œæ–¹å‘
 }FOC_Motor;
 
-//µç»ú½á¹¹Ìå±äÁ¿
+//ç”µæœºç»“æ„ä½“å˜é‡
 extern FOC_Motor Motor1;
 
 
