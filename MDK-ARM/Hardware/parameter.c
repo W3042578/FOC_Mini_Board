@@ -6,22 +6,22 @@
 #include "control_loop.h"
 
 union _Error_Message Error_Message;		//错误信息指示位
-union _Work_Status Work_Status;				//工作状态指示位
+union _Work_Status Work_Status;			//工作状态指示位
 
-_Control_Word Control_Word; 					//通许变量、控制变量定义
-_Control_Loop	Control_Loop;						//控制环路变量
+_Control_Word Control_Word; 			//通许变量、控制变量定义
+_Control_Loop	Control_Loop;			//控制环路变量
 
-int16_t Number_Encoder_Direction;			//待定
+int16_t Number_Encoder_Direction;		//待定
 
 //硬件配置
 void Hardware_Init(void)
 {
 	//电机
 	Motor1.Polar = 11;
-	Motor1.Udc = 12;						//母线电压为 12V
+	Motor1.Udc = 12;			//母线电压为 12V
 		
 	//编码器
-	encoder1.Type = 1; 					//SPI通讯编码器
+	encoder1.Type = 1; 			//SPI通讯编码器
 	encoder1.Single_Bit = 14;		//14位单圈
 	encoder1.Multi_Bit = 0;			//多圈位为0
 	
@@ -37,15 +37,15 @@ void Control_Word_Init(_Control_Word *Data)
 {
 	Data->Work_Model = 0;							//1:校准  2:占空比  3:电压开环  4:电流环 5:速度环 6:位置环 7:速度环无感
 	Data->PWM_Enable = 0;							//0:PWM关闭使能		1:PWM开始使能
-	Data->Energency_Stop = 0;					//1:进入紧急停止
-	Data->Work_Direction = 0;					//0:当前方向 1:当前反向
-	Data->Open_Loop_Voltage = 0;			//开环电压
-	Data->Max_Voltage = 16;						//最大电压限制
+	Data->Energency_Stop = 0;		//1:进入紧急停止
+	Data->Work_Direction = 0;		//0:当前方向 1:当前反向
+	Data->Open_Loop_Voltage = 0;		//开环电压
+	Data->Max_Voltage = 16;			//最大电压限制
 	Data->Angle_Initial_Voltage = 5;	//编码器线性校正和初始位置置零Ud电压
 	Data->Number_Angle_Offest = 5;		//次数 = 2的n次方
-	Data->Clear_Position = 0;					//重置当前位置为0
+	Data->Clear_Position = 0;		//重置当前位置为0
 	
-	Data->Duty_Model_A = 50;					//占空比模式三相初始值
+	Data->Duty_Model_A = 50;		//占空比模式三相初始值
 	Data->Duty_Model_B = 50;
 	Data->Duty_Model_C = 50;
 }
