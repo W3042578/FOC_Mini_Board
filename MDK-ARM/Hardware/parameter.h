@@ -8,25 +8,25 @@
 #include "foc.h" 
 
 #define MT6815
-#define Speed_Transfer	6.5536			//ËÙ¶È×ª»»±ÈÀı  1rpm -> 1 dec_diff/1ms = 6.5536
+#define Speed_Transfer	6.5536			//é€Ÿåº¦è½¬æ¢æ¯”ä¾‹  1rpm -> 1 dec_diff/1ms = 6.5536
 
 
 typedef  struct
 {
-		uint8_t 	Work_Model;							//1:Ğ£×¼  2:Õ¼¿Õ±È  3:µçÑ¹¿ª»·  4:µçÁ÷»· 5:ËÙ¶È»· 6:Î»ÖÃ»· 7:ËÙ¶È»·ÎŞ¸Ğ 
-		uint8_t 	PWM_Enable;							//0:PWM¹Ø±ÕÊ¹ÄÜ		1:PWM¿ªÊ¼Ê¹ÄÜ				
-		uint8_t 	Energency_Stop;					//0£º²»Ê¹ÓÃ¼±Í£ 1:´¥·¢¼±Í£
-		uint8_t 	Work_Direction;					//0:Õı×ª		1:·´×ª
-	
-		uint8_t		Open_Loop_Voltage;			//¿ª»·µçÑ¹
-		uint8_t 	Max_Voltage;						//×î´óµçÑ¹ÏŞÖÆ
-		uint8_t		Angle_Initial_Voltage;	//±àÂëÆ÷ÏßĞÔĞ£ÕıºÍ³õÊ¼Î»ÖÃÖÃÁãUdµçÑ¹
-		uint8_t   Number_Angle_Offest;		//³õÊ¼½ÇĞ£ÕıÀÛ¼Ó´ÎÊı= 2µÄn´Î·½
-		uint8_t		Clear_Position;					//ÖØÖÃµ±Ç°Î»ÖÃÎª0
-	
-		uint8_t		Duty_Model_A;						//Õ¼¿Õ±ÈÄ£Ê½ÈıÏàÊäÈëÖµ
-		uint8_t		Duty_Model_B;
-		uint8_t		Duty_Model_C;
+	uint8_t 	Work_Model;		//1:æ ¡å‡†  2:å ç©ºæ¯”  3:ç”µå‹å¼€ç¯  4:ç”µæµç¯ 5:é€Ÿåº¦ç¯ 6:ä½ç½®ç¯ 7:é€Ÿåº¦ç¯æ— æ„Ÿ 
+	uint8_t 	PWM_Enable;		//0:PWMå…³é—­ä½¿èƒ½		1:PWMå¼€å§‹ä½¿èƒ½				
+	uint8_t 	Energency_Stop;		//0ï¼šä¸ä½¿ç”¨æ€¥åœ 1:è§¦å‘æ€¥åœ
+	uint8_t 	Work_Direction;		//0:æ­£è½¬		1:åè½¬
+
+	uint8_t		Open_Loop_Voltage;	//å¼€ç¯ç”µå‹
+	uint8_t 	Max_Voltage;		//æœ€å¤§ç”µå‹é™åˆ¶
+	uint8_t		Angle_Initial_Voltage;	//ç¼–ç å™¨çº¿æ€§æ ¡æ­£å’Œåˆå§‹ä½ç½®ç½®é›¶Udç”µå‹
+	uint8_t   	Number_Angle_Offest;		//åˆå§‹è§’æ ¡æ­£ç´¯åŠ æ¬¡æ•°= 2çš„næ¬¡æ–¹
+	uint8_t		Clear_Position;		//é‡ç½®å½“å‰ä½ç½®ä¸º0
+
+	uint8_t		Duty_Model_A;		//å ç©ºæ¯”æ¨¡å¼ä¸‰ç›¸è¾“å…¥å€¼
+	uint8_t		Duty_Model_B;
+	uint8_t		Duty_Model_C;
 	
 }_Control_Word;
 
@@ -37,13 +37,13 @@ union _Error_Message
 		uint16_t	All;
 		struct
 		{
-			uint8_t		ADC_Error:1;						//µçÁ÷²ÉÑù´íÎó
-			uint8_t		Bus_Voltage:1;					//×ÜÏßµçÑ¹´íÎó	
-			uint8_t		Encoder_Status:1;				//±àÂëÆ÷×´Ì¬´íÎó
-			uint8_t		Modbus_Status:1;				//ModbusÍ¨Ñ¶×´Ì¬´íÎó
-			uint8_t		IIC_Status:1;						//IICÍ¨Ñ¶×´Ì¬´íÎó
-			uint8_t		Control_Loop_Error:1;		//¿ØÖÆ»·Â·´íÎó
-			uint8_t		Phase_Lose:1;						//Ïà¶ªÊ§´íÎó  µç»úÃ»ÓĞ°´ÕÕÖ¸ÁîÕı³£ÔË¶¯
+			uint8_t		ADC_Error:1;			//ç”µæµé‡‡æ ·é”™è¯¯
+			uint8_t		Bus_Voltage:1;			//æ€»çº¿ç”µå‹é”™è¯¯	
+			uint8_t		Encoder_Status:1;		//ç¼–ç å™¨çŠ¶æ€é”™è¯¯
+			uint8_t		Modbus_Status:1;		//Modbusé€šè®¯çŠ¶æ€é”™è¯¯
+			uint8_t		IIC_Status:1;			//IICé€šè®¯çŠ¶æ€é”™è¯¯
+			uint8_t		Control_Loop_Error:1;		//æ§åˆ¶ç¯è·¯é”™è¯¯
+			uint8_t		Phase_Lose:1;			//ç›¸ä¸¢å¤±é”™è¯¯  ç”µæœºæ²¡æœ‰æŒ‰ç…§æŒ‡ä»¤æ­£å¸¸è¿åŠ¨
 		}bits;
 };
 
@@ -52,32 +52,32 @@ union _Work_Status
 		uint16_t All;
 		struct
 		{
-			uint8_t 	Enable_Status:1;									//PWMÊ¹ÄÜ×´Ì¬
-			uint8_t 	Angle_Offest:1;										//±àÂëÆ÷ºÍµçÁ÷»ñÈ¡ĞŞÕıÖµ×´Ì¬
-			uint8_t 	Duty_Model_Status:1;  						//Õ¼¿Õ±ÈÄ£Ê½×´Ì¬
-			uint8_t		Offest_Encoder:1;								//±àÂëÆ÷ÁãÎ»Ğ£×¼
-			uint8_t		Direction_Encoder:1;						//±àÂëÆ÷·½ÏòÅĞ¶Ï
-			uint8_t		Linear_Compensation_Encoder:1;	//±àÂëÆ÷ÏßĞÔ²¹³¥
-			uint8_t		Offest_Current:1;								//µçÁ÷ĞŞÕı
-			uint8_t		First_Start:1;									//³õ´ÎÆô¶¯
-			uint8_t		Ready_On:1;											//¿ØÖÆÆ÷×¼±¸¾ÍĞ÷
-			uint8_t		Control_Loop_Error:1;						//¿ØÖÆ»·Â·´íÎó
-			uint8_t		Phase_Lose:1;										//Ïà¶ªÊ§´íÎó  µç»úÃ»ÓĞ°´ÕÕÖ¸ÁîÕı³£ÔË¶¯
-			uint8_t		Encoder_Init:1;									//±àÂëÆ÷Æô¶¯¼ÆÊıÎ»ÖÃ³õ´Î²Ù×÷
+			uint8_t 	Enable_Status:1;		//PWMä½¿èƒ½çŠ¶æ€
+			uint8_t 	Angle_Offest:1;			//ç¼–ç å™¨å’Œç”µæµè·å–ä¿®æ­£å€¼çŠ¶æ€
+			uint8_t 	Duty_Model_Status:1;  		//å ç©ºæ¯”æ¨¡å¼çŠ¶æ€
+			uint8_t		Offest_Encoder:1;		//ç¼–ç å™¨é›¶ä½æ ¡å‡†
+			uint8_t		Direction_Encoder:1;		//ç¼–ç å™¨æ–¹å‘åˆ¤æ–­
+			uint8_t		Linear_Compensation_Encoder:1;	//ç¼–ç å™¨çº¿æ€§è¡¥å¿
+			uint8_t		Offest_Current:1;		//ç”µæµä¿®æ­£
+			uint8_t		First_Start:1;			//åˆæ¬¡å¯åŠ¨
+			uint8_t		Ready_On:1;			//æ§åˆ¶å™¨å‡†å¤‡å°±ç»ª
+			uint8_t		Control_Loop_Error:1;		//æ§åˆ¶ç¯è·¯é”™è¯¯
+			uint8_t		Phase_Lose:1;			//ç›¸ä¸¢å¤±é”™è¯¯  ç”µæœºæ²¡æœ‰æŒ‰ç…§æŒ‡ä»¤æ­£å¸¸è¿åŠ¨
+			uint8_t		Encoder_Init:1;			//ç¼–ç å™¨å¯åŠ¨è®¡æ•°ä½ç½®åˆæ¬¡æ“ä½œ
 		}bits;	
 };
 
-//¿ØÖÆ×´Ì¬±äÁ¿
+//æ§åˆ¶çŠ¶æ€å˜é‡
 extern	_Control_Word Control_Word; 
 extern	union _Error_Message Error_Message;
 extern  union _Work_Status Work_Status;
 extern int16_t Number_Encoder_Offest,Number_Encoder_Direction;
 
-//±äÁ¿ÓÃÓÚ±àÂëÆ÷Í¨Ñ¶½Ç¶È»ñÈ¡ ²âÊÔÑéÖ¤ÓÃ
+//å˜é‡ç”¨äºç¼–ç å™¨é€šè®¯è§’åº¦è·å– æµ‹è¯•éªŒè¯ç”¨
 extern uint16_t Transfer1[3];
 
 
-//³õÊ¼»¯
+//åˆå§‹åŒ–
 void Hardware_Init(void);
 void Error_Message_Init(union _Error_Message *Message);
 void Work_Status_Init(union _Work_Status *Status);
