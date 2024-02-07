@@ -6,7 +6,8 @@
 
 typedef  struct
 {
-	int32_t 	Target_Current;						//目标  
+	int32_t 	Target_Q_Current;			//目标 
+	int32_t 	Target_D_Current;
 	int32_t 	Target_Speed;								
 	int32_t 	Target_Position;
 	
