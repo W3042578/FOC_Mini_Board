@@ -153,7 +153,7 @@ int main(void)
  	 //同步dual模式为多模式采样，同步规则采样需要开启DMA，注入采样建立在同步采样基础上
 	HAL_ADCEx_MultiModeStart_DMA(&hadc1,ADC_Data,2);
 	
-		//开启cc4比较通道触发adc注入采样
+	//开启cc4比较通道触发adc注入采样
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
 //	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 //	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
@@ -185,13 +185,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-			
-//		printf("%d,%d\n",Motor1.Ia,Motor1.Ib);  //使用printf打印需要关闭串口1的空闲中断和dma传输，printf重定向串口1就是使用串口1进行简单发送接受
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 		
-		HAL_Delay(10);
+	HAL_Delay(10);
 
   }
   /* USER CODE END 3 */
@@ -249,7 +247,7 @@ void SystemClock_Config(void)
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	
-		// HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_SET);//环路执行周期测试
+	// HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_SET);//环路执行周期测试
 
     	
     //编码器方向判断
@@ -281,30 +279,30 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
 //      Motor1.Direction = encoder1.Encoder_Direction;//多值赋予方便多电机设置
 //    }
 
-		//获取a,b相电流采样值  开环给零电压测试 离开电机方向为负
-		Motor1.Ia = -(HAL_ADCEx_InjectedGetValue(&hadc1,ADC_INJECTED_RANK_1) - Motor1.Ia_Offect);
-		Motor1.Ib = -(HAL_ADCEx_InjectedGetValue(&hadc2,ADC_INJECTED_RANK_1) - Motor1.Ib_Offect);
-		
+	//获取a,b相电流采样值  开环给零电压测试 离开电机方向为负
+	Motor1.Ia = -(HAL_ADCEx_InjectedGetValue(&hadc1,ADC_INJECTED_RANK_1) - Motor1.Ia_Offect);
+	Motor1.Ib = -(HAL_ADCEx_InjectedGetValue(&hadc2,ADC_INJECTED_RANK_1) - Motor1.Ib_Offect);
+	
 
-		//PWM使能控制
-		Enable_Logic_Control();
-		
-		//进行FOC控制
-		FOC_Control(&Motor1);
-		
-		//STM32 HAL 三相PWM比较值设置
-		STM32_HAL_PWM_SET_Compare(&Motor1);
-		
-		//初始角校准,累加求和
-		Get_Initial_Angle_Offest(&Motor1);
-		
-		//在同步注入中断回调中hal库默认关闭该中断使能，因此在执行完注入中断后再次打开中断使能
-		__HAL_ADC_ENABLE_IT(&hadc1, ADC_IT_JEOC);
-		
-		// HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_RESET); //环路执行周期测试
+	//PWM使能控制
+	Enable_Logic_Control();
+	
+	//进行FOC控制
+	FOC_Control(&Motor1);
+	
+	//STM32 HAL 三相PWM比较值设置
+	STM32_HAL_PWM_SET_Compare(&Motor1);
+	
+	//初始角校准,累加求和
+	Get_Initial_Angle_Offest(&Motor1);
+	
+	//在同步注入中断回调中hal库默认关闭该中断使能，因此在执行完注入中断后再次打开中断使能
+	__HAL_ADC_ENABLE_IT(&hadc1, ADC_IT_JEOC);
+	
+	// HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_RESET); //环路执行周期测试
 
 }
-//1ms中断回调函数 
+//定时器中断回调函数 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if(htim == &htim2)
