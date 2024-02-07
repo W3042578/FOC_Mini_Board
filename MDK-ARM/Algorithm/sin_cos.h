@@ -3,6 +3,7 @@
 
 #include "stm32f1xx_hal.h"
 
+
 extern short SIN_COS_TABLE[512];
 	
 #endif
