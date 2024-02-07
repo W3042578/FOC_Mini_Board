@@ -1,9 +1,14 @@
 # FOC_Mini_Board
 目前代码所有注释均为中文
+
 8010云台电机FOC控制程序
+
 使用MT6813编码器通过spi通讯获取位置绝对值
+
 uart串口实现modbus RTU通讯
+
 电流环16K，速度环8K，位置环4K
+
 STM32F103C8T6主控，开发环境keil
 
 基本思路：
@@ -18,9 +23,13 @@ STM32配置定时器1通道4触发adc采样，foc控制函数放在ADC采样完�
 底层具体配置详见STM32CubeMX文件 FOC_Mini_Board.ioc
 keil工程启动文件在MDK-ARM文件中
 主要文件分为Algorithm、Application、Hardware、Infrastructure四个文件
+
 其中Algorithm包含基本FOC算法、PID控制环和角度正余弦查表
+
 Application包含编码器SPI通讯、串口modbus通讯、滤波、通讯变量字典（usart_control文件和SSD1306未使用）
+
 Hardware包含硬件和底层的参数配置
+
 Infrastructure包含底层文件配置，从CubeMx中底层代码生成后部分修改拷贝过来
 
 8010 gimbal motor FOC control program
