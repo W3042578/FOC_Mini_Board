@@ -14,7 +14,9 @@ _PID_Control	Current_Q_PID,Current_D_PID,Speed_PI,Position_PI;
 //实际只用PI 并联式抗积分饱和
 void PID_Control_Deal(_PID_Control * PID_Control)
 {
-	uint32_t Integral_Data;
+	int32_t Integral_Data;	//积分结果变量
+	int32_t	Init_Output;	//未限幅前总输出
+	int32_t Anti_Wind;	//抗饱和结果变量
 	
 	PID_Control->Error = PID_Control->Expect - PID_Control->Feedback;
 	PID_Control->Integral_Sum = PID_Control->Integral_Sum + PID_Control->Error;
@@ -22,38 +24,37 @@ void PID_Control_Deal(_PID_Control * PID_Control)
 	PID_Control->Proportion_Sum = PID_Control->Proportion * PID_Control->Error;   //Kp * Error
 	Integral_Data = PID_Control->Integral * PID_Control->Integral_Sum;		//Ki * Integral
 	PID_Control->Difference_Sum = PID_Control->Difference * (PID_Control->Error - PID_Control->Last_Error); //Kd * Difference
-	//误差限幅
-	if(PID_Control->Proportion_Sum > PID_Control->)
-		PID_Control->Error = PID_Control->Error_Limit;
-	else if(PID_Control->Error *PID_Control->Kp < -PID_Control->Error_Limit)
-		PID_Control->Error = -PID_Control->Error_Limit;
-	else
-		PID_Control->Error = PID_Control->Error *PID_Control->Kp;
-	//积分限幅
-	if(PID_Control->Integral > PID_Control->Integral_Limit)
-		PID_Control->Integral = PID_Control->Integral_Limit;
-	else if(PID_Control->Integral < -PID_Control->Integral_Limit)
-		PID_Control->Integral = PID_Control->Integral_Limit;
-	//PI输出
-	PID_Control->Output = PID_Control->Error + PID_Control->Integral;
+	//比例限幅
+	if(PID_Control->Proportion_Sum > PID_Control->Proportion_Limit)
+		PID_Control->Proportion_Sum = PID_Control->Proportion_Limit;
+	else if(PID_Control->Proportion_Sum < -PID_Control->Proportion_Limit)
+		PID_Control->Proportion_Sum = -PID_Control->Proportion_Limit;
 	
-	//输出限幅  积分快速反馈  限饱和
-	if(PID_Control->Output > PID_Control->Output_Limit)
-	{
-		PID_Control->Output = PID_Control->Output_Limit;
-		if(PID_Control->Output_Limit >= PID_Control->Error)
-			PID_Control->Integral = PID_Control->Output_Limit - PID_Control->Error;
-		else
-			PID_Control->Integral = 0;
-	}
-	if(PID_Control->Output < -PID_Control->Output_Limit)
-		{
-			PID_Control->Output = -PID_Control->Output_Limit;
-			if(PID_Control->Output_Limit <= PID_Control->Error)
-				PID_Control->Integral = PID_Control->Output_Limit - PID_Control->Error;
-			else
-				PID_Control->Integral = 0;
-		}
+	//积分限幅
+	if(Integral_Data > PID_Control->Integral_Limit)
+		Integral_Data = PID_Control->Integral_Limit;
+	else if(Integral_Data < -PID_Control->Integral_Limit)
+		Integral_Data = PID_Control->Integral_Limit;
+	//微分限幅
+	if(PID_Control->Difference_Sum > PID_Control->Difference_Limit)
+		PID_Control->Difference_Sum = PID_Control->Difference_Limit;
+	else if(PID_Control->Difference_Sum < -PID_Control->Difference_Limit)
+		PID_Control->Difference_Sum = -PID_Control->Difference_Limit;
+	
+	//总输出限幅并计算抗饱和
+	PID_Control->Output_Sum = PID_Control->Proportion_Sum + Integral_Data + PID_Control->Difference_Sum;
+	Init_Output = PID_Control->Output_Sum;
+	if(PID_Control->Output_Sum > PID_Control->Output_limit)
+		PID_Control->Output_Sum = PID_Control->Output_limit;
+	else if(PID_Control->Output_Sum < -PID_Control->Output_limit)
+		PID_Control->Output_Sum = -PID_Control->Output_limit;
+	Anti_Wind = PID_Control->Antiback * (Init_Output - PID_Control->Output_Sum);
+	
+	//积分有限幅 控制抗饱和反馈避免积分量正负间跳变
+	if(((Anti_Wind > 0) && (Anti_Wind < PID_Control->Integral_Sum)) || ((Anti_Wind < 0) && (Anti_Wind > PID_Control->Integral_Sum)))
+		PID_Control->Integral_Sum = PID_Control->Integral_Sum - Anti_Wind;
+	else
+		PID_Control->Integral_Sum = 0;
 }
 
 //PID结构体参数初始化
