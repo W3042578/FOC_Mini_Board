@@ -7,28 +7,28 @@
 
 typedef struct _Encoder
 {
-	uint8_t		Type;							//±àÂëÆ÷ÀàĞÍ
-	uint8_t		Multi_Bit;						//¶àÈ¦Î»Êı
-	uint8_t		Single_Bit;						//µ¥È¦Î»Êı
-	uint16_t	Encoder_Angle;					//±àÂëÆ÷16Î»Öµ
-	uint16_t	Encoder_Angle_Buffer;			//±àÂëÆ÷ÉÏÒ»´ÎÖµ
-	int32_t		Encode_Position;				//±àÂëÆ÷Î»ÖÃÊı¾İ£¬°üº¬¶àÈ¦¼ÆÊı
-	int16_t 	Encoder_Speed_Angle;			//1ms±àÂëÆ÷ËÙ¶È
-	int16_t 	Encoder_Speed_Angle_Buffer;		//ÉÏÒ»´Î1ms±àÂëÆ÷ËÙ¶È
-	int16_t 	Encoder_Speed_Angle_Loop;		//ËÙ¶È»·±àÂëÆ÷ËÙ¶È
-	int16_t 	Encoder_Speed_Angle_Loop_Buffer;//ÉÏÒ»´ÎËÙ¶È»·±àÂëÆ÷ËÙ¶È
-	int16_t 	Speed_Filter;					//ËÙ¶ÈÂË²¨¿ØÖÆÎ»
-	int16_t		Last_Encoder_Loop;				//ËÙ¶È»·ÄÚ²¿¼ÆËãËÙ¶ÈÓÃ
-	int16_t 	Speed_Filter_Loop;              //ËÙ¶È»·ËÙ¶È¼ÆËãÂË²¨
-	uint32_t 	Encoder_Offest_Data;		        	//±àÂëÆ÷ĞŞÕıÖµ
-	uint8_t		Encoder_Direction;				//±àÂëÆ÷·½Ïò£¬ÓëqÖá·½ÏòÏàÍ¬Îª0£¬Ïà·´Îª1
-	uint16_t 	Encoder_Direction_Position;		//±àÂëÆ÷·½ÏòÅĞ¶ÏÓÃÎ»ÖÃ
+	uint8_t		Type;					//ç¼–ç å™¨ç±»å‹
+	uint8_t		Multi_Bit;				//å¤šåœˆä½æ•°
+	uint8_t		Single_Bit;				//å•åœˆä½æ•°
+	uint16_t	Encoder_Angle;				//ç¼–ç å™¨16ä½å€¼
+	uint16_t	Encoder_Angle_Buffer;			//ç¼–ç å™¨ä¸Šä¸€æ¬¡å€¼
+	int32_t		Encode_Position;			//ç¼–ç å™¨ä½ç½®æ•°æ®ï¼ŒåŒ…å«å¤šåœˆè®¡æ•°
+	int16_t 	Encoder_Speed_Angle;			//1msç¼–ç å™¨é€Ÿåº¦
+	int16_t 	Encoder_Speed_Angle_Buffer;		//ä¸Šä¸€æ¬¡1msç¼–ç å™¨é€Ÿåº¦
+	int16_t 	Encoder_Speed_Angle_Loop;		//é€Ÿåº¦ç¯ç¼–ç å™¨é€Ÿåº¦
+	int16_t 	Encoder_Speed_Angle_Loop_Buffer;	//ä¸Šä¸€æ¬¡é€Ÿåº¦ç¯ç¼–ç å™¨é€Ÿåº¦
+	int16_t 	Speed_Filter;				//é€Ÿåº¦æ»¤æ³¢æ§åˆ¶ä½
+	int16_t		Last_Encoder_Loop;			//é€Ÿåº¦ç¯å†…éƒ¨è®¡ç®—é€Ÿåº¦ç”¨
+	int16_t 	Speed_Filter_Loop;              	//é€Ÿåº¦ç¯é€Ÿåº¦è®¡ç®—æ»¤æ³¢
+	uint32_t 	Encoder_Offest_Data;		        //ç¼–ç å™¨ä¿®æ­£å€¼
+	uint8_t		Encoder_Direction;			//ç¼–ç å™¨æ–¹å‘ï¼Œä¸qè½´æ–¹å‘ç›¸åŒä¸º0ï¼Œç›¸åä¸º1
+	uint16_t 	Encoder_Direction_Position;		//ç¼–ç å™¨æ–¹å‘åˆ¤æ–­ç”¨ä½ç½®
 }Encoder;
 
 extern  uint16_t Tx_Encoder[2];
 extern  uint16_t Rx_Encoder[2];
 
-//±àÂëÆ÷±äÁ¿
+//ç¼–ç å™¨å˜é‡
 extern  Encoder encoder1;
 
 void Start_Encoder_GET(Encoder *encoder);
