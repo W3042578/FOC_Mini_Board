@@ -5,82 +5,90 @@
 #include "object_commicate.h"
 #include "control_loop.h"
 
-union _Error_Message Error_Message;		//´íÎóĞÅÏ¢Ö¸Ê¾Î»
-union _Work_Status Work_Status;				//¹¤×÷×´Ì¬Ö¸Ê¾Î»
+union _Error_Message Error_Message;		//é”™è¯¯ä¿¡æ¯æŒ‡ç¤ºä½
+union _Work_Status Work_Status;				//å·¥ä½œçŠ¶æ€æŒ‡ç¤ºä½
 
-_Control_Word Control_Word; 					//Í¨Ğí±äÁ¿¡¢¿ØÖÆ±äÁ¿¶¨Òå
-_Control_Loop	Control_Loop;						//¿ØÖÆ»·Â·±äÁ¿
+_Control_Word Control_Word; 					//é€šè®¸å˜é‡ã€æ§åˆ¶å˜é‡å®šä¹‰
+_Control_Loop	Control_Loop;						//æ§åˆ¶ç¯è·¯å˜é‡
 
-int16_t Number_Encoder_Direction;			//´ı¶¨
+int16_t Number_Encoder_Direction;			//å¾…å®š
 
-//Ó²¼şÅäÖÃ
+//ç¡¬ä»¶é…ç½®
 void Hardware_Init(void)
 {
-	//µç»ú
+	//ç”µæœº
 	Motor1.Polar = 11;
-	Motor1.Udc = 12;						//Ä¸ÏßµçÑ¹Îª 12V
+	Motor1.Udc = 12;						//æ¯çº¿ç”µå‹ä¸º 12V
 		
-	//±àÂëÆ÷
-	encoder1.Type = 1; 					//SPIÍ¨Ñ¶±àÂëÆ÷
-	encoder1.Single_Bit = 14;		//14Î»µ¥È¦
-	encoder1.Multi_Bit = 0;			//¶àÈ¦Î»Îª0
+	//ç¼–ç å™¨
+	encoder1.Type = 1; 					//SPIé€šè®¯ç¼–ç å™¨
+	encoder1.Single_Bit = 14;		//14ä½å•åœˆ
+	encoder1.Multi_Bit = 0;			//å¤šåœˆä½ä¸º0
 	
-	//MCUÅäÖÃ
-	//ÉèÖÃ¹¤×÷Ê±¼äTs = 2*(2+1)*(1499+1)/72M = 125us  ÖĞĞÄ¶ÔÆëÄ£Ê½x2
-	Motor1.Ts = 2249;//16kÆµÂÊÏÂ¶¨Ê±Æ÷¼ÆÊıÖµ  Âú¶î2249  
+	//MCUé…ç½®
+	//è®¾ç½®å·¥ä½œæ—¶é—´Ts = 2*(2+1)*(1499+1)/72M = 125us  ä¸­å¿ƒå¯¹é½æ¨¡å¼x2
+	Motor1.Ts = 2249;//16ké¢‘ç‡ä¸‹å®šæ—¶å™¨è®¡æ•°å€¼  æ»¡é¢2249  
 }
 
 
 
-//¿ØÖÆ×Ö
+//æ§åˆ¶å­—
 void Control_Word_Init(_Control_Word *Data)
 {
-	Data->Work_Model = 0;							//1:Ğ£×¼  2:Õ¼¿Õ±È  3:µçÑ¹¿ª»·  4:µçÁ÷»· 5:ËÙ¶È»· 6:Î»ÖÃ»· 7:ËÙ¶È»·ÎŞ¸Ğ
-	Data->PWM_Enable = 0;							//0:PWM¹Ø±ÕÊ¹ÄÜ		1:PWM¿ªÊ¼Ê¹ÄÜ
-	Data->Energency_Stop = 0;					//1:½øÈë½ô¼±Í£Ö¹
-	Data->Work_Direction = 0;					//0:µ±Ç°·½Ïò 1:µ±Ç°·´Ïò
-	Data->Open_Loop_Voltage = 0;			//¿ª»·µçÑ¹
-	Data->Max_Voltage = 16;						//×î´óµçÑ¹ÏŞÖÆ
-	Data->Angle_Initial_Voltage = 5;	//±àÂëÆ÷ÏßĞÔĞ£ÕıºÍ³õÊ¼Î»ÖÃÖÃÁãUdµçÑ¹
-	Data->Number_Angle_Offest = 5;		//´ÎÊı = 2µÄn´Î·½
-	Data->Clear_Position = 0;					//ÖØÖÃµ±Ç°Î»ÖÃÎª0
+	Data->Work_Model = 0;							//1:æ ¡å‡†  2:å ç©ºæ¯”  3:ç”µå‹å¼€ç¯  4:ç”µæµç¯ 5:é€Ÿåº¦ç¯ 6:ä½ç½®ç¯ 7:é€Ÿåº¦ç¯æ— æ„Ÿ
+	Data->PWM_Enable = 0;							//0:PWMå…³é—­ä½¿èƒ½		1:PWMå¼€å§‹ä½¿èƒ½
+	Data->Energency_Stop = 0;					//1:è¿›å…¥ç´§æ€¥åœæ­¢
+	Data->Work_Direction = 0;					//0:å½“å‰æ–¹å‘ 1:å½“å‰åå‘
+	Data->Open_Loop_Voltage = 0;			//å¼€ç¯ç”µå‹
+	Data->Max_Voltage = 16;						//æœ€å¤§ç”µå‹é™åˆ¶
+	Data->Angle_Initial_Voltage = 5;	//ç¼–ç å™¨çº¿æ€§æ ¡æ­£å’Œåˆå§‹ä½ç½®ç½®é›¶Udç”µå‹
+	Data->Number_Angle_Offest = 5;		//æ¬¡æ•° = 2çš„næ¬¡æ–¹
+	Data->Clear_Position = 0;					//é‡ç½®å½“å‰ä½ç½®ä¸º0
 	
-	Data->Duty_Model_A = 50;					//Õ¼¿Õ±ÈÄ£Ê½ÈıÏà³õÊ¼Öµ
+	Data->Duty_Model_A = 50;					//å ç©ºæ¯”æ¨¡å¼ä¸‰ç›¸åˆå§‹å€¼
 	Data->Duty_Model_B = 50;
 	Data->Duty_Model_C = 50;
 }
 
-//´íÎó×Ö
+//é”™è¯¯å­—
 void Error_Message_Init(union _Error_Message *Message)
 {
 	Message->All = 0;
 }	
 
-//¹¤×÷×´Ì¬×Ö
+//å·¥ä½œçŠ¶æ€å­—
 void Work_Status_Init(union _Work_Status *Status)
 {
 	Status->All = 0;
 }
 
-//²ÎÊı³õÊ¼»¯
+//å‚æ•°åˆå§‹åŒ–
 void Parameter_Init(void)
 {
-	//Ó²¼ş²ÎÊı³õÊ¼»¯
+	//ç¡¬ä»¶å‚æ•°åˆå§‹åŒ–
 	Hardware_Init();
 	
-	//modbusÍ¨Ñ¶Êı¾İ³õÊ¼»¯
+	//modbusé€šè®¯æ•°æ®åˆå§‹åŒ–
 	Commicate_Data_Init();
 	
-	//¿ØÖÆ»·²ÎÊı³õÊ¼»¯
+	//æ§åˆ¶ç¯å‚æ•°åˆå§‹åŒ–
 	Control_Loop_Init(&Control_Loop);
 	
-	//¿ØÖÆ×Ö³õÊ¼»¯
+	//æ§åˆ¶å­—åˆå§‹åŒ–
 	Control_Word_Init(&Control_Word);
 	
-	//´íÎó×´Ì¬³õÊ¼»¯
+	//é”™è¯¯çŠ¶æ€åˆå§‹åŒ–
 	Error_Message_Init(&Error_Message);
 	
-	//¹¤×÷×´Ì¬³õÊ¼»¯
+	//å·¥ä½œçŠ¶æ€åˆå§‹åŒ–
 	Work_Status_Init(&Work_Status);
-	
+
+	//å„æ§åˆ¶ç¯PIDå‚æ•°åˆå§‹åŒ–
+	PID_Control_Init(&Current_Q_PID);
+	PID_Control_Init(&Current_D_PID);
+	PID_Control_Init(&Speed_PI);
+	PID_Control_Init(&Position_PI);
+
+	//æ§åˆ¶ç¯å‚æ•°åˆå§‹åŒ–
+	Control_Loop_Init(&Control_Loop);
 }
