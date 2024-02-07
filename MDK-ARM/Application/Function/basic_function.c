@@ -13,8 +13,9 @@
 //功能层&底层交互
 //主要存放出于功能层需要对底层修改的函数
 
-
-uint16_t Interrupt_Delay,Number_Offest_Count;
+//定义全局变量
+uint16_t	Encoder_Offset_Delay;	//编码器初始角度对齐延迟
+uint16_t	Number_Offest_Count;	//编码器累加实际次数
 
 //获取编码器角度并转换为电角度
 void Encoder_To_Electri_Angle(FOC_Motor *motor)
@@ -55,6 +56,14 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 	motor->Cos_Angle = SIN_COS_TABLE[((electri_angle >> 7)+128) & 0x1ff];
 }
 
+//STM32 HAL 三相PWM比较值设置
+void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
+{
+	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor->Ta);
+	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor->Tb);
+	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor->Tc);
+}
+
 //编码器校准 
 //获取编码器对应alpha轴零位修正角度值
 //正反转编码器获取线性化查表补偿数据并判断编码器方向与q轴正方向是否一致
@@ -64,9 +73,9 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 	//编码器零位校正
 	if(Control_Word.Work_Model == 1 && Work_Status.bits.Angle_Offest != 0)//判断工作模式1且为零位校准状态进入校准
 	{
-		if(Interrupt_Delay > 0)	//Interrupt_Delay非零减到零
-			Interrupt_Delay --;
-		else										//Interrupt_Delay为零后进行编码器累加计数工作，累加指定次数
+		if(Encoder_Offset_Delay > 0)	//Encoder_Offset_Delay非零减到零
+			Encoder_Offset_Delay --;
+		else	//Encoder_Offset_Delay为零后进行编码器累加计数工作，累加指定次数
 		{
 			motor->Initial_Angle_Offset = motor->Initial_Angle_Offset + encoder1.Encoder_Angle;
 			Number_Offest_Count --;
@@ -110,11 +119,11 @@ void ADC_Current_Offest(FOC_Motor *motor)
 	HAL_Delay(1000);
 	//平均减小误差
 	for(uint8_t i = 1;i<=Number_ADC_Offect;i++)
-		{
-			Add_ADC_Offect_U = Add_ADC_Offect_U - motor->Ia;
-			Add_ADC_Offect_V = Add_ADC_Offect_V - motor->Ib;//此处累加使用负号考虑到校准时获取的数值是负数
-			HAL_Delay(2);
-		}
+	{
+		Add_ADC_Offect_U = Add_ADC_Offect_U - motor->Ia;
+		Add_ADC_Offect_V = Add_ADC_Offect_V - motor->Ib;//此处累加使用负号考虑到校准时获取的数值是负数
+		HAL_Delay(2);
+	}
 	motor->Ia_Offect = Add_ADC_Offect_U >> 5;
 	motor->Ib_Offect = Add_ADC_Offect_V >> 5;
 	motor->Ia = motor->Ib =0;	
@@ -142,10 +151,10 @@ void Model_Control(FOC_Motor *motor)
 			{
 				Work_Status.bits.Angle_Offest = 1;
 				motor->Initial_Angle_Offset = 0;
-				Interrupt_Delay = 32;
+				Encoder_Offset_Delay = 32;
 				Number_Offest_Count = 1<<(Control_Word.Number_Angle_Offest);
 			}
-			break;
+		break;
 		
 		//占空比模式：按照设置输出指定单相满额占空比（考虑采样最大98%）
 		case 2:
@@ -162,38 +171,49 @@ void Model_Control(FOC_Motor *motor)
 			{
 				Control_Word.Duty_Model_C = 96;
 			}
-			break;
+		break;
 		
 		//电压开环模式：按照设置的Uq、Ud电压开环控制
 		case 3:
 			motor->Ud = 0;
 			motor->Uq = Control_Word.Open_Loop_Voltage * 2048;
-			break;
+		break;
 		
 		//速度环模拟无感控制：模拟速度增加控制速度开环输出
 		case 7:
 			
-			break;
+		break;
 		
 		//位置环模式：PID控制相对位置闭环输出
 		case 6:
 			
-			break;
+		break;
 		
 		//速度环模式：PID控制速度闭环输出
 		case 5:
 			
-		  break;
+		break;
 			
 		//电流环模式：PID控制电流Iq、Id闭环输出
 		case 4:
+			//输入反馈电流
+			Current_Q_PID.Feedback = motor->Iq;
+			Current_D_PID.Feedback = motor->Id;
+			//输入期望电流
+			Current_Q_PID.Expect = Control_Loop.Target_Q_Current;
+			Current_D_PID.Expect = Control_Loop.Target_D_Current;
+			//PID计算
+			PID_Control_Deal(Current_Q_PID);
+			PID_Control_Deal(Current_D_PID);
+			//输出控制电压
+			motor->Uq = Current_Q_PID.Output_Sum;
+			motor->Ud = Current_D_PID.Output_Sum;
+		break;
 			
-			break;
-
 		//默认0模式，不做输出
 		default:
 //			Error_Message.bits.Control_Loop_Error = 1;
-			break;
+		break;
 	}
 }
 
@@ -237,14 +257,6 @@ void Enable_Logic_Control(void)
 			Work_Status.bits.Enable_Status = 0;
 		}
 	}
-}
-
-//STM32 HAL 三相PWM比较值设置
-void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
-{
-	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor->Ta);
-	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor->Tb);
-	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor->Tc);
 }
 
 //1ms中断回调函数 外部输入输出数据、温度保护、电机状态保护处理
