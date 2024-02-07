@@ -1,6 +1,5 @@
 #include "control_loop.h"
 
-#include "math.h"
 #include "main.h"
 #include "foc.h"
 
