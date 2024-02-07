@@ -52,10 +52,10 @@ typedef  struct
 }_PID_Control;
 
 extern	_Control_Loop	Control_Loop;
-extern	_PID_Control Current_Q_PID;
-extern	_PID_Control Current_D_PID;
-extern	_PID_Control Speed_PI;
-extern	_PID_Control Position_PI;
+extern	_PID_Control 	Current_Q_PID;
+extern	_PID_Control 	Current_D_PID;
+extern	_PID_Control 	Speed_PI;
+extern	_PID_Control 	Position_PI;
 
 
 void PID_Control_Deal(_PID_Control * PID_Control);
