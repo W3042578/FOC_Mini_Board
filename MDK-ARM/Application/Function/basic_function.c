@@ -247,5 +247,10 @@ void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor->Tc);
 }
 
+//1ms中断回调函数
+void Interrupt_1MS(void)
+{
+	
+}
 
 
