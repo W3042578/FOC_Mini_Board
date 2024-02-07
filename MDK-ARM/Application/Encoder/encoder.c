@@ -14,7 +14,7 @@
 //MT6813 14位绝对值编码器
 uint16_t Tx_Encoder[2] = {0x8300,0x0000};  //定义6813编码器收发数据 burst模式
 uint16_t Rx_Encoder[2];
-Encoder encoder1;
+Encoder Encoder1;
 
 //开始编码器数据的获取
 //编码器数据DMA传输，进入电流注入采样中断后先取出上一次角度数据然后开始本次角度DMA获取
