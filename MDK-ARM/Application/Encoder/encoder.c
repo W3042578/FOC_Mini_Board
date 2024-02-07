@@ -8,62 +8,61 @@
 #include "stdio.h"
 #include "object_commicate.h"
 
-//±¾ÎÄ¼şÕë¶Ô²»Í¬±àÂëÆ÷×÷ÊäÈë×ª»»£¬×îÖÕÊäÈë¸ø16Î»¾ø¶ÔÖµ½Ç¶È¡¢ËÙ¶È¡¢Ïà¶Ô¶àÈ¦Î»ÖÃÊı¾İ
+//æœ¬æ–‡ä»¶é’ˆå¯¹ä¸åŒç¼–ç å™¨ä½œè¾“å…¥è½¬æ¢ï¼Œæœ€ç»ˆè¾“å…¥ç»™16ä½ç»å¯¹å€¼è§’åº¦ã€é€Ÿåº¦ã€ç›¸å¯¹å¤šåœˆä½ç½®æ•°æ®
 
 
-//MT6813 14Î»¾ø¶ÔÖµ±àÂëÆ÷
-uint16_t Tx_Encoder[2] = {0x8300,0x0000};  //¶¨Òå6813±àÂëÆ÷ÊÕ·¢Êı¾İ burstÄ£Ê½
+//MT6813 14ä½ç»å¯¹å€¼ç¼–ç å™¨
+uint16_t Tx_Encoder[2] = {0x8300,0x0000};  //å®šä¹‰6813ç¼–ç å™¨æ”¶å‘æ•°æ® burstæ¨¡å¼
 uint16_t Rx_Encoder[2];
 Encoder encoder1;
 
-//¿ªÊ¼±àÂëÆ÷Êı¾İµÄ»ñÈ¡
-//±àÂëÆ÷Êı¾İDMA´«Êä£¬½øÈëµçÁ÷×¢Èë²ÉÑùÖĞ¶ÏºóÏÈÈ¡³öÉÏÒ»´Î½Ç¶ÈÊı¾İÈ»ºó¿ªÊ¼±¾´Î½Ç¶ÈDMA»ñÈ¡
+//å¼€å§‹ç¼–ç å™¨æ•°æ®çš„è·å–
+//ç¼–ç å™¨æ•°æ®DMAä¼ è¾“ï¼Œè¿›å…¥ç”µæµæ³¨å…¥é‡‡æ ·ä¸­æ–­åå…ˆå–å‡ºä¸Šä¸€æ¬¡è§’åº¦æ•°æ®ç„¶åå¼€å§‹æœ¬æ¬¡è§’åº¦DMAè·å–
 void Start_Encoder_GET(Encoder *encoder)
 {
-	if(encoder->Type == 1)//SPIÍ¨Ñ¶±àÂëÆ÷
+	if(encoder->Type == 1)//SPIé€šè®¯ç¼–ç å™¨
 	{
-			//¿ªÊ¼DMA·¢ËÍÇ°Êı¾İÊ±À­µÍNSSÆ¬Ñ¡½Å£¬Æ¬Ñ¡½ÅµÄ¹Ø±ÕÔÚDMA´«ÊäÖĞ¶Ïº¯ÊıÖĞ
-			//¸Ã´ÎDMA´«Êä½Ç¶ÈÓÃÓÚÏÂ´Î¼ÆËã
-			HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_RESET);//À­µÍÆ¬Ñ¡
-			HAL_SPI_TransmitReceive_DMA(&hspi1,(uint8_t*)Tx_Encoder,(uint8_t*)Rx_Encoder,2);  
+		//å¼€å§‹DMAå‘é€å‰æ•°æ®æ—¶æ‹‰ä½NSSç‰‡é€‰è„šï¼Œç‰‡é€‰è„šçš„å…³é—­åœ¨DMAä¼ è¾“ä¸­æ–­å‡½æ•°ä¸­
+		//è¯¥æ¬¡DMAä¼ è¾“è§’åº¦ç”¨äºä¸‹æ¬¡è®¡ç®—
+		HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_RESET);//æ‹‰ä½ç‰‡é€‰
+		HAL_SPI_TransmitReceive_DMA(&hspi1,(uint8_t*)Tx_Encoder,(uint8_t*)Rx_Encoder,2);  
     }
-
 }
 
-//ÓÉ±àÂëÆ÷Êı¾İ¼ÆËã±àÂëÆ÷ËÙ¶È²¢½øĞĞÎ»ÖÃ¼ÆÊı
-//ÅĞ¶ÏÓĞÎŞ¶àÈ¦½Ç¶ÈÊı¾İ
+//ç”±ç¼–ç å™¨æ•°æ®è®¡ç®—ç¼–ç å™¨é€Ÿåº¦å¹¶è¿›è¡Œä½ç½®è®¡æ•°
+//åˆ¤æ–­æœ‰æ— å¤šåœˆè§’åº¦æ•°æ®
 void Encoder_Data_Deal(Encoder *encoder)
 {
     uint16_t    Angle_Single,Angle_Multi;
-		uint16_t    Angle_Transfer;
+    uint16_t    Angle_Transfer;
     int16_t     Angle_Difference;
-    //Ê¹ÓÃMT6815±àÂëÆ÷ ±àÂëÆ÷Õı·½ÏòÓëµç»úÕı·½ÏòÏà·´
+    //ä½¿ç”¨MT6815ç¼–ç å™¨ ç¼–ç å™¨æ­£æ–¹å‘ä¸ç”µæœºæ­£æ–¹å‘ç›¸å
     #ifdef MT6815
         Angle_Transfer = ((Rx_Encoder[0] & 0x00FF) << 8) | ((Rx_Encoder[1] & 0XFF00) >> 8);
         Angle_Transfer = (Angle_Transfer >> 2) & 0x3FFF;
     #endif 
-    if(encoder->Single_Bit <= 16)//±àÂëÆ÷Î»Êıµ÷ÕûÎª16Î»½øĞĞFOC¼ÆËã
+    if(encoder->Single_Bit <= 16)//ç¼–ç å™¨ä½æ•°è°ƒæ•´ä¸º16ä½è¿›è¡ŒFOCè®¡ç®—
 //				Angle[0] = Angle_Transfer << (16 - encoder->Single_Bit);
-        Angle_Single = 65536 - (Angle_Transfer << (16 - encoder->Single_Bit));//±àÂëÆ÷·½ÏòÓëµç»úIq·½ÏòÏà·´
+        Angle_Single = 65536 - (Angle_Transfer << (16 - encoder->Single_Bit));//ç¼–ç å™¨æ–¹å‘ä¸ç”µæœºIqæ–¹å‘ç›¸å
     else
         Angle_Single = Angle_Transfer >> (encoder->Single_Bit - 16);
-    if(encoder->Multi_Bit != 0)//¶àÈ¦Ã»ÓĞ×÷Î»ÊıÏŞÖÆ£¬ÔÚMT6813ÖĞÎ´Ê¹ÓÃ
+    if(encoder->Multi_Bit != 0)//å¤šåœˆæ²¡æœ‰ä½œä½æ•°é™åˆ¶ï¼Œåœ¨MT6813ä¸­æœªä½¿ç”¨
     {
         Angle_Multi = Angle_Transfer >>16;
     }
-	//µ¥È¦Î»ÖÃ·¶Î§ÏŞÖÆ
+	//å•åœˆä½ç½®èŒƒå›´é™åˆ¶
 	encoder->Encoder_Angle = Angle_Single & 0xFFFF;
 
-    //±àÂëÆ÷Êı¾İ²îÖµÀÛ¼ÓµÃ³öÏà¶ÔÎ»ÖÃ
-    //³õ´ÎÉÏµçÎ»ÖÃÇåÁã
+    //ç¼–ç å™¨æ•°æ®å·®å€¼ç´¯åŠ å¾—å‡ºç›¸å¯¹ä½ç½®
+    //åˆæ¬¡ä¸Šç”µä½ç½®æ¸…é›¶
     if(Work_Status.bits.Encoder_Init == 1)
     {
         encoder->Encoder_Angle_Buffer = encoder->Encoder_Angle;
-				Work_Status.bits.Encoder_Init = 0;
+	Work_Status.bits.Encoder_Init = 0;
     }
     Angle_Difference = encoder->Encoder_Angle - encoder->Encoder_Angle_Buffer;
     encoder->Encode_Position = encoder->Encode_Position + Angle_Difference;
-    if(encoder->Encode_Position > 16777216)//24Î»Î»ÖÃ·¶Î§£¬³¬¹ıÔò»Ø»·
+    if(encoder->Encode_Position > 16777216)//24ä½ä½ç½®èŒƒå›´ï¼Œè¶…è¿‡åˆ™å›ç¯
     {
          encoder->Encode_Position = encoder->Encode_Position - 33554432;
     }
@@ -71,7 +70,7 @@ void Encoder_Data_Deal(Encoder *encoder)
     {
         encoder->Encode_Position = encoder->Encode_Position + 33554432;
     }
-		encoder->Encoder_Angle_Buffer = encoder->Encoder_Angle;
+    encoder->Encoder_Angle_Buffer = encoder->Encoder_Angle;
 }
 
 
