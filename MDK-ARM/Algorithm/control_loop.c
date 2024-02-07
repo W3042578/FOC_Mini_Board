@@ -83,7 +83,8 @@ void PID_Control_Init(_PID_Control *PID)
 //PID控制环具体参数初始化
 void Control_Loop_Init(_Control_Loop *Loop)
 {
-	Loop->Target_Current = 0;
+	Loop->Target_Q_Current = 0;
+	Loop->Target_D_Current = 0;
 	Loop->Target_Speed = 0;
 	Loop->Target_Position = 0;
 	
