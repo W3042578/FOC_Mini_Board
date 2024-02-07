@@ -247,10 +247,11 @@ void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor->Tc);
 }
 
-//1ms中断回调函数
+//1ms中断回调函数 外部输入输出数据、温度保护、电机状态保护处理
 void Interrupt_1MS(void)
 {
-	
+	//更新PID控制参数数据
+	PID_Control_Update();
 }
 
 
