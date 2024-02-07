@@ -6,6 +6,25 @@
 
 typedef  struct
 {
+	uint16_t 	Proportion;						  
+	uint16_t 	Integral;								
+	uint16_t 	Difference;
+	uint16_t	Antiback;
+	
+	int32_t		Error,Last_Error,Expect,Feedback,Feedforward;	
+	int32_t		Proportion_Sum;
+	int32_t		Integral_Sum;
+	int32_t		Difference_Sum;
+	int32_t		Output_Sum;
+	
+	uint32_t  	Proportion_Limit;			//输出限制
+	uint32_t	Integral_Limit;
+	uint32_t	Difference_Limit;
+	uint32_t	Output_limit;
+}_PID_Control;
+
+typedef  struct
+{
 	int32_t 	Target_Q_Current;	//目标 
 	int32_t 	Target_D_Current;
 	int32_t 	Target_Speed;								
@@ -33,24 +52,6 @@ typedef  struct
 	int32_t		Position_Output_Limit;
 }_Control_Loop;
 
-typedef  struct
-{
-	uint16_t 	Proportion;						  
-	uint16_t 	Integral;								
-	uint16_t 	Difference;
-	uint16_t	Antiback;
-	
-	int32_t		Error,Last_Error,Expect,Feedback,Feedforward;	
-	int32_t		Proportion_Sum;
-	int32_t		Integral_Sum;
-	int32_t		Difference_Sum;
-	int32_t		Output_Sum;
-	
-	uint32_t  	Proportion_Limit;			//输出限制
-	uint32_t	Integral_Limit;
-	uint32_t	Difference_Limit;
-	uint32_t	Output_limit;
-}_PID_Control;
 
 extern	_Control_Loop	Control_Loop;
 extern	_PID_Control 	Current_Q_PID;
