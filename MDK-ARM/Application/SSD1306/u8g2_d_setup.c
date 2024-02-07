@@ -3,6 +3,7 @@
 
 /* ssd1306 */
 /* ssd1306 1 */
+
 void u8g2_Setup_ssd1306_i2c_128x64_noname_1(u8g2_t *u8g2, const u8g2_cb_t *rotation, u8x8_msg_cb byte_cb, u8x8_msg_cb gpio_and_delay_cb)
 {
   uint8_t tile_buf_height;
