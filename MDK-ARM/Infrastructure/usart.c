@@ -163,32 +163,31 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 
 /* USER CODE BEGIN 1 */
 
-//¿ÕÏĞÖĞ¶Ï´¦Àíº¯Êı
+//ç©ºé—²ä¸­æ–­å¤„ç†å‡½æ•°
 void uart_idleback(UART_HandleTypeDef *huart)
 {
-	uint8_t remain; 						//¶¨Òå±äÁ¿´¢´æDMAÊ£Óà´«ÊäÎ»
-	//Í£Ö¹±¾´ÎDMA´«Êä
+	uint8_t remain; 						//å®šä¹‰å˜é‡å‚¨å­˜DMAå‰©ä½™ä¼ è¾“ä½
+	//åœæ­¢æœ¬æ¬¡DMAä¼ è¾“
 	HAL_UART_DMAStop(&huart1);
 	
-	//»ñÈ¡DMAÎ´½ÓÊÜµ½µÄÊı¾İÎ»
+	//è·å–DMAæœªæ¥å—åˆ°çš„æ•°æ®ä½
 	remain = __HAL_DMA_GET_COUNTER(&hdma_usart1_rx);
-	//½ÓÊÜÊı¾İµÄ³¤¶ÈµÈÓÚ»º³åÇø×Ü³¤¼õÈ¥Ê£Óà³¤¶È
+	//æ¥å—æ•°æ®çš„é•¿åº¦ç­‰äºç¼“å†²åŒºæ€»é•¿å‡å»å‰©ä½™é•¿åº¦
 	Modbus_Length_In = RX_BUFF_LONG - remain;
 	
-	//½«½ÓÊÜµ½µÄÊı×é¸´ÖÆµ½»º³åÇø  memcpyº¯ÊıÔÚstring.hÍ·ÎÄ¼şÏÂ
+	//å°†æ¥å—åˆ°çš„æ•°ç»„å¤åˆ¶åˆ°ç¼“å†²åŒº  memcpyå‡½æ•°åœ¨string.hå¤´æ–‡ä»¶ä¸‹
 	memcpy(Modbus_Buffer,Rx_Data,Modbus_Length_In);	
 	
-	//Çå¿Õ½ÓÊÜÊı×éÄÚÈİ  memsetº¯ÊıÔÚstring.hÍ·ÎÄ¼şÏÂ
+	//æ¸…ç©ºæ¥å—æ•°ç»„å†…å®¹  memsetå‡½æ•°åœ¨string.hå¤´æ–‡ä»¶ä¸‹
 	memset(Rx_Data,0,Modbus_Length_In);
 	
-	
-	//ModbusĞ­Òé´¦Àí
-	if(Modbus_Process(Modbus_Buffer,Modbus_Length_In,Tx_Data,&Modbus_Length_Out) == 1)//ÅĞ¶ÏModbus½ø³ÌÊÇ·ñÕı³£
+	//Modbusåè®®å¤„ç†
+	if(Modbus_Process(Modbus_Buffer,Modbus_Length_In,Tx_Data,&Modbus_Length_Out) == 1)//åˆ¤æ–­Modbusè¿›ç¨‹æ˜¯å¦æ­£å¸¸
 	{
-		//¸ù¾İ´¦Àí½á¹û·¢ËÍÊı¾İ¸øÖ÷»ú
-		HAL_UART_Transmit_DMA(&huart1,Tx_Data,Modbus_Length_Out); //5Î»·Ö±ğÎª IDÎ» ¹¦ÄÜÂë  ×Ö½ÚÊıÎ»  ¸ßµÍÁ½Î»Ğ£ÑéÂë
+		//æ ¹æ®å¤„ç†ç»“æœå‘é€æ•°æ®ç»™ä¸»æœº
+		HAL_UART_Transmit_DMA(&huart1,Tx_Data,Modbus_Length_Out); //5ä½åˆ†åˆ«ä¸º IDä½ åŠŸèƒ½ç   å­—èŠ‚æ•°ä½  é«˜ä½ä¸¤ä½æ ¡éªŒç 
 	}
-	//Êı¾İ´¦Àí½áÊøºóÖØĞÂ¿ªÊ¼DMA´«Êä
+	//æ•°æ®å¤„ç†ç»“æŸåé‡æ–°å¼€å§‹DMAä¼ è¾“
 	HAL_UART_Receive_DMA(&huart1,(uint8_t *)&Rx_Data,RX_BUFF_LONG);
 }
 
