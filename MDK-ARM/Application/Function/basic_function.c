@@ -17,6 +17,7 @@
 uint16_t	Encoder_Offset_Delay;	//编码器初始角度对齐延迟
 uint16_t	Number_Offest_Count;	//编码器累加实际次数
 uint8_t		Last_Work_Model;	//上一次的工作模式
+int32_t		Last_Encoder_Position;	//上一次编码器胡相对位置
 
 //获取编码器角度并转换为电角度
 void Encoder_To_Electri_Angle(FOC_Motor *motor)
@@ -31,9 +32,9 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 	
 	//电机原点位置对齐alpha轴
 	if(Encoder1.Encoder_Angle < motor->Initial_Angle_Offset)
-			offest_angle = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset + 65535;
+		offest_angle = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset + 65535;
 	else
-			offest_angle = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset;
+		offest_angle = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset;
 	
 	//电机速度补偿计算用角度
 	if(motor->Speed_Angle > 0)
@@ -84,9 +85,9 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 		if(Number_Offest_Count == 0)//指定次数累加后平均获得零位校准值
 		{
 			motor->Initial_Angle_Offset = motor->Initial_Angle_Offset >> (Control_Word.Number_Angle_Offest);
-			Control_Word.Work_Model = 0;			//校正完成退出校正模式并关闭PWM使能
+			Control_Word.Work_Model = 0;		//校正完成退出校正模式并关闭PWM使能
 			Control_Word.PWM_Enable = 0;
-			Work_Status.bits.Angle_Offest = 0;//编码器校正位清零 允许下一次进入零位校准
+			Work_Status.bits.Angle_Offest = 0;	//编码器校正位清零 允许下一次进入零位校准
 		}
 	}
 }
@@ -146,7 +147,7 @@ void Model_Control(FOC_Motor *motor)
 	{
 		if(Control_Word.PWM_Enable == 1)//PWM使能输出情况下不允许更改工作模式
 			Control_Word.Work_Model = Last_Work_Model;
-		else//PWM非使能也许模式切换，但需要清零各PID器中的积分量
+		else//PWM非使能允许模式切换，但需要清零各PID器中的积分量
 		{
 			Current_Q_PID.Integral_Sum = 0;
 			Current_D_PID.Integral_Sum = 0;
@@ -206,7 +207,7 @@ void Model_Control(FOC_Motor *motor)
 			{
 				//相对位置回馈
 				Position_PI.Feedback = Encoder1.Encode_Position;
-				//目标速度 单位：
+				//目标速度 单位：dec(编码器单个数值单位)
 				Position_PI.Feedback = Control_Loop.Target_Position;
 				//PI计算
 				PID_Control_Deal(Position_PI);
@@ -221,8 +222,8 @@ void Model_Control(FOC_Motor *motor)
 			if((Control_Loop.Loop_Count & 0x02) == 0)
 			{
 				//速度回馈
-				Speed_PI.Feedback = motor->Iq;
-				//目标速度 单位：
+				Speed_PI.Feedback = Encoder1.Encoder_1MS_Speed;
+				//目标速度 单位：rpm
 				Speed_PI.Feedback = Control_Loop.Target_Speed;
 				//PI计算
 				PID_Control_Deal(Speed_PI);
@@ -247,8 +248,15 @@ void Model_Control(FOC_Motor *motor)
 
 			//环路计数累加
 			Control_Loop.Loop_Count ++;
-			if(Control_Loop.Loop_Count > 4)
+			//电流环62.5us计算一次 16次为1ms时间
+			if(Control_Loop.Loop_Count > 16)
+			{
 				Control_Loop.Loop_Count = 0;
+				//考虑到编码器给出为绝对值位置信号，速度的求解需要结合时间，将编码器速度计算放在控制环路中
+				Encoder1.Encoder_1MS_Speed = Encoder1.Encode_Position - Last_Encoder_Position;
+				//更新过去1ms时间编码器位置
+				Last_Encoder_Position = Encoder1.Encode_Position;
+			}
 		break;
 			
 		//默认0模式，不做输出
