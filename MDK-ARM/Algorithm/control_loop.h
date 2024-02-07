@@ -6,27 +6,27 @@
 
 typedef  struct
 {
-	int32_t 	Target_Current;						//目标  
+	int32_t 	Target_Current;						//鐩爣  
 	int32_t 	Target_Speed;								
 	int32_t 	Target_Position;
 	
 
-	uint16_t	Current_Q_Proportion;			//q轴电流PID
+	uint16_t	Current_Q_Proportion;			//q杞寸數娴丳ID
 	uint16_t	Current_Q_Integral;
 	uint16_t	Current_Q_Difference;
 	
-	uint16_t	Current_D_Proportion;			//d轴电流PID
+	uint16_t	Current_D_Proportion;			//d杞寸數娴丳ID
 	uint16_t	Current_D_Integral;
 	uint16_t	Current_D_Difference;
 
-	uint16_t	Speed_Proportion;					//速度PI
+	uint16_t	Speed_Proportion;					//閫熷害PI
 	uint16_t	Speed_Integral;
 		
-	uint16_t	Position_Proportion;			//位置PI
+	uint16_t	Position_Proportion;			//浣嶇疆PI
 	uint16_t	Position_Integral;		
 	uint16_t 	Position_Feedforward;	
 	
-	int32_t  	Current_Q_Output_Limit;		//输出限制
+	int32_t  	Current_Q_Output_Limit;		//杈撳嚭闄愬埗
 	int32_t  	Current_D_Output_Limit;	
 	int32_t		Speed_Output_Limit;
 	int32_t		Position_Output_Limit;
@@ -39,13 +39,13 @@ typedef  struct
 	uint16_t 	Difference;
 	uint16_t	Antiback;
 	
-	uint16_t	Error,Last_Error,Expect,Feedback,Feedforward;	
+	int32_t		Error,Last_Error,Expect,Feedback,Feedforward;	
 	int32_t		Proportion_Sum;
 	int32_t		Integral_Sum;
 	int32_t		Difference_Sum;
 	int32_t		Output_Sum;
 	
-	uint32_t  Proportion_Limit;			//输出限制
+	uint32_t  	Proportion_Limit;			//杈撳嚭闄愬埗
 	uint32_t	Integral_Limit;
 	uint32_t	Difference_Limit;
 	uint32_t	Output_limit;
@@ -61,11 +61,11 @@ extern	_PID_Control Position_PI;
 void PID_Control_Deal(_PID_Control * PID_Control);
 void Control_Loop_Deal(_Control_Loop *Loop);
 
-//PID结构体参数初始化
+//PID缁撴瀯浣撳弬鏁板垵濮嬪寲
 void PID_Control_Init(_PID_Control *PID);
-//PID控制环具体参数初始化
+//PID鎺у埗鐜叿浣撳弬鏁板垵濮嬪寲
 void Control_Loop_Init(_Control_Loop *Loop);
-//1ms中断更新PID结构体中数据
+//1ms涓柇鏇存柊PID缁撴瀯浣撲腑鏁版嵁
 void PID_Control_Update(void);
 
 #endif
