@@ -60,11 +60,11 @@ static const uint8_t Modbus_CRC_Low[] = {
 0x41, 0x81, 0x80, 0x40
 };
 
-uint8_t Tx_Data[TX_BUFF_LONG];					//定义串口接受和发送缓冲区长度
+uint8_t Tx_Data[TX_BUFF_LONG];		//定义串口接受和发送缓冲区长度
 uint8_t Rx_Data[RX_BUFF_LONG];
-uint8_t 	Modbus_Length_In;								//接受到的一帧Modbus数据长度，有多少个byte
-MODBUS 		Modbus;													//Modbus数据处理结构体
-uint8_t		Modbus_Buffer[30];							//Modbus发送缓冲区长度
+uint8_t 	Modbus_Length_In;	//接受到的一帧Modbus数据长度，有多少个byte
+MODBUS 		Modbus;			//Modbus数据处理结构体
+uint8_t		Modbus_Buffer[30];	//Modbus发送缓冲区长度
 uint16_t	Modbus_Length_Out;
 
 
@@ -74,9 +74,10 @@ uint16_t	Modbus_Length_Out;
 uint8_t Modbus_Process(uint8_t *data_in,uint8_t length_in,uint8_t *data_out,uint16_t* length_out)
 {
 	//中间变量
-	commicate_code transfer;					//存储需要读取的数据
-	uint16_t read_limit;							//判断读取数据允许最大长度，避免读取数据地址超出
-	uint16_t write_limit;							//判断写入数据允许最大长度，避免写入数据地址超出
+	//存储需要读取的数据
+	commicate_code transfer;
+	uint16_t read_limit;		//判断读取数据允许最大长度，避免读取数据地址超出
+	uint16_t write_limit;		//判断写入数据允许最大长度，避免写入数据地址超出
 	
 	//Modbus结构体数据清零
 	memset(&Modbus,0,sizeof(Modbus));
@@ -89,15 +90,15 @@ uint8_t Modbus_Process(uint8_t *data_in,uint8_t length_in,uint8_t *data_out,uint
 
 	if(Modbus.CRC_Self_Data.ALL == Modbus.CRC_RX_Data.ALL)//校验正确
 	{
-		Modbus.ID = *data_in;				//Modbus_Buffer[0]
-		if(Modbus.ID == Slave_ID)		//判断从机ID是否对应
+		Modbus.ID = *data_in;		//Modbus_Buffer[0]
+		if(Modbus.ID == Slave_ID)	//判断从机ID是否对应
 		{
-				Modbus.Function_Code = *(data_in + 1);															//Modbus_Buffer[1]     获取传输数据功能码
-				Modbus.Start_Address = (*(data_in + 2)<<8) | *(data_in + 3);				//Modbus_Buffer[2]和Modbus_Buffer[3]处理   获取传输数据开始地址，依次判断要改变的变量索引
+				Modbus.Function_Code = *(data_in + 1);	//Modbus_Buffer[1]     获取传输数据功能码
+				Modbus.Start_Address = (*(data_in + 2)<<8) | *(data_in + 3);	//Modbus_Buffer[2]和Modbus_Buffer[3]处理   获取传输数据开始地址，依次判断要改变的变量索引
 
-				for(uint8_t i = 0; i<=Commicate_Data_All_Number; i++)								//遍历限制范围为object_commitcate.c文件中结构体数组数量
+				for(uint8_t i = 0; i<=Commicate_Data_All_Number; i++)	//遍历限制范围为object_commitcate.c文件中结构体数组数量
 					{
-						if(Commicate_Code[i].Index == Modbus.Start_Address)							//Modbus数据起始地址判断对应变量索引位置
+						if(Commicate_Code[i].Index == Modbus.Start_Address)	//Modbus数据起始地址判断对应变量索引位置
 						{
 							Modbus.Const_Columns_Number = i;													
 							break;
@@ -105,7 +106,7 @@ uint8_t Modbus_Process(uint8_t *data_in,uint8_t length_in,uint8_t *data_out,uint
 						if(i == Commicate_Data_All_Number )
 						{
 							Modbus.Error = 1;
-							return 0;							//没有找到对应数据索引，直接返回
+							return 0;	//没有找到对应数据索引，直接返回
 						}
 					}																											
 				switch(Modbus.Function_Code)//根据功能码执行
@@ -117,41 +118,41 @@ uint8_t Modbus_Process(uint8_t *data_in,uint8_t length_in,uint8_t *data_out,uint
 					//	01   03       02         00  03       F8 453
 					//  ID  功能码   字节数    返回数据内容      校验码
 					case 0x03:  //读取多个寄存器数据
-							Modbus.Register_Number = (*(data_in + 4) << 8) | *(data_in + 5);	//Modbus_Buffer[4]和Modbus_Buffer[5]处理  获取寄存器数值
-							Modbus.Byte_Number = Modbus.Register_Number * 2;									//Modbus中 字节数 = 寄存器 x2  
+						Modbus.Register_Number = (*(data_in + 4) << 8) | *(data_in + 5);//Modbus_Buffer[4]和Modbus_Buffer[5]处理  获取寄存器数值
+						Modbus.Byte_Number = Modbus.Register_Number * 2;		//Modbus中 字节数 = 寄存器 x2  
 							
-							//判断数据读取有无超出范围
-							if(Modbus.Register_Number + Modbus.Const_Columns_Number > Commicate_Data_All_Number)//寻得读取数据起始加上要读取数量超出变量数组个数
-								read_limit = Modbus.Register_Number - (Modbus.Register_Number + Modbus.Const_Columns_Number - Commicate_Data_All_Number);	//获取允许读取的数据量
-							else
-								read_limit = Modbus.Register_Number;//没有超出不作限制
-							
-							//对没有超出数据一一进行读取
-							for(uint8_t i = 0; i<read_limit; i++)
+						//判断数据读取有无超出范围
+						if(Modbus.Register_Number + Modbus.Const_Columns_Number > Commicate_Data_All_Number)//寻得读取数据起始加上要读取数量超出变量数组个数
+							read_limit = Modbus.Register_Number - (Modbus.Register_Number + Modbus.Const_Columns_Number - Commicate_Data_All_Number);//获取允许读取的数据量
+						else
+							read_limit = Modbus.Register_Number;//没有超出不作限制
+						
+						//对没有超出数据一一进行读取
+						for(uint8_t i = 0; i<read_limit; i++)
+						{
+							transfer = Commicate_Code[Modbus.Const_Columns_Number + i];
+							if(transfer.Data_Type == 2)
 							{
-								transfer = Commicate_Code[Modbus.Const_Columns_Number + i];
-								if(transfer.Data_Type == 2)
-								{
-									Modbus.Read_Data_Array[i].ALL = *((uint16_t*)transfer.Commicate_Pointor);					//依次获取变量地址对应数据  获取将要读取的变量值  void指针可以赋值给其他数据类型，但需要对指针进行强制转换
-									Modbus.Read_To_Send[2*i] = Modbus.Read_Data_Array[i].byte.Transfer_Data_8bit_low;//i指16位数组中数据位置，2*i指对应8位数组中数据对应位置
-									Modbus.Read_To_Send[2*i+1] = Modbus.Read_Data_Array[i].byte.Transfer_Data_8bit_high;
-								}
-								else if(transfer.Data_Type ==1)
-								{
-									Modbus.Read_To_Send[2*i+1] = *((uint8_t*)transfer.Commicate_Pointor);
-								}					
+								Modbus.Read_Data_Array[i].ALL = *((uint16_t*)transfer.Commicate_Pointor);		//依次获取变量地址对应数据  获取将要读取的变量值  void指针可以赋值给其他数据类型，但需要对指针进行强制转换
+								Modbus.Read_To_Send[2*i] = Modbus.Read_Data_Array[i].byte.Transfer_Data_8bit_low;	//i指16位数组中数据位置，2*i指对应8位数组中数据对应位置
+								Modbus.Read_To_Send[2*i+1] = Modbus.Read_Data_Array[i].byte.Transfer_Data_8bit_high;
 							}
-		
-							//准备数据发送
-							*data_out = Modbus.ID;
-							*(data_out + 1) = Modbus.Function_Code;
-							*(data_out + 2) = Modbus.Byte_Number;
-							memcpy(data_out+3, Modbus.Read_To_Send, Modbus.Byte_Number);							//填入要读取数据，8位数组,实际读取数据长度不够对其他位填0
-							Modbus.CRC_TX_Data.ALL = Modbus_CRC_Data(data_out,3 + Modbus.Byte_Number);//计算将要发送数据校验码，数据存放低位开始，多余空位放在高位
-							*(data_out + 3 + Modbus.Byte_Number) = Modbus.CRC_TX_Data.nchar.high;			//填入高8位校验码
-							*(data_out + 4 + Modbus.Byte_Number) = Modbus.CRC_TX_Data.nchar.low;			//填入低8位校验码
-							*length_out = Modbus.Byte_Number + 5;
-						return 1;
+							else if(transfer.Data_Type ==1)
+							{
+								Modbus.Read_To_Send[2*i+1] = *((uint8_t*)transfer.Commicate_Pointor);
+							}					
+						}
+	
+						//准备数据发送
+						*data_out = Modbus.ID;
+						*(data_out + 1) = Modbus.Function_Code;
+						*(data_out + 2) = Modbus.Byte_Number;
+						memcpy(data_out+3, Modbus.Read_To_Send, Modbus.Byte_Number);			//填入要读取数据，8位数组,实际读取数据长度不够对其他位填0
+						Modbus.CRC_TX_Data.ALL = Modbus_CRC_Data(data_out,3 + Modbus.Byte_Number);	//计算将要发送数据校验码，数据存放低位开始，多余空位放在高位
+						*(data_out + 3 + Modbus.Byte_Number) = Modbus.CRC_TX_Data.nchar.high;		//填入高8位校验码
+						*(data_out + 4 + Modbus.Byte_Number) = Modbus.CRC_TX_Data.nchar.low;		//填入低8位校验码
+						*length_out = Modbus.Byte_Number + 5;
+					return 1;
 					// 主机：0x06
 					//  01   06     00  01       00  02       59 C8
 					//  ID  功能码  写入地址		写入数据内容    	校验码
@@ -161,100 +162,100 @@ uint8_t Modbus_Process(uint8_t *data_in,uint8_t length_in,uint8_t *data_out,uint
 					case 0x06:  //写入一个寄存器数据
 						transfer = Commicate_Code[Modbus.Const_Columns_Number];
 						Modbus.Write_Data = (*(data_in + 4) << 8) | *(data_in + 5);//获取要写入数据内容
-							if(transfer.Data_Type == 1)
+						if(transfer.Data_Type == 1)
+						{
+							if(Modbus.Write_Data > 0xFF)//内部设置数据类型为一个字节，实际输入超出1个字节byte范围直接返回0，输入超出错误		
 							{
-								if(Modbus.Write_Data > 0xFF)//内部设置数据类型为一个字节，实际输入超出1个字节byte范围直接返回0，输入超出错误		
-								{
-									Modbus.Error = 1;
-									return 0;	
-								}	
-								*((uint8_t*)(transfer.Commicate_Pointor)) = Modbus.Write_Data;//将输入数据赋值给对应变量
-							}
-							else if(transfer.Data_Type == 2)
-							{
-								*((uint16_t*)(transfer.Commicate_Pointor)) = Modbus.Write_Data;//将输入数据赋值给对应变量
-							}
-							 //变量数据大小写入错误  将8位数据转为16位指针错误
-							
-							//准备数据发送  写入数据和开始地址均为16位数据，data_out为8位数组串口发送
-							*data_out = Modbus.ID;
-							*(data_out + 1) = Modbus.Function_Code;
-							*(data_out + 2) = Modbus.Start_Address >>8 ;					//取开始地址高两位
-							*(data_out + 3) = Modbus.Start_Address & 0xFF;				//取开始地址低两位
-							*(data_out + 4) = Modbus.Write_Data >>8;							//取写入数据高两位
-							*(data_out + 5) = Modbus.Write_Data & 0xFF;						//取写入数据低两位
-							Modbus.CRC_TX_Data.ALL = Modbus_CRC_Data(data_out,6);	//计算将要发送数据校验码，数据存放低位开始，多余空位放在高位
-							*(data_out + 6)	= Modbus.CRC_TX_Data.nchar.high;			//填入高8位校验码
-							*(data_out + 7) = Modbus.CRC_TX_Data.nchar.low;				//填入低8位校验码
-							*length_out = 8;
-						return 1;
+								Modbus.Error = 1;
+								return 0;	
+							}	
+							*((uint8_t*)(transfer.Commicate_Pointor)) = Modbus.Write_Data;//将输入数据赋值给对应变量
+						}
+						else if(transfer.Data_Type == 2)
+						{
+							*((uint16_t*)(transfer.Commicate_Pointor)) = Modbus.Write_Data;//将输入数据赋值给对应变量
+						}
+						 //变量数据大小写入错误  将8位数据转为16位指针错误
+						
+						//准备数据发送  写入数据和开始地址均为16位数据，data_out为8位数组串口发送
+						*data_out = Modbus.ID;
+						*(data_out + 1) = Modbus.Function_Code;
+						*(data_out + 2) = Modbus.Start_Address >>8 ;		//取开始地址高两位
+						*(data_out + 3) = Modbus.Start_Address & 0xFF;		//取开始地址低两位
+						*(data_out + 4) = Modbus.Write_Data >>8;		//取写入数据高两位
+						*(data_out + 5) = Modbus.Write_Data & 0xFF;		//取写入数据低两位
+						Modbus.CRC_TX_Data.ALL = Modbus_CRC_Data(data_out,6);	//计算将要发送数据校验码，数据存放低位开始，多余空位放在高位
+						*(data_out + 6)	= Modbus.CRC_TX_Data.nchar.high;	//填入高8位校验码
+						*(data_out + 7) = Modbus.CRC_TX_Data.nchar.low;		//填入低8位校验码
+						*length_out = 8;
+					return 1;
 					// 主机：0x10
-					//  01   10    	00  01       00  06      		0C					00 03 	00 00	 00 00	 00 00 	00 00 	00 05						04 00
-					//  ID  功能码  写入地址		写入寄存器个数		写入字节数    											写入内容														校验码
+					//  01   10    	00  01		00  06      	0C		00 03 	00 00	 00 00	 00 00 	00 00 	00 05		04 00
+					//  ID  功能码  写入地址		写入寄存器个数	写入字节数    	写入内容							校验码
 					// 从机返回：
-					//	01   10     00  01       00  06       59 C8
-					//  ID  功能码  写入地址  	写入寄存器个数   	校验码				
+					//01   10     00  01       00  06       59 C8
+					//ID  功能码  写入地址  	写入寄存器个数   校验码				
 					case 0x10:  //写入多个寄存器数据
-							Modbus.Register_Number = (*(data_in + 4) << 8) | *(data_in + 5);
-							Modbus.Byte_Number = *(data_in + 6);
-							
-							//判断数据写入有无超出范围
-							if(Modbus.Register_Number + Modbus.Const_Columns_Number > Commicate_Data_All_Number)//寻得写入数据起始加上要写入数量超出变量数组个数
-								{
-									write_limit = Modbus.Register_Number - (Modbus.Register_Number + Modbus.Const_Columns_Number - Commicate_Data_All_Number);	//获取允许写入的数据量
-								}
-							else
-								write_limit = Modbus.Register_Number;																			//没有超出不作限制
-							
-							memcpy(Modbus.Write_Data_Array,data_in + 7,write_limit * 2);								//按照写入限制
-							//对没有超出数据一一进行写入
-							for(uint8_t i = 0; i<write_limit; i++)
+						Modbus.Register_Number = (*(data_in + 4) << 8) | *(data_in + 5);
+						Modbus.Byte_Number = *(data_in + 6);
+						
+						//判断数据写入有无超出范围
+						if(Modbus.Register_Number + Modbus.Const_Columns_Number > Commicate_Data_All_Number)//寻得写入数据起始加上要写入数量超出变量数组个数
 							{
-								transfer = Commicate_Code[Modbus.Const_Columns_Number + i];
-								*((uint16_t*)transfer.Commicate_Pointor) = (Modbus.Write_Data_Array[i].byte.Transfer_Data_8bit_high) << 8 | Modbus.Write_Data_Array[i].byte.Transfer_Data_8bit_low;			
+								write_limit = Modbus.Register_Number - (Modbus.Register_Number + Modbus.Const_Columns_Number - Commicate_Data_All_Number);//获取允许写入的数据量
 							}
-					
-							//准备数据发送
-							*data_out = Modbus.ID;
-							*(data_out + 1) = Modbus.Function_Code;
-							*(data_out + 2) = Modbus.Start_Address >>8 ;					//取开始地址高两位
-							*(data_out + 3) = Modbus.Start_Address & 0xFF;				//取开始地址低两位
-							*(data_out + 4) = Modbus.Register_Number >>8;					//取写入寄存器个数高两位
-							*(data_out + 5) = Modbus.Register_Number & 0xFF;			//取写入寄存器个数低两位
-							Modbus.CRC_TX_Data.ALL = Modbus_CRC_Data(data_out,6);	//计算将要发送数据校验码，数据存放低位开始，多余空位放在高位
-							*(data_out + 6)	= Modbus.CRC_TX_Data.nchar.high;			//填入高8位校验码
-							*(data_out + 7) = Modbus.CRC_TX_Data.nchar.low;				//填入低8位校验码
-							*length_out = 8;
-						return 1;
+						else
+							write_limit = Modbus.Register_Number;			//没有超出不作限制
+						
+						memcpy(Modbus.Write_Data_Array,data_in + 7,write_limit * 2);	//按照写入限制
+						//对没有超出数据一一进行写入
+						for(uint8_t i = 0; i<write_limit; i++)
+						{
+							transfer = Commicate_Code[Modbus.Const_Columns_Number + i];
+							*((uint16_t*)transfer.Commicate_Pointor) = (Modbus.Write_Data_Array[i].byte.Transfer_Data_8bit_high) << 8 | Modbus.Write_Data_Array[i].byte.Transfer_Data_8bit_low;			
+						}
+				
+						//准备数据发送
+						*data_out = Modbus.ID;
+						*(data_out + 1) = Modbus.Function_Code;
+						*(data_out + 2) = Modbus.Start_Address >>8 ;		//取开始地址高两位
+						*(data_out + 3) = Modbus.Start_Address & 0xFF;		//取开始地址低两位
+						*(data_out + 4) = Modbus.Register_Number >>8;		//取写入寄存器个数高两位
+						*(data_out + 5) = Modbus.Register_Number & 0xFF;	//取写入寄存器个数低两位
+						Modbus.CRC_TX_Data.ALL = Modbus_CRC_Data(data_out,6);	//计算将要发送数据校验码，数据存放低位开始，多余空位放在高位
+						*(data_out + 6)	= Modbus.CRC_TX_Data.nchar.high;	//填入高8位校验码
+						*(data_out + 7) = Modbus.CRC_TX_Data.nchar.low;		//填入低8位校验码
+						*length_out = 8;
+					return 1;
 					default:
 						Error_Message.bits.Modbus_Status = 1;
-						return 0;//ID正确、校验正确情况下没有找到对应功能码
+					return 0;//ID正确、校验正确情况下没有找到对应功能码
 				}
 		}
 		else
 		{
 			Error_Message.bits.Modbus_Status = 1;
-			return 0;				//校验正确但ID不正确
+			return 0;	//校验正确但ID不正确
 		}
 	}
 	else
 	{
 		Error_Message.bits.Modbus_Status = 1;
-		return 0;					//校验不正确
+		return 0;		//校验不正确
 	}
 }
 //Modbus协议校验查表实现
 uint16_t Modbus_CRC_Data(uint8_t *data,uint16_t length)
 {
 	uint8_t CRCHig = 0xFF;
-  uint8_t CRCLow = 0xFF;
-    int iIndex;
+  	uint8_t CRCLow = 0xFF;
+    	int iIndex;
 
 	while(length--)
 	{
-			iIndex = CRCLow ^*( data++ );
-			CRCLow = ( uint8_t )( CRCHig ^Modbus_CRC_Hig[iIndex] );
-			CRCHig = Modbus_CRC_Low[iIndex];
+		iIndex = CRCLow ^*( data++ );
+		CRCLow = ( uint8_t )( CRCHig ^Modbus_CRC_Hig[iIndex] );
+		CRCHig = Modbus_CRC_Low[iIndex];
 	}
     return ( uint16_t )(  CRCLow << 8 | CRCHig );
 }
