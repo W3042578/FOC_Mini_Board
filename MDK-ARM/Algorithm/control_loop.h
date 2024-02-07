@@ -60,13 +60,13 @@ extern	_PID_Control 	Speed_PI;
 extern	_PID_Control 	Position_PI;
 
 
-void PID_Control_Deal(_PID_Control * PID_Control);
-void Control_Loop_Deal(_Control_Loop *Loop);
+void PID_Control_Deal(_PID_Control * pid_control);
+void Control_Loop_Deal(_Control_Loop *loop);
 
 //PID结构体参数初始化
-void PID_Control_Init(_PID_Control *PID);
+void PID_Control_Init(_PID_Control *pid);
 //PID控制环具体参数初始化
-void Control_Loop_Init(_Control_Loop *Loop);
+void Control_Loop_Init(_Control_Loop *loop);
 //1ms中断更新PID结构体中数据
 void PID_Control_Update(void);
 
