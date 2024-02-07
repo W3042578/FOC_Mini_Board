@@ -222,7 +222,7 @@ void DMA1_Channel2_IRQHandler(void)
   /* USER CODE END DMA1_Channel2_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_spi1_rx);
   /* USER CODE BEGIN DMA1_Channel2_IRQn 1 */
-	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET);//����Ƭѡ�����źţ���������
+	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET);//拉高片选引脚信号，结束传输
   /* USER CODE END DMA1_Channel2_IRQn 1 */
 }
 
@@ -236,7 +236,7 @@ void DMA1_Channel3_IRQHandler(void)
   /* USER CODE END DMA1_Channel3_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_spi1_tx);
   /* USER CODE BEGIN DMA1_Channel3_IRQn 1 */
-  HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET);//SPI DMA��������Ƭѡ��
+  HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET);//SPI DMA走完拉高片选脚
   /* USER CODE END DMA1_Channel3_IRQn 1 */
 }
 
@@ -336,16 +336,16 @@ void USART1_IRQHandler(void)
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
 
-	//���п����жϴ���
-    if(USART1 == huart1.Instance)// �ж��Ƿ��Ǵ���1                                
+	//进行空闲中断处理
+    if(USART1 == huart1.Instance)// 判断是否是串口1                                
     {		
-				// �ж��Ƿ��ǿ����ж� ��������һ���ֽڵ�ʱ����û���ٽ��յ����ݵ�ʱ���� �ж������Ƿ���ܽ���
+	// 判断是否是空闲中断 总线上在一个字节的时间内没有再接收到数据的时候发生 判断数据是否接受结束
         if(RESET != __HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE))   
         {	 
-            __HAL_UART_CLEAR_IDLEFLAG(&huart1); // ��������жϱ�־�������һֱ���Ͻ����жϣ�                   
-            uart_idleback(&huart1); 						// ���ÿ����жϴ�������                      
+            __HAL_UART_CLEAR_IDLEFLAG(&huart1); // 清除空闲中断标志（否则会一直不断进入中断）                   
+            uart_idleback(&huart1); 		// 调用空闲中断处理函数                      
         }
-		}
+   }
 
   /* USER CODE END USART1_IRQn 1 */
 }
