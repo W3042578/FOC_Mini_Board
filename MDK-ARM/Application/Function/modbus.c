@@ -8,7 +8,8 @@
 #include "stm32f1xx_hal_dma.h"
 #include "stm32f1xx_hal_def.h"
 
-//²é±í·½Ê½ÊµÏÖModbusĞ£Ñé
+
+//æŸ¥è¡¨æ–¹å¼å®ç°Modbusæ ¡éªŒ
 static const uint8_t Modbus_CRC_Hig[] = {
 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40,
@@ -59,44 +60,44 @@ static const uint8_t Modbus_CRC_Low[] = {
 0x41, 0x81, 0x80, 0x40
 };
 
-uint8_t Tx_Data[TX_BUFF_LONG];					//¶¨Òå´®¿Ú½ÓÊÜºÍ·¢ËÍ»º³åÇø³¤¶È
+uint8_t Tx_Data[TX_BUFF_LONG];					//å®šä¹‰ä¸²å£æ¥å—å’Œå‘é€ç¼“å†²åŒºé•¿åº¦
 uint8_t Rx_Data[RX_BUFF_LONG];
-uint8_t 	Modbus_Length_In;								//½ÓÊÜµ½µÄÒ»Ö¡ModbusÊı¾İ³¤¶È£¬ÓĞ¶àÉÙ¸öbyte
-MODBUS 		Modbus;													//ModbusÊı¾İ´¦Àí½á¹¹Ìå
-uint8_t		Modbus_Buffer[30];							//Modbus·¢ËÍ»º³åÇø³¤¶È
+uint8_t 	Modbus_Length_In;								//æ¥å—åˆ°çš„ä¸€å¸§Modbusæ•°æ®é•¿åº¦ï¼Œæœ‰å¤šå°‘ä¸ªbyte
+MODBUS 		Modbus;													//Modbusæ•°æ®å¤„ç†ç»“æ„ä½“
+uint8_t		Modbus_Buffer[30];							//Modbuså‘é€ç¼“å†²åŒºé•¿åº¦
 uint16_t	Modbus_Length_Out;
 
 
-//½ÓÊÜ²»¶¨³¤Êı¾İ£º´®¿Ú½ÓÊÜÊı¾İ£¬Ò»Î»Ê±¼äÄÚÃ»ÓĞ½ÓÊÜµ½Êı¾İ´¥·¢¿ÕÏĞÖĞ¶Ï£¬¿ÕÏĞÖĞ¶Ï¶ÔDMA»ñÈ¡Êı¾İ½øĞĞ´¦Àí
-//ÊäÈë²ÎÊı:½ÓÊÜµ½µÄ´®¿ÚÊı¾İÖ¸Õë:data_in		´®¿ÚÊı¾İ³¤¶È:length_in		Êä³ö·¢ËÍÊı¾İÖ¸Õë:data_out   
-//¶ÁÈ¡10¸öÊı¾İÊ±Tx_DataÊı×é´óĞ¡Ó¦²»Ğ¡ÓÚ25¸öbyte
+//æ¥å—ä¸å®šé•¿æ•°æ®ï¼šä¸²å£æ¥å—æ•°æ®ï¼Œä¸€ä½æ—¶é—´å†…æ²¡æœ‰æ¥å—åˆ°æ•°æ®è§¦å‘ç©ºé—²ä¸­æ–­ï¼Œç©ºé—²ä¸­æ–­å¯¹DMAè·å–æ•°æ®è¿›è¡Œå¤„ç†
+//è¾“å…¥å‚æ•°:æ¥å—åˆ°çš„ä¸²å£æ•°æ®æŒ‡é’ˆ:data_in		ä¸²å£æ•°æ®é•¿åº¦:length_in		è¾“å‡ºå‘é€æ•°æ®æŒ‡é’ˆ:data_out   
+//è¯»å–10ä¸ªæ•°æ®æ—¶Tx_Dataæ•°ç»„å¤§å°åº”ä¸å°äº25ä¸ªbyte
 uint8_t Modbus_Process(uint8_t *data_in,uint8_t length_in,uint8_t *data_out,uint16_t* length_out)
 {
-	//ÖĞ¼ä±äÁ¿
-	commicate_code transfer;					//´æ´¢ĞèÒª¶ÁÈ¡µÄÊı¾İ
-	uint16_t read_limit;							//ÅĞ¶Ï¶ÁÈ¡Êı¾İÔÊĞí×î´ó³¤¶È£¬±ÜÃâ¶ÁÈ¡Êı¾İµØÖ·³¬³ö
-	uint16_t write_limit;							//ÅĞ¶ÏĞ´ÈëÊı¾İÔÊĞí×î´ó³¤¶È£¬±ÜÃâĞ´ÈëÊı¾İµØÖ·³¬³ö
+	//ä¸­é—´å˜é‡
+	commicate_code transfer;					//å­˜å‚¨éœ€è¦è¯»å–çš„æ•°æ®
+	uint16_t read_limit;							//åˆ¤æ–­è¯»å–æ•°æ®å…è®¸æœ€å¤§é•¿åº¦ï¼Œé¿å…è¯»å–æ•°æ®åœ°å€è¶…å‡º
+	uint16_t write_limit;							//åˆ¤æ–­å†™å…¥æ•°æ®å…è®¸æœ€å¤§é•¿åº¦ï¼Œé¿å…å†™å…¥æ•°æ®åœ°å€è¶…å‡º
 	
-	//Modbus½á¹¹ÌåÊı¾İÇåÁã
+	//Modbusç»“æ„ä½“æ•°æ®æ¸…é›¶
 	memset(&Modbus,0,sizeof(Modbus));
 	
 	
-	//Ğ£ÑéÊı¾İ´«Êä
+	//æ ¡éªŒæ•°æ®ä¼ è¾“
 	Modbus.CRC_Self_Data.ALL = Modbus_CRC_Data(data_in,length_in - 2);
-	Modbus.CRC_RX_Data.ALL =  (*(data_in + length_in - 2)<<8)|*(data_in + length_in - 1); //È¡Modbus_Buffer×îºóÁ½Î»´¦Àí
+	Modbus.CRC_RX_Data.ALL =  (*(data_in + length_in - 2)<<8)|*(data_in + length_in - 1); //å–Modbus_Bufferæœ€åä¸¤ä½å¤„ç†
 																								
 
-	if(Modbus.CRC_Self_Data.ALL == Modbus.CRC_RX_Data.ALL)//Ğ£ÑéÕıÈ·
+	if(Modbus.CRC_Self_Data.ALL == Modbus.CRC_RX_Data.ALL)//æ ¡éªŒæ­£ç¡®
 	{
 		Modbus.ID = *data_in;				//Modbus_Buffer[0]
-		if(Modbus.ID == Slave_ID)		//ÅĞ¶Ï´Ó»úIDÊÇ·ñ¶ÔÓ¦
+		if(Modbus.ID == Slave_ID)		//åˆ¤æ–­ä»æœºIDæ˜¯å¦å¯¹åº”
 		{
-				Modbus.Function_Code = *(data_in + 1);															//Modbus_Buffer[1]     »ñÈ¡´«ÊäÊı¾İ¹¦ÄÜÂë
-				Modbus.Start_Address = (*(data_in + 2)<<8) | *(data_in + 3);				//Modbus_Buffer[2]ºÍModbus_Buffer[3]´¦Àí   »ñÈ¡´«ÊäÊı¾İ¿ªÊ¼µØÖ·£¬ÒÀ´ÎÅĞ¶ÏÒª¸Ä±äµÄ±äÁ¿Ë÷Òı
+				Modbus.Function_Code = *(data_in + 1);															//Modbus_Buffer[1]     è·å–ä¼ è¾“æ•°æ®åŠŸèƒ½ç 
+				Modbus.Start_Address = (*(data_in + 2)<<8) | *(data_in + 3);				//Modbus_Buffer[2]å’ŒModbus_Buffer[3]å¤„ç†   è·å–ä¼ è¾“æ•°æ®å¼€å§‹åœ°å€ï¼Œä¾æ¬¡åˆ¤æ–­è¦æ”¹å˜çš„å˜é‡ç´¢å¼•
 
-				for(uint8_t i = 0; i<=Commicate_Data_All_Number; i++)								//±éÀúÏŞÖÆ·¶Î§Îªobject_commitcate.cÎÄ¼şÖĞ½á¹¹ÌåÊı×éÊıÁ¿
+				for(uint8_t i = 0; i<=Commicate_Data_All_Number; i++)								//éå†é™åˆ¶èŒƒå›´ä¸ºobject_commitcate.cæ–‡ä»¶ä¸­ç»“æ„ä½“æ•°ç»„æ•°é‡
 					{
-						if(Commicate_Code[i].Index == Modbus.Start_Address)							//ModbusÊı¾İÆğÊ¼µØÖ·ÅĞ¶Ï¶ÔÓ¦±äÁ¿Ë÷ÒıÎ»ÖÃ
+						if(Commicate_Code[i].Index == Modbus.Start_Address)							//Modbusæ•°æ®èµ·å§‹åœ°å€åˆ¤æ–­å¯¹åº”å˜é‡ç´¢å¼•ä½ç½®
 						{
 							Modbus.Const_Columns_Number = i;													
 							break;
@@ -104,35 +105,35 @@ uint8_t Modbus_Process(uint8_t *data_in,uint8_t length_in,uint8_t *data_out,uint
 						if(i == Commicate_Data_All_Number )
 						{
 							Modbus.Error = 1;
-							return 0;							//Ã»ÓĞÕÒµ½¶ÔÓ¦Êı¾İË÷Òı£¬Ö±½Ó·µ»Ø
+							return 0;							//æ²¡æœ‰æ‰¾åˆ°å¯¹åº”æ•°æ®ç´¢å¼•ï¼Œç›´æ¥è¿”å›
 						}
 					}																											
-				switch(Modbus.Function_Code)//¸ù¾İ¹¦ÄÜÂëÖ´ĞĞ
+				switch(Modbus.Function_Code)//æ ¹æ®åŠŸèƒ½ç æ‰§è¡Œ
 				{
-					// Ö÷»ú£º0x03
+					// ä¸»æœºï¼š0x03
 					//  01   03     00  01       00  01       D5 CA
-					//  ID  ¹¦ÄÜÂë  ÆğÊ¼µØÖ·   ¶ÁÈ¡¼Ä´æÆ÷¸öÊı    Ğ£ÑéÂë
-					// ´Ó»ú·µ»Ø£º
+					//  ID  åŠŸèƒ½ç   èµ·å§‹åœ°å€   è¯»å–å¯„å­˜å™¨ä¸ªæ•°    æ ¡éªŒç 
+					// ä»æœºè¿”å›ï¼š
 					//	01   03       02         00  03       F8 453
-					//  ID  ¹¦ÄÜÂë   ×Ö½ÚÊı    ·µ»ØÊı¾İÄÚÈİ      Ğ£ÑéÂë
-					case 0x03:  //¶ÁÈ¡¶à¸ö¼Ä´æÆ÷Êı¾İ
-							Modbus.Register_Number = (*(data_in + 4) << 8) | *(data_in + 5);	//Modbus_Buffer[4]ºÍModbus_Buffer[5]´¦Àí  »ñÈ¡¼Ä´æÆ÷ÊıÖµ
-							Modbus.Byte_Number = Modbus.Register_Number * 2;									//ModbusÖĞ ×Ö½ÚÊı = ¼Ä´æÆ÷ x2  
+					//  ID  åŠŸèƒ½ç    å­—èŠ‚æ•°    è¿”å›æ•°æ®å†…å®¹      æ ¡éªŒç 
+					case 0x03:  //è¯»å–å¤šä¸ªå¯„å­˜å™¨æ•°æ®
+							Modbus.Register_Number = (*(data_in + 4) << 8) | *(data_in + 5);	//Modbus_Buffer[4]å’ŒModbus_Buffer[5]å¤„ç†  è·å–å¯„å­˜å™¨æ•°å€¼
+							Modbus.Byte_Number = Modbus.Register_Number * 2;									//Modbusä¸­ å­—èŠ‚æ•° = å¯„å­˜å™¨ x2  
 							
-							//ÅĞ¶ÏÊı¾İ¶ÁÈ¡ÓĞÎŞ³¬³ö·¶Î§
-							if(Modbus.Register_Number + Modbus.Const_Columns_Number > Commicate_Data_All_Number)//Ñ°µÃ¶ÁÈ¡Êı¾İÆğÊ¼¼ÓÉÏÒª¶ÁÈ¡ÊıÁ¿³¬³ö±äÁ¿Êı×é¸öÊı
-								read_limit = Modbus.Register_Number - (Modbus.Register_Number + Modbus.Const_Columns_Number - Commicate_Data_All_Number);	//»ñÈ¡ÔÊĞí¶ÁÈ¡µÄÊı¾İÁ¿
+							//åˆ¤æ–­æ•°æ®è¯»å–æœ‰æ— è¶…å‡ºèŒƒå›´
+							if(Modbus.Register_Number + Modbus.Const_Columns_Number > Commicate_Data_All_Number)//å¯»å¾—è¯»å–æ•°æ®èµ·å§‹åŠ ä¸Šè¦è¯»å–æ•°é‡è¶…å‡ºå˜é‡æ•°ç»„ä¸ªæ•°
+								read_limit = Modbus.Register_Number - (Modbus.Register_Number + Modbus.Const_Columns_Number - Commicate_Data_All_Number);	//è·å–å…è®¸è¯»å–çš„æ•°æ®é‡
 							else
-								read_limit = Modbus.Register_Number;//Ã»ÓĞ³¬³ö²»×÷ÏŞÖÆ
+								read_limit = Modbus.Register_Number;//æ²¡æœ‰è¶…å‡ºä¸ä½œé™åˆ¶
 							
-							//¶ÔÃ»ÓĞ³¬³öÊı¾İÒ»Ò»½øĞĞ¶ÁÈ¡
+							//å¯¹æ²¡æœ‰è¶…å‡ºæ•°æ®ä¸€ä¸€è¿›è¡Œè¯»å–
 							for(uint8_t i = 0; i<read_limit; i++)
 							{
 								transfer = Commicate_Code[Modbus.Const_Columns_Number + i];
 								if(transfer.Data_Type == 2)
 								{
-									Modbus.Read_Data_Array[i].ALL = *((uint16_t*)transfer.Commicate_Pointor);					//ÒÀ´Î»ñÈ¡±äÁ¿µØÖ·¶ÔÓ¦Êı¾İ  »ñÈ¡½«Òª¶ÁÈ¡µÄ±äÁ¿Öµ  voidÖ¸Õë¿ÉÒÔ¸³Öµ¸øÆäËûÊı¾İÀàĞÍ£¬µ«ĞèÒª¶ÔÖ¸Õë½øĞĞÇ¿ÖÆ×ª»»
-									Modbus.Read_To_Send[2*i] = Modbus.Read_Data_Array[i].byte.Transfer_Data_8bit_low;//iÖ¸16Î»Êı×éÖĞÊı¾İÎ»ÖÃ£¬2*iÖ¸¶ÔÓ¦8Î»Êı×éÖĞÊı¾İ¶ÔÓ¦Î»ÖÃ
+									Modbus.Read_Data_Array[i].ALL = *((uint16_t*)transfer.Commicate_Pointor);					//ä¾æ¬¡è·å–å˜é‡åœ°å€å¯¹åº”æ•°æ®  è·å–å°†è¦è¯»å–çš„å˜é‡å€¼  voidæŒ‡é’ˆå¯ä»¥èµ‹å€¼ç»™å…¶ä»–æ•°æ®ç±»å‹ï¼Œä½†éœ€è¦å¯¹æŒ‡é’ˆè¿›è¡Œå¼ºåˆ¶è½¬æ¢
+									Modbus.Read_To_Send[2*i] = Modbus.Read_Data_Array[i].byte.Transfer_Data_8bit_low;//iæŒ‡16ä½æ•°ç»„ä¸­æ•°æ®ä½ç½®ï¼Œ2*iæŒ‡å¯¹åº”8ä½æ•°ç»„ä¸­æ•°æ®å¯¹åº”ä½ç½®
 									Modbus.Read_To_Send[2*i+1] = Modbus.Read_Data_Array[i].byte.Transfer_Data_8bit_high;
 								}
 								else if(transfer.Data_Type ==1)
@@ -141,108 +142,108 @@ uint8_t Modbus_Process(uint8_t *data_in,uint8_t length_in,uint8_t *data_out,uint
 								}					
 							}
 		
-							//×¼±¸Êı¾İ·¢ËÍ
+							//å‡†å¤‡æ•°æ®å‘é€
 							*data_out = Modbus.ID;
 							*(data_out + 1) = Modbus.Function_Code;
 							*(data_out + 2) = Modbus.Byte_Number;
-							memcpy(data_out+3, Modbus.Read_To_Send, Modbus.Byte_Number);							//ÌîÈëÒª¶ÁÈ¡Êı¾İ£¬8Î»Êı×é,Êµ¼Ê¶ÁÈ¡Êı¾İ³¤¶È²»¹»¶ÔÆäËûÎ»Ìî0
-							Modbus.CRC_TX_Data.ALL = Modbus_CRC_Data(data_out,3 + Modbus.Byte_Number);//¼ÆËã½«Òª·¢ËÍÊı¾İĞ£ÑéÂë£¬Êı¾İ´æ·ÅµÍÎ»¿ªÊ¼£¬¶àÓà¿ÕÎ»·ÅÔÚ¸ßÎ»
-							*(data_out + 3 + Modbus.Byte_Number) = Modbus.CRC_TX_Data.nchar.high;			//ÌîÈë¸ß8Î»Ğ£ÑéÂë
-							*(data_out + 4 + Modbus.Byte_Number) = Modbus.CRC_TX_Data.nchar.low;			//ÌîÈëµÍ8Î»Ğ£ÑéÂë
+							memcpy(data_out+3, Modbus.Read_To_Send, Modbus.Byte_Number);							//å¡«å…¥è¦è¯»å–æ•°æ®ï¼Œ8ä½æ•°ç»„,å®é™…è¯»å–æ•°æ®é•¿åº¦ä¸å¤Ÿå¯¹å…¶ä»–ä½å¡«0
+							Modbus.CRC_TX_Data.ALL = Modbus_CRC_Data(data_out,3 + Modbus.Byte_Number);//è®¡ç®—å°†è¦å‘é€æ•°æ®æ ¡éªŒç ï¼Œæ•°æ®å­˜æ”¾ä½ä½å¼€å§‹ï¼Œå¤šä½™ç©ºä½æ”¾åœ¨é«˜ä½
+							*(data_out + 3 + Modbus.Byte_Number) = Modbus.CRC_TX_Data.nchar.high;			//å¡«å…¥é«˜8ä½æ ¡éªŒç 
+							*(data_out + 4 + Modbus.Byte_Number) = Modbus.CRC_TX_Data.nchar.low;			//å¡«å…¥ä½8ä½æ ¡éªŒç 
 							*length_out = Modbus.Byte_Number + 5;
 						return 1;
-					// Ö÷»ú£º0x06
+					// ä¸»æœºï¼š0x06
 					//  01   06     00  01       00  02       59 C8
-					//  ID  ¹¦ÄÜÂë  Ğ´ÈëµØÖ·		Ğ´ÈëÊı¾İÄÚÈİ    	Ğ£ÑéÂë
-					// ´Ó»ú·µ»Ø£º
+					//  ID  åŠŸèƒ½ç   å†™å…¥åœ°å€		å†™å…¥æ•°æ®å†…å®¹    	æ ¡éªŒç 
+					// ä»æœºè¿”å›ï¼š
 					//	01   06     00  01       00  02       59 C8
-					//  ID  ¹¦ÄÜÂë  Ğ´ÈëµØÖ·  	Ğ´ÈëÊı¾İÄÚÈİ    	Ğ£ÑéÂë	
-					case 0x06:  //Ğ´ÈëÒ»¸ö¼Ä´æÆ÷Êı¾İ
+					//  ID  åŠŸèƒ½ç   å†™å…¥åœ°å€  	å†™å…¥æ•°æ®å†…å®¹    	æ ¡éªŒç 	
+					case 0x06:  //å†™å…¥ä¸€ä¸ªå¯„å­˜å™¨æ•°æ®
 						transfer = Commicate_Code[Modbus.Const_Columns_Number];
-						Modbus.Write_Data = (*(data_in + 4) << 8) | *(data_in + 5);//»ñÈ¡ÒªĞ´ÈëÊı¾İÄÚÈİ
+						Modbus.Write_Data = (*(data_in + 4) << 8) | *(data_in + 5);//è·å–è¦å†™å…¥æ•°æ®å†…å®¹
 							if(transfer.Data_Type == 1)
 							{
-								if(Modbus.Write_Data > 0xFF)//ÄÚ²¿ÉèÖÃÊı¾İÀàĞÍÎªÒ»¸ö×Ö½Ú£¬Êµ¼ÊÊäÈë³¬³ö1¸ö×Ö½Úbyte·¶Î§Ö±½Ó·µ»Ø0£¬ÊäÈë³¬³ö´íÎó		
+								if(Modbus.Write_Data > 0xFF)//å†…éƒ¨è®¾ç½®æ•°æ®ç±»å‹ä¸ºä¸€ä¸ªå­—èŠ‚ï¼Œå®é™…è¾“å…¥è¶…å‡º1ä¸ªå­—èŠ‚byteèŒƒå›´ç›´æ¥è¿”å›0ï¼Œè¾“å…¥è¶…å‡ºé”™è¯¯		
 								{
 									Modbus.Error = 1;
 									return 0;	
 								}	
-								*((uint8_t*)(transfer.Commicate_Pointor)) = Modbus.Write_Data;//½«ÊäÈëÊı¾İ¸³Öµ¸ø¶ÔÓ¦±äÁ¿
+								*((uint8_t*)(transfer.Commicate_Pointor)) = Modbus.Write_Data;//å°†è¾“å…¥æ•°æ®èµ‹å€¼ç»™å¯¹åº”å˜é‡
 							}
 							else if(transfer.Data_Type == 2)
 							{
-								*((uint16_t*)(transfer.Commicate_Pointor)) = Modbus.Write_Data;//½«ÊäÈëÊı¾İ¸³Öµ¸ø¶ÔÓ¦±äÁ¿
+								*((uint16_t*)(transfer.Commicate_Pointor)) = Modbus.Write_Data;//å°†è¾“å…¥æ•°æ®èµ‹å€¼ç»™å¯¹åº”å˜é‡
 							}
-							 //±äÁ¿Êı¾İ´óĞ¡Ğ´Èë´íÎó  ½«8Î»Êı¾İ×ªÎª16Î»Ö¸Õë´íÎó
+							 //å˜é‡æ•°æ®å¤§å°å†™å…¥é”™è¯¯  å°†8ä½æ•°æ®è½¬ä¸º16ä½æŒ‡é’ˆé”™è¯¯
 							
-							//×¼±¸Êı¾İ·¢ËÍ  Ğ´ÈëÊı¾İºÍ¿ªÊ¼µØÖ·¾ùÎª16Î»Êı¾İ£¬data_outÎª8Î»Êı×é´®¿Ú·¢ËÍ
+							//å‡†å¤‡æ•°æ®å‘é€  å†™å…¥æ•°æ®å’Œå¼€å§‹åœ°å€å‡ä¸º16ä½æ•°æ®ï¼Œdata_outä¸º8ä½æ•°ç»„ä¸²å£å‘é€
 							*data_out = Modbus.ID;
 							*(data_out + 1) = Modbus.Function_Code;
-							*(data_out + 2) = Modbus.Start_Address >>8 ;					//È¡¿ªÊ¼µØÖ·¸ßÁ½Î»
-							*(data_out + 3) = Modbus.Start_Address & 0xFF;				//È¡¿ªÊ¼µØÖ·µÍÁ½Î»
-							*(data_out + 4) = Modbus.Write_Data >>8;							//È¡Ğ´ÈëÊı¾İ¸ßÁ½Î»
-							*(data_out + 5) = Modbus.Write_Data & 0xFF;						//È¡Ğ´ÈëÊı¾İµÍÁ½Î»
-							Modbus.CRC_TX_Data.ALL = Modbus_CRC_Data(data_out,6);	//¼ÆËã½«Òª·¢ËÍÊı¾İĞ£ÑéÂë£¬Êı¾İ´æ·ÅµÍÎ»¿ªÊ¼£¬¶àÓà¿ÕÎ»·ÅÔÚ¸ßÎ»
-							*(data_out + 6)	= Modbus.CRC_TX_Data.nchar.high;			//ÌîÈë¸ß8Î»Ğ£ÑéÂë
-							*(data_out + 7) = Modbus.CRC_TX_Data.nchar.low;				//ÌîÈëµÍ8Î»Ğ£ÑéÂë
+							*(data_out + 2) = Modbus.Start_Address >>8 ;					//å–å¼€å§‹åœ°å€é«˜ä¸¤ä½
+							*(data_out + 3) = Modbus.Start_Address & 0xFF;				//å–å¼€å§‹åœ°å€ä½ä¸¤ä½
+							*(data_out + 4) = Modbus.Write_Data >>8;							//å–å†™å…¥æ•°æ®é«˜ä¸¤ä½
+							*(data_out + 5) = Modbus.Write_Data & 0xFF;						//å–å†™å…¥æ•°æ®ä½ä¸¤ä½
+							Modbus.CRC_TX_Data.ALL = Modbus_CRC_Data(data_out,6);	//è®¡ç®—å°†è¦å‘é€æ•°æ®æ ¡éªŒç ï¼Œæ•°æ®å­˜æ”¾ä½ä½å¼€å§‹ï¼Œå¤šä½™ç©ºä½æ”¾åœ¨é«˜ä½
+							*(data_out + 6)	= Modbus.CRC_TX_Data.nchar.high;			//å¡«å…¥é«˜8ä½æ ¡éªŒç 
+							*(data_out + 7) = Modbus.CRC_TX_Data.nchar.low;				//å¡«å…¥ä½8ä½æ ¡éªŒç 
 							*length_out = 8;
 						return 1;
-					// Ö÷»ú£º0x10
+					// ä¸»æœºï¼š0x10
 					//  01   10    	00  01       00  06      		0C					00 03 	00 00	 00 00	 00 00 	00 00 	00 05						04 00
-					//  ID  ¹¦ÄÜÂë  Ğ´ÈëµØÖ·		Ğ´Èë¼Ä´æÆ÷¸öÊı		Ğ´Èë×Ö½ÚÊı    											Ğ´ÈëÄÚÈİ														Ğ£ÑéÂë
-					// ´Ó»ú·µ»Ø£º
+					//  ID  åŠŸèƒ½ç   å†™å…¥åœ°å€		å†™å…¥å¯„å­˜å™¨ä¸ªæ•°		å†™å…¥å­—èŠ‚æ•°    											å†™å…¥å†…å®¹														æ ¡éªŒç 
+					// ä»æœºè¿”å›ï¼š
 					//	01   10     00  01       00  06       59 C8
-					//  ID  ¹¦ÄÜÂë  Ğ´ÈëµØÖ·  	Ğ´Èë¼Ä´æÆ÷¸öÊı   	Ğ£ÑéÂë				
-					case 0x10:  //Ğ´Èë¶à¸ö¼Ä´æÆ÷Êı¾İ
+					//  ID  åŠŸèƒ½ç   å†™å…¥åœ°å€  	å†™å…¥å¯„å­˜å™¨ä¸ªæ•°   	æ ¡éªŒç 				
+					case 0x10:  //å†™å…¥å¤šä¸ªå¯„å­˜å™¨æ•°æ®
 							Modbus.Register_Number = (*(data_in + 4) << 8) | *(data_in + 5);
 							Modbus.Byte_Number = *(data_in + 6);
 							
-							//ÅĞ¶ÏÊı¾İĞ´ÈëÓĞÎŞ³¬³ö·¶Î§
-							if(Modbus.Register_Number + Modbus.Const_Columns_Number > Commicate_Data_All_Number)//Ñ°µÃĞ´ÈëÊı¾İÆğÊ¼¼ÓÉÏÒªĞ´ÈëÊıÁ¿³¬³ö±äÁ¿Êı×é¸öÊı
+							//åˆ¤æ–­æ•°æ®å†™å…¥æœ‰æ— è¶…å‡ºèŒƒå›´
+							if(Modbus.Register_Number + Modbus.Const_Columns_Number > Commicate_Data_All_Number)//å¯»å¾—å†™å…¥æ•°æ®èµ·å§‹åŠ ä¸Šè¦å†™å…¥æ•°é‡è¶…å‡ºå˜é‡æ•°ç»„ä¸ªæ•°
 								{
-									write_limit = Modbus.Register_Number - (Modbus.Register_Number + Modbus.Const_Columns_Number - Commicate_Data_All_Number);	//»ñÈ¡ÔÊĞíĞ´ÈëµÄÊı¾İÁ¿
+									write_limit = Modbus.Register_Number - (Modbus.Register_Number + Modbus.Const_Columns_Number - Commicate_Data_All_Number);	//è·å–å…è®¸å†™å…¥çš„æ•°æ®é‡
 								}
 							else
-								write_limit = Modbus.Register_Number;																			//Ã»ÓĞ³¬³ö²»×÷ÏŞÖÆ
+								write_limit = Modbus.Register_Number;																			//æ²¡æœ‰è¶…å‡ºä¸ä½œé™åˆ¶
 							
-							memcpy(Modbus.Write_Data_Array,data_in + 7,write_limit * 2);								//°´ÕÕĞ´ÈëÏŞÖÆ
-							//¶ÔÃ»ÓĞ³¬³öÊı¾İÒ»Ò»½øĞĞĞ´Èë
+							memcpy(Modbus.Write_Data_Array,data_in + 7,write_limit * 2);								//æŒ‰ç…§å†™å…¥é™åˆ¶
+							//å¯¹æ²¡æœ‰è¶…å‡ºæ•°æ®ä¸€ä¸€è¿›è¡Œå†™å…¥
 							for(uint8_t i = 0; i<write_limit; i++)
 							{
 								transfer = Commicate_Code[Modbus.Const_Columns_Number + i];
 								*((uint16_t*)transfer.Commicate_Pointor) = (Modbus.Write_Data_Array[i].byte.Transfer_Data_8bit_high) << 8 | Modbus.Write_Data_Array[i].byte.Transfer_Data_8bit_low;			
 							}
 					
-							//×¼±¸Êı¾İ·¢ËÍ
+							//å‡†å¤‡æ•°æ®å‘é€
 							*data_out = Modbus.ID;
 							*(data_out + 1) = Modbus.Function_Code;
-							*(data_out + 2) = Modbus.Start_Address >>8 ;					//È¡¿ªÊ¼µØÖ·¸ßÁ½Î»
-							*(data_out + 3) = Modbus.Start_Address & 0xFF;				//È¡¿ªÊ¼µØÖ·µÍÁ½Î»
-							*(data_out + 4) = Modbus.Register_Number >>8;					//È¡Ğ´Èë¼Ä´æÆ÷¸öÊı¸ßÁ½Î»
-							*(data_out + 5) = Modbus.Register_Number & 0xFF;			//È¡Ğ´Èë¼Ä´æÆ÷¸öÊıµÍÁ½Î»
-							Modbus.CRC_TX_Data.ALL = Modbus_CRC_Data(data_out,6);	//¼ÆËã½«Òª·¢ËÍÊı¾İĞ£ÑéÂë£¬Êı¾İ´æ·ÅµÍÎ»¿ªÊ¼£¬¶àÓà¿ÕÎ»·ÅÔÚ¸ßÎ»
-							*(data_out + 6)	= Modbus.CRC_TX_Data.nchar.high;			//ÌîÈë¸ß8Î»Ğ£ÑéÂë
-							*(data_out + 7) = Modbus.CRC_TX_Data.nchar.low;				//ÌîÈëµÍ8Î»Ğ£ÑéÂë
+							*(data_out + 2) = Modbus.Start_Address >>8 ;					//å–å¼€å§‹åœ°å€é«˜ä¸¤ä½
+							*(data_out + 3) = Modbus.Start_Address & 0xFF;				//å–å¼€å§‹åœ°å€ä½ä¸¤ä½
+							*(data_out + 4) = Modbus.Register_Number >>8;					//å–å†™å…¥å¯„å­˜å™¨ä¸ªæ•°é«˜ä¸¤ä½
+							*(data_out + 5) = Modbus.Register_Number & 0xFF;			//å–å†™å…¥å¯„å­˜å™¨ä¸ªæ•°ä½ä¸¤ä½
+							Modbus.CRC_TX_Data.ALL = Modbus_CRC_Data(data_out,6);	//è®¡ç®—å°†è¦å‘é€æ•°æ®æ ¡éªŒç ï¼Œæ•°æ®å­˜æ”¾ä½ä½å¼€å§‹ï¼Œå¤šä½™ç©ºä½æ”¾åœ¨é«˜ä½
+							*(data_out + 6)	= Modbus.CRC_TX_Data.nchar.high;			//å¡«å…¥é«˜8ä½æ ¡éªŒç 
+							*(data_out + 7) = Modbus.CRC_TX_Data.nchar.low;				//å¡«å…¥ä½8ä½æ ¡éªŒç 
 							*length_out = 8;
 						return 1;
 					default:
 						Error_Message.bits.Modbus_Status = 1;
-						return 0;//IDÕıÈ·¡¢Ğ£ÑéÕıÈ·Çé¿öÏÂÃ»ÓĞÕÒµ½¶ÔÓ¦¹¦ÄÜÂë
+						return 0;//IDæ­£ç¡®ã€æ ¡éªŒæ­£ç¡®æƒ…å†µä¸‹æ²¡æœ‰æ‰¾åˆ°å¯¹åº”åŠŸèƒ½ç 
 				}
 		}
 		else
 		{
 			Error_Message.bits.Modbus_Status = 1;
-			return 0;				//Ğ£ÑéÕıÈ·µ«ID²»ÕıÈ·
+			return 0;				//æ ¡éªŒæ­£ç¡®ä½†IDä¸æ­£ç¡®
 		}
 	}
 	else
 	{
 		Error_Message.bits.Modbus_Status = 1;
-		return 0;					//Ğ£Ñé²»ÕıÈ·
+		return 0;					//æ ¡éªŒä¸æ­£ç¡®
 	}
 }
-//ModbusĞ­ÒéĞ£Ñé²é±íÊµÏÖ
+//Modbusåè®®æ ¡éªŒæŸ¥è¡¨å®ç°
 uint16_t Modbus_CRC_Data(uint8_t *data,uint16_t length)
 {
 	uint8_t CRCHig = 0xFF;
