@@ -141,9 +141,20 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 //函数工作在FOC电流环中
 void Model_Control(FOC_Motor *motor)
 {
-	//PWM使能输出情况下不允许更改工作模式
-	if((Last_Work_Model != Control_Word.Work_Model) && Control_Word.PWM_Enable ==1)
-		Control_Word.Work_Model = Last_Work_Model;
+	//模式切换判断
+	if(Last_Work_Model != Control_Word.Work_Model)
+	{
+		if(Control_Word.PWM_Enable == 1)//PWM使能输出情况下不允许更改工作模式
+			Control_Word.Work_Model = Last_Work_Model;
+		else//PWM非使能也许模式切换，但需要清零各PID器中的积分量
+		{
+			Current_Q_PID.Integral_Sum = 0;
+			Current_D_PID.Integral_Sum = 0;
+			Speed_PI.Integral_Sum = 0;
+			Position_PI.Integral_Sum = 0;
+		}
+	}
+		
 	//根据控制字判断工作环
 	switch(Control_Word.Work_Model)
 	{	
