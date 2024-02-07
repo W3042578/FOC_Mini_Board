@@ -59,10 +59,8 @@ extern	_PID_Control 	Current_D_PID;
 extern	_PID_Control 	Speed_PI;
 extern	_PID_Control 	Position_PI;
 
-
+//PID计算
 void PID_Control_Deal(_PID_Control * pid_control);
-void Control_Loop_Deal(_Control_Loop *loop);
-
 //PID结构体参数初始化
 void PID_Control_Init(_PID_Control *pid);
 //PID控制环具体参数初始化
