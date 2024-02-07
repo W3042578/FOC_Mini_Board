@@ -35,7 +35,7 @@ void Encoder_Data_Deal(Encoder *encoder)
 {
     uint16_t    Angle_Single,Angle_Multi;
     uint16_t    Angle_Transfer;
-    int16_t     Angle_Difference;
+    int32_t     Angle_Difference;
     //使用MT6815编码器 编码器正方向与电机正方向相反
     #ifdef MT6815
         Angle_Transfer = ((Rx_Encoder[0] & 0x00FF) << 8) | ((Rx_Encoder[1] & 0XFF00) >> 8);
@@ -60,7 +60,13 @@ void Encoder_Data_Deal(Encoder *encoder)
         encoder->Encoder_Angle_Buffer = encoder->Encoder_Angle;
 	Work_Status.bits.Encoder_Init = 0;
     }
+	
     Angle_Difference = encoder->Encoder_Angle - encoder->Encoder_Angle_Buffer;
+    //对差值范围进行限制，绝对式编码器回欢计数
+    if(Angle_Difference > 32768)
+	    Angle_Difference = 65536 - Angle_Difference;
+    if(Angle_Difference < -32768)
+	    Angle_Difference = 65536 + Angle_Difference;
     encoder->Encode_Position = encoder->Encode_Position + Angle_Difference;
     if(encoder->Encode_Position > 16777216)//24位位置范围，超过则回环
     {
