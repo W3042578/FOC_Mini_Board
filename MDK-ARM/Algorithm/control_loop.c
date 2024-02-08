@@ -1,7 +1,6 @@
+
 #include "control_loop.h"
 
-#include "main.h"
-#include "foc.h"
 
 
 //定义控制环全局结构体

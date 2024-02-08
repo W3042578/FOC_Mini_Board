@@ -2,8 +2,7 @@
 #define __MODBUS_H
 
 #include "stm32f1xx_hal.h"
-#include "stdint.h"
-#include "main.h"
+
 
 #define RX_BUFF_LONG  30 	//接受缓冲区数据长度
 #define TX_BUFF_LONG  30	//发送缓冲区数据长度

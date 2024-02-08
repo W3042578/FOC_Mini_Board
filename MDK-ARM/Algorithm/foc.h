@@ -2,10 +2,6 @@
 #define __FOC_H
 
 #include "stm32f1xx_hal.h"
-#include "stdint.h"
-#include "spi.h"
-#include "usart_control.h" 
-
 
 typedef struct _FOC_MOTOR
 {

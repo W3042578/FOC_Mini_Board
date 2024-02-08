@@ -1,4 +1,4 @@
-#include "main.h"
+
 #include "object_commicate.h"
 #include "modbus.h"
 #include "parameter.h"

@@ -4,8 +4,7 @@
 
 
 #include "stm32f1xx_hal.h"
-#include "stdint.h"
-#include "foc.h" 
+ 
 
 #define MT6815
 #define Speed_Transfer	6.5536			//速度转换比例  1rpm -> 1 dec_diff/1ms = 6.5536
@@ -78,9 +77,9 @@ extern uint16_t Transfer1[3];
 
 
 //初始化
-void Hardware_Init(void);
-void Error_Message_Init(union _Error_Message *Message);
-void Work_Status_Init(union _Work_Status *Status);
-void Parameter_Init(void);
+void Hardware_Init(void);//硬件参数初始化
+void Error_Message_Init(union _Error_Message *Message);//控制字初始化
+void Work_Status_Init(union _Work_Status *Status);//错误状态初始化
+void Parameter_Init(void);		//上层参数初始化
 
 #endif

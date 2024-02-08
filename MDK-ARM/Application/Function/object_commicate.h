@@ -1,7 +1,7 @@
 #ifndef __OBJECT_COMMICATE_H
 #define __OBJECT_COMMICATE_H
 
-#include "main.h"
+#include "stm32f1xx_hal.h"
 
 //索引		子索引		数据byte位数		通迅变量变量地址		变量最大值		变量最小值		调用函数指针
 

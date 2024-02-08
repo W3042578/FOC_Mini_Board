@@ -1,5 +1,6 @@
 foc_mini_board/object_commicate.o: \
-  Application\Function\object_commicate.c ..\Inc\main.h \
+  Application\Function\object_commicate.c \
+  Application\Function\object_commicate.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal.h \
   ..\Inc\stm32f1xx_hal_conf.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_rcc.h \
@@ -33,6 +34,5 @@ foc_mini_board/object_commicate.o: \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim_ex.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h \
-  Application\Function\object_commicate.h Application\Function\modbus.h \
-  Hardware\parameter.h Algorithm\foc.h ..\Inc\spi.h \
-  Application\Function\usart_control.h Algorithm\control_loop.h
+  Application\Function\modbus.h Hardware\parameter.h \
+  Algorithm\control_loop.h

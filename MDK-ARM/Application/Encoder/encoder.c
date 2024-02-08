@@ -1,11 +1,8 @@
-#include "foc.h"
-#include "main.h"
-#include "encoder.h"
-#include "math.h"
-#include "tim.h"
+
 #include "spi.h"
+
+#include "encoder.h"
 #include "parameter.h"
-#include "stdio.h"
 #include "object_commicate.h"
 
 //本文件针对不同编码器作输入转换，最终输入给16位绝对值角度、速度、相对多圈位置数据

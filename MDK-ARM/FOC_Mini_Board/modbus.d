@@ -1,5 +1,5 @@
-foc_mini_board/modbus.o: Application\Function\modbus.c ..\Inc\main.h \
-  ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal.h \
+foc_mini_board/modbus.o: Application\Function\modbus.c ..\Inc\usart.h \
+  ..\Inc\main.h ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal.h \
   ..\Inc\stm32f1xx_hal_conf.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_rcc.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_def.h \
@@ -34,5 +34,4 @@ foc_mini_board/modbus.o: Application\Function\modbus.c ..\Inc\main.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h \
   Application\Function\modbus.h \
   C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\string.h Hardware\parameter.h \
-  Algorithm\foc.h ..\Inc\spi.h Application\Function\usart_control.h \
-  Application\Function\object_commicate.h ..\Inc\usart.h
+  Application\Function\object_commicate.h

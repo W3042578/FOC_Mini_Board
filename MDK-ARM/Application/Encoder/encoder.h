@@ -1,7 +1,7 @@
 
 #ifndef __ENCODER_H
 #define __ENCODER_H
-#include "foc.h"
+
 #include "stm32f1xx_hal.h"
 
 

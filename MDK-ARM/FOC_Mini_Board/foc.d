@@ -31,9 +31,5 @@ foc_mini_board/foc.o: Algorithm\foc.c Algorithm\foc.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_spi.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim_ex.h \
-  ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h ..\Inc\spi.h \
-  ..\Inc\main.h Application\Function\usart_control.h \
-  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\math.h ..\Inc\tim.h \
-  ..\Inc\usart.h C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdio.h \
-  Application\Encoder\encoder.h Application\Function\basic_function.h \
-  Hardware\parameter.h
+  ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h \
+  Application\Function\basic_function.h Hardware\parameter.h

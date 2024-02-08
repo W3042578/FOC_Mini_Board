@@ -1,12 +1,5 @@
-#include "foc.h"
-#include "math.h"
-#include "tim.h"
-#include "spi.h"
-#include "usart.h"
-#include "stdio.h"
-#include "main.h"
 
-#include "encoder.h"
+#include "foc.h"
 #include "basic_function.h"
 #include "parameter.h"
 

@@ -1,12 +1,12 @@
-#include "main.h"
+
+#include "usart.h"
+
 #include "modbus.h"
 #include "string.h"
 #include "parameter.h"
 #include "object_commicate.h"
-#include "usart.h"
 
-#include "stm32f1xx_hal_dma.h"
-#include "stm32f1xx_hal_def.h"
+
 
 
 //查表方式实现Modbus校验

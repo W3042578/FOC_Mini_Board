@@ -29,14 +29,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
-#include "foc.h"
-#include "table.h"
-#include "modbus.h"
-#include "usart_control.h"
-#include "object_commicate.h"
 #include "control_loop.h"
-#include "hal_my.h"
-#include "encoder.h"
 #include "parameter.h"
 #include "basic_function.h"
 /* USER CODE END Includes */
@@ -58,15 +51,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t ADC_Data[2];					//ADC采样DMA储存数据地址
 
-
-
-//环路设计中， 
-//环路间比例最小为2，保证控制环路稳定
-
-
-//编码器获取数据查看验证
+//编码器获取数据查看验证 测试用
 uint16_t Transfer1[3];
 //uint16_t Angle_Transfer[2];
 /* USER CODE END PV */
@@ -136,38 +122,10 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 	
-	//校准ADC采样
-	//同步注入采样中需将adc模式设置为连续采样模式才可以使用，仍需对规则组进行部分配置，如规则采样触发，采样数，数据对齐方式
-	//同步注入采样中adc1为主采样器，adc2为从配置器，因此触发adc1即可触发adc2
-	HAL_ADCEx_Calibration_Start(&hadc1);
-	HAL_ADCEx_Calibration_Start(&hadc2);
+  //底层初始化配置
+  STM32_Infrastructure_Init();
 
-	//开启规则组常规采样
-	HAL_ADC_Start(&hadc2); 
-	HAL_ADC_Start(&hadc1);
-
-  	//开启注入组采样，注意注入采样控制中断的处理函数中会关闭注入中断使能位
-	HAL_ADCEx_InjectedStart(&hadc1);
-	HAL_ADCEx_InjectedStart_IT(&hadc2);
-
- 	 //同步dual模式为多模式采样，同步规则采样需要开启DMA，注入采样建立在同步采样基础上
-	HAL_ADCEx_MultiModeStart_DMA(&hadc1,ADC_Data,2);
-	
-	//开启cc4比较通道触发adc注入采样
-	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
-//	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
-//	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
-//	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
-
-	//定时器2开启1ms中断
-	HAL_TIM_Base_Start_IT(&htim2);
-	//开启串口DMA发送和接受
-	HAL_UART_Receive_DMA(&huart1,(uint8_t *)&Rx_Data,RX_BUFF_LONG);
-
-	//使能串口空闲中断
-	__HAL_UART_ENABLE_IT(&huart1,UART_IT_IDLE);
-	
-	//参数初始化
+	//上层参数初始化
 	Parameter_Init();
 	
 	//获取两相电流采样修正值
@@ -189,7 +147,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 		
-	HAL_Delay(10);
+	  HAL_Delay(10);
 
   }
   /* USER CODE END 3 */
@@ -249,37 +207,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
 	
 	// HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_SET);//环路执行周期测试
 
-    	
-    //编码器方向判断
-//    if(Work_Status.bits.Direction_Encoder == 1 && Work_Status.bits.Offest_Encoder == 0)//方向判断在零位校正后
-//    {
-//      //对前进后角度编码器值累加求平均
-//      //前后编码器值对比判断方向是否相同
-//      encoder1.Encoder_Direction_Position = encoder1.Encoder_Direction_Position + encoder1.Encoder_Angle;
-//      Number_Encoder_Direction = Number_Encoder_Direction - 1;
-//      if(Number_Encoder_Direction < 0)
-//      {
-//        encoder1.Encoder_Direction_Position = encoder1.Encoder_Direction_Position >> 5;
-//        Work_Status.bits.Direction_Encoder = 0;
-//        if (encoder1.Encoder_Direction_Position < encoder1.Encoder_Offest_Data)
-//        {
-//          if(encoder1.Encoder_Offest_Data - encoder1.Encoder_Direction_Position < 32768)
-//            encoder1.Encoder_Direction = 1;//反向
-//          else
-//            encoder1.Encoder_Direction = 0;//同向
-//        }
-//        else
-//        {
-//          if(encoder1.Encoder_Direction_Position - encoder1.Encoder_Offest_Data < 32768)
-//            encoder1.Encoder_Direction = 0;
-//          else
-//            encoder1.Encoder_Direction = 1;
-//        }
-//      }
-//      Motor1.Direction = encoder1.Encoder_Direction;//多值赋予方便多电机设置
-//    }
-
-	//获取a,b相电流采样值  开环给零电压测试 离开电机方向为负
+	//获取a,b相电流采样值  开环给零电压测试 离开电机方向为负因此电流计算取符号
 	Motor1.Ia = -(HAL_ADCEx_InjectedGetValue(&hadc1,ADC_INJECTED_RANK_1) - Motor1.Ia_Offect);
 	Motor1.Ib = -(HAL_ADCEx_InjectedGetValue(&hadc2,ADC_INJECTED_RANK_1) - Motor1.Ib_Offect);
 	

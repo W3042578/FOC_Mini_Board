@@ -1,12 +1,14 @@
 
-#include "main.h"
-#include "math.h"
+#include "usart.h"
+#include "adc.h"
 #include "tim.h"
+
 #include "foc.h"
 #include "parameter.h"
 #include "control_loop.h"
 #include "table.h"
 #include "encoder.h"
+#include "modbus.h"
 #include "basic_function.h"
 
 
@@ -19,7 +21,52 @@ uint16_t	Number_Offest_Count;	//编码器累加实际次数
 uint8_t		Last_Work_Model;		//上一次的工作模式
 int32_t		Last_Encoder_Position;	//上一次编码器胡相对位置
 int32_t		Last_1MS_Speed;			//上一次1ms编码器位置计算得速度
+uint32_t 	ADC_Data[2];			//ADC采样DMA储存数据地址
 
+//底层配置
+//底层初始化配置
+void STM32_Infrastructure_Init(void)
+{
+	//校准ADC采样
+	//同步注入采样中需将adc模式设置为连续采样模式才可以使用，仍需对规则组进行部分配置，如规则采样触发，采样数，数据对齐方式
+	//同步注入采样中adc1为主采样器，adc2为从配置器，因此触发adc1即可触发adc2
+	HAL_ADCEx_Calibration_Start(&hadc1);
+	HAL_ADCEx_Calibration_Start(&hadc2);
+
+	//开启规则组常规采样
+	HAL_ADC_Start(&hadc2); 
+	HAL_ADC_Start(&hadc1);
+
+  	//开启注入组采样，注意注入采样控制中断的处理函数中会关闭注入中断使能位
+	HAL_ADCEx_InjectedStart(&hadc1);
+	HAL_ADCEx_InjectedStart_IT(&hadc2);
+
+ 	 //同步dual模式为多模式采样，同步规则采样需要开启DMA，注入采样建立在同步采样基础上
+	HAL_ADCEx_MultiModeStart_DMA(&hadc1,ADC_Data,2);
+	
+	//开启cc4比较通道触发adc注入采样
+	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
+
+	//定时器2开启1ms中断
+	HAL_TIM_Base_Start_IT(&htim2);
+
+	//开启串口DMA发送和接受
+	HAL_UART_Receive_DMA(&huart1,(uint8_t *)&Rx_Data,RX_BUFF_LONG);
+
+	//使能串口空闲中断
+	__HAL_UART_ENABLE_IT(&huart1,UART_IT_IDLE);
+}
+
+//STM32 HAL 三相PWM比较值设置
+void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
+{
+	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor->Ta);
+	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor->Tb);
+	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor->Tc);
+}
+
+
+//编码器&角度
 //获取编码器角度并转换为电角度
 void Encoder_To_Electri_Angle(FOC_Motor *motor)
 {
@@ -59,18 +106,7 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 	motor->Cos_Angle = SIN_COS_TABLE[((electri_angle >> 7)+128) & 0x1ff];
 }
 
-//STM32 HAL 三相PWM比较值设置
-void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
-{
-	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor->Ta);
-	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor->Tb);
-	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor->Tc);
-}
-
-//编码器校准 
-//获取编码器对应alpha轴零位修正角度值
-//正反转编码器获取线性化查表补偿数据并判断编码器方向与q轴正方向是否一致
-//获取零位置角度修正值
+//编码器校准 获取编码器对应alpha轴零位修正角度值，判断编码器方向与q轴正方向是否一致
 void Get_Initial_Angle_Offest(FOC_Motor *motor)
 {
 	//编码器零位校正
@@ -93,54 +129,37 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 	}
 }
 
+
+//电流采样
 //获取两相电流采样修正值  包含偏置电压
 void ADC_Current_Offest(FOC_Motor *motor)
 {
-	uint32_t Add_ADC_Offect_U,Add_ADC_Offect_V;
+	uint32_t	Add_ADC_Offect_U,Add_ADC_Offect_V;
 	uint16_t	Number_ADC_Offect;
 	Work_Status.bits.Offest_Current = 1;
 	Add_ADC_Offect_U = Add_ADC_Offect_V = 0;
 	Number_ADC_Offect = 32;
 	motor->Ia_Offect = 0;				//校准值置零，避免采样回调函数中修正值影响直接采得的数据
 	motor->Ib_Offect = 0;
-	
-	motor->Ualph = 0;//Ualph = 0V
-	motor->Ubeta = 0;
-	SVPWM(motor);
-	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor->Ta);
-	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor->Tb);
-	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor->Tc);	
-	
-	//使能drv8313
-	HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_SET);	
-	
-	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
-	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
-	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
-	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
-	
+
 	HAL_Delay(1000);
 	//平均减小误差
 	for(uint8_t i = 1;i<=Number_ADC_Offect;i++)
 	{
+		//累加考虑到电流获取负号，负负得正
 		Add_ADC_Offect_U = Add_ADC_Offect_U - motor->Ia;
-		Add_ADC_Offect_V = Add_ADC_Offect_V - motor->Ib;//此处累加使用负号考虑到校准时获取的数值是负数
-		HAL_Delay(2);
+		Add_ADC_Offect_V = Add_ADC_Offect_V - motor->Ib;
+		HAL_Delay(2);//延迟2ms 62.5us获取一次电流采样值，确保2ms内采样值至少更新一次
 	}
 	motor->Ia_Offect = Add_ADC_Offect_U >> 5;
 	motor->Ib_Offect = Add_ADC_Offect_V >> 5;
 	motor->Ia = motor->Ib =0;	
 }
 
-//电机控制死区补偿
-void Dead_Time_Compensate(FOC_Motor *motor)
-{
-	//根据回馈电流极性判断SVPWM生成三相占空比正负时间补偿
-	
-}
 
+
+//应用层功能
 //工作模式控制
-//函数工作在FOC电流环中
 void Model_Control(FOC_Motor *motor)
 {
 	//模式切换判断
@@ -213,7 +232,7 @@ void Model_Control(FOC_Motor *motor)
 				//PI计算
 				PID_Control_Deal(&Position_PI);
 				//输出控制电流
-				Control_Loop.Target_Q_Current = Position_PI.Output_Sum;
+				Control_Loop.Target_Speed = Position_PI.Output_Sum;
 			}
 		
 
@@ -266,7 +285,7 @@ void Model_Control(FOC_Motor *motor)
 			
 		//默认0模式，不做输出
 		default:
-//			Error_Message.bits.Control_Loop_Error = 1;
+			Error_Message.bits.Control_Loop_Error = 1;
 		break;
 	}
 	//保存上一次控制模式
@@ -313,6 +332,13 @@ void Enable_Logic_Control(void)
 			Work_Status.bits.Enable_Status = 0;
 		}
 	}
+}
+
+//电机控制死区补偿
+void Dead_Time_Compensate(FOC_Motor *motor)
+{
+	//根据回馈电流极性判断SVPWM生成三相占空比正负时间补偿
+	
 }
 
 //1ms中断回调函数 外部输入输出数据、温度保护、电机状态保护处理

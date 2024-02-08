@@ -1,5 +1,5 @@
-#include "parameter.h"
 
+#include "parameter.h"
 #include "foc.h"
 #include "encoder.h"
 #include "object_commicate.h"
@@ -13,7 +13,7 @@ _Control_Word Control_Word; 			//通许变量、控制变量定义
 
 int16_t Number_Encoder_Direction;		//待定
 
-//硬件配置
+//硬件参数初始化
 void Hardware_Init(void)
 {
 	//电机
@@ -32,7 +32,7 @@ void Hardware_Init(void)
 
 
 
-//控制字
+//控制字初始化
 void Control_Word_Init(_Control_Word *Data)
 {
 	Data->Work_Model = 0;			//1:校准  2:占空比  3:电压开环  4:电流环 5:速度环 6:位置环 7:速度环无感
@@ -50,19 +50,19 @@ void Control_Word_Init(_Control_Word *Data)
 	Data->Duty_Model_C = 50;
 }
 
-//错误字
+//错误状态初始化
 void Error_Message_Init(union _Error_Message *Message)
 {
 	Message->All = 0;
 }	
 
-//工作状态字
+//工作状态初始化
 void Work_Status_Init(union _Work_Status *Status)
 {
 	Status->All = 0;
 }
 
-//参数初始化
+//上层参数初始化
 void Parameter_Init(void)
 {
 	//硬件参数初始化

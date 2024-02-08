@@ -35,6 +35,4 @@ foc_mini_board/stm32f1xx_it.o: Infrastructure\stm32f1xx_it.c \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h \
   Infrastructure\stm32f1xx_it.h \
   C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdio.h Infrastructure\adc.h \
-  Algorithm\foc.h ..\Inc\spi.h ..\Inc\main.h \
-  Application\Function\usart_control.h Application\Function\modbus.h \
-  Infrastructure\hal_my.h
+  Algorithm\foc.h Application\Function\modbus.h Infrastructure\hal_my.h

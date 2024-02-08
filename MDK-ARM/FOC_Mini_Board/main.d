@@ -35,8 +35,5 @@ foc_mini_board/main.o: Infrastructure\main.c Infrastructure\main.h \
   Infrastructure\adc.h Infrastructure\dma.h Infrastructure\i2c.h \
   Infrastructure\spi.h Infrastructure\tim.h Infrastructure\usart.h \
   Infrastructure\gpio.h C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdio.h \
-  Algorithm\foc.h ..\Inc\spi.h Application\Function\usart_control.h \
-  ..\Inc\main.h Algorithm\table.h Application\Function\modbus.h \
-  Application\Function\object_commicate.h Algorithm\control_loop.h \
-  Infrastructure\hal_my.h Application\Encoder\encoder.h \
-  Hardware\parameter.h Application\Function\basic_function.h
+  Algorithm\control_loop.h Hardware\parameter.h \
+  Application\Function\basic_function.h Algorithm\foc.h
