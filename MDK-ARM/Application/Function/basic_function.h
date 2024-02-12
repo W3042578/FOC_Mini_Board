@@ -11,6 +11,8 @@
 //功能层&底层交互
 //主要存放出于功能层需要对底层修改的函数
 
+//同步采样用电流采样变量
+extern uint32_t ADC_Data[2];
 
 //底层配置
 //底层初始化配置
@@ -39,6 +41,8 @@ void Model_Control(FOC_Motor *motor);
 void Enable_Logic_Control(void);
 //死区补偿
 void Dead_Time_Compensate(FOC_Motor *motor);
+//1ms速度计算
+void Speed_1MS(void);
 //1ms中断回调函数
 void Interrupt_1MS(void);
 

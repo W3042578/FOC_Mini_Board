@@ -98,8 +98,6 @@ void Error_Handler(void);
 
 void uart_idleback(UART_HandleTypeDef *huart);	//串口空闲回调中断函数 具体定义放在usart.c
 
-//电流采样变量
-extern uint32_t ADC_Data[2];
 
 /* USER CODE END Private defines */
 

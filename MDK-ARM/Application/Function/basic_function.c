@@ -265,22 +265,6 @@ void Model_Control(FOC_Motor *motor)
 			//输出控制电压
 			motor->Uq = Current_Q_PID.Output_Sum;
 			motor->Ud = Current_D_PID.Output_Sum;
-
-			//环路计数累加
-			Control_Loop.Loop_Count ++;
-			//电流环62.5us计算一次 16次为1ms时间
-			if(Control_Loop.Loop_Count > 16)
-			{
-				Control_Loop.Loop_Count = 0;
-				//考虑到编码器给出为绝对值位置信号，速度的求解需要结合时间，将编码器速度计算放在控制环路中
-				Encoder1.Encoder_1MS_Speed = Encoder1.Encode_Position - Last_Encoder_Position;
-				//编码器速度范围限制,超出限制以上一次速度代替
-				if((Encoder1.Encoder_1MS_Speed > 16384) || (Encoder1.Encoder_1MS_Speed < -16384))
-					Encoder1.Encoder_1MS_Speed = Last_1MS_Speed;
-				//更新过去1ms时间编码器位置、1ms编码器速度
-				Last_Encoder_Position = Encoder1.Encode_Position;
-				Last_1MS_Speed = Encoder1.Encoder_1MS_Speed;
-			}
 		break;
 			
 		//默认0模式，不做输出
@@ -290,6 +274,13 @@ void Model_Control(FOC_Motor *motor)
 	}
 	//保存上一次控制模式
 	Last_Work_Model = Control_Word.Work_Model;
+	//环路计数累加
+	Control_Loop.Loop_Count ++;
+	//环路计数到达限制清零
+	if(Control_Loop.Loop_Count > 8)
+	{
+		Control_Loop.Loop_Count = 0;
+	}
 }
 
 //PWM使能控制
@@ -341,9 +332,34 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 	
 }
 
-//1ms中断回调函数 外部输入输出数据、温度保护、电机状态保护处理
+//1ms速度计算
+void Speed_1MS(void)
+{
+	//判断是否首次进入1ms中断
+	if(Work_Status.bits.Interrupt_1MS_Init == 0)
+	{
+		Work_Status.bits.Interrupt_1MS_Init = 1;
+		//令过去位置对于当前位置，避免起步错误速度
+		Last_Encoder_Position = Encoder1.Encode_Position;
+	}
+	//1ms速度等于 当前位置 - 1ms前位置
+	Encoder1.Encoder_1MS_Speed = Encoder1.Encode_Position - Last_Encoder_Position;
+	//编码器速度范围限制,超出限制以上一次速度代替
+	if((Encoder1.Encoder_1MS_Speed > 16384) || (Encoder1.Encoder_1MS_Speed < -16384))
+		Encoder1.Encoder_1MS_Speed = Last_1MS_Speed;
+	//更新过去1ms时间编码器位置、1ms编码器速度
+	Last_Encoder_Position = Encoder1.Encode_Position;
+	Last_1MS_Speed = Encoder1.Encoder_1MS_Speed;
+	//1ms速度计算1个电流环周期机械角速度并乘2
+	//乘2因为当前周期获取得的速度为上一个周期发送指令获取得，在下一周期生效
+	Motor1.Speed_Angle = Encoder1.Encoder_1MS_Speed >> 3;
+}
+
+//1ms中断回调函数 外部输入输出数据、温度保护、电机状态保护、速度计算处理
 void Interrupt_1MS(void)
 {
+	//考虑到编码器给出为绝对值位置信号，速度的求解需要结合时间，将编码器速度计算放在定时器中
+	Speed_1MS();
 	//更新PID控制参数数据
 	PID_Control_Update();
 }

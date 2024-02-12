@@ -56,7 +56,7 @@ void Encoder_Data_Deal(_Encoder *encoder)
     if(Work_Status.bits.Encoder_Init == 1)
     {
         encoder->Encoder_Angle_Buffer = encoder->Encoder_Angle;
-	Work_Status.bits.Encoder_Init = 0;
+	    Work_Status.bits.Encoder_Init = 0;
     }
 	
     Angle_Difference = encoder->Encoder_Angle - encoder->Encoder_Angle_Buffer;

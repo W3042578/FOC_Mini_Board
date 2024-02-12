@@ -53,16 +53,17 @@ union _Work_Status
 		{
 			uint8_t 	Enable_Status:1;		//PWM使能状态
 			uint8_t 	Angle_Offest:1;			//编码器和电流获取修正值状态
-			uint8_t 	Duty_Model_Status:1;  		//占空比模式状态
+			uint8_t 	Duty_Model_Status:1;  	//占空比模式状态
 			uint8_t		Offest_Encoder:1;		//编码器零位校准
-			uint8_t		Direction_Encoder:1;		//编码器方向判断
+			uint8_t		Direction_Encoder:1;	//编码器方向判断
 			uint8_t		Linear_Compensation_Encoder:1;	//编码器线性补偿
 			uint8_t		Offest_Current:1;		//电流修正
 			uint8_t		First_Start:1;			//初次启动
-			uint8_t		Ready_On:1;			//控制器准备就绪
-			uint8_t		Control_Loop_Error:1;		//控制环路错误
+			uint8_t		Ready_On:1;				//控制器准备就绪
+			uint8_t		Control_Loop_Error:1;	//控制环路错误
 			uint8_t		Phase_Lose:1;			//相丢失错误  电机没有按照指令正常运动
 			uint8_t		Encoder_Init:1;			//编码器启动计数位置初次操作
+			uint8_t		Interrupt_1MS_Init:1;	//1ms首次进入标志位
 		}bits;	
 };
 
