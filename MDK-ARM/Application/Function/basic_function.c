@@ -227,7 +227,7 @@ void Model_Control(FOC_Motor *motor)
 			{
 				//相对位置回馈
 				Position_PI.Feedback = Encoder1.Encode_Position;
-				//目标速度 单位：dec(编码器单个数值单位)
+				//目标速度 单位：dec(编码器单个数值单位) 360度对应65536dec
 				Position_PI.Feedback = Control_Loop.Target_Position;
 				//PI计算
 				PID_Control_Deal(&Position_PI);
@@ -242,7 +242,7 @@ void Model_Control(FOC_Motor *motor)
 			if((Control_Loop.Loop_Count & 0x02) == 0)
 			{
 				//速度回馈
-				Speed_PI.Feedback = Encoder1.Encoder_1MS_Speed;
+				Speed_PI.Feedback = Encoder1.Encoder_1MS_Speed * 1.0923; //1.0923 = 65536/60000 1rpm转1dec/ms
 				//目标速度 单位：rpm
 				Speed_PI.Feedback = Control_Loop.Target_Speed;
 				//PI计算
@@ -285,7 +285,7 @@ void Model_Control(FOC_Motor *motor)
 			
 		//默认0模式，不做输出
 		default:
-			Error_Message.bits.Control_Loop_Error = 1;
+			// Error_Message.bits.Control_Loop_Error = 1;
 		break;
 	}
 	//保存上一次控制模式

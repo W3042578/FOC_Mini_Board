@@ -1,4 +1,8 @@
 *** Using Compiler 'V6.18', folder: 'C:\Keil_v5\ARM\ARMCLANG\Bin'
 Build target 'FOC_Mini_Board'
+compiling basic_function.c...
+linking...
+Program Size: Code=32270 RO-data=1302 RW-data=1040 ZI-data=2584  
+FromELF: creating hex file...
 "FOC_Mini_Board\FOC_Mini_Board.axf" - 0 Error(s), 0 Warning(s).
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:02
