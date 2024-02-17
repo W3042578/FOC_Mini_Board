@@ -110,7 +110,7 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 void Get_Initial_Angle_Offest(FOC_Motor *motor)
 {
 	//编码器零位校正
-	if(Control_Word.Work_Model == 1 && Work_Status.bits.Angle_Offest != 0)//判断工作模式1且为零位校准状态进入校准
+	if(Control_Word.Work_Model == 1 && Control_Word.PWM_Enable == 1)//判断工作模式1且进入PWM使能
 	{
 		if(Encoder_Offset_Delay > 0)	//Encoder_Offset_Delay非零减到零
 			Encoder_Offset_Delay --;
