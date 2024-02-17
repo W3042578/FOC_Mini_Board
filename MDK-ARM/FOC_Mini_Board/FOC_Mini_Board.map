@@ -3814,42 +3814,42 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-       636          0          0          0         96       5899   adc.o
-      1870          8          0          0         21       4441   basic_function.o
-       650          0          0          0        296       3326   control_loop.o
-       150          0          0          0          0       2021   dma.o
-       340          0          0          4         28       2204   encoder.o
-      1320         12          0          0        116       3641   foc.o
-       322          0          0          0          0       1593   gpio.o
-       382          0          0          0        220       4671   i2c.o
-       422          0          0          0          6       6615   main.o
-      1480          0        512          0        173       3502   modbus.o
-        70          0        496          0          2       1303   object_commicate.o
-       244          0          0          0         16       2451   parameter.o
-       404          0          0          0        224       4235   spi.o
+       636          0          0          0         96       5877   adc.o
+      1870          8          0          0         21       4419   basic_function.o
+       650          0          0          0        296       3312   control_loop.o
+       150          0          0          0          0       1999   dma.o
+       340          0          0          4         28       2182   encoder.o
+      1320         12          0          0        116       3619   foc.o
+       322          0          0          0          0       1571   gpio.o
+       382          0          0          0        220       4649   i2c.o
+       422          0          0          0          6       6593   main.o
+      1480          0        512          0        173       3480   modbus.o
+        70          0        496          0          2       1281   object_commicate.o
+       244          0          0          0         16       2429   parameter.o
+       404          0          0          0        224       4213   spi.o
         36          8        236          0       1024        792   startup_stm32f103xb.o
-       260          0          0          5          4       5563   stm32f1xx_hal.o
-      2328          0          0          0          0       9290   stm32f1xx_hal_adc.o
-      2512          8          0          0          0       7397   stm32f1xx_hal_adc_ex.o
-       482          0          0          0          0       7516   stm32f1xx_hal_cortex.o
-      1510          0          0          0          0       6257   stm32f1xx_hal_dma.o
-       844          0          0          0          0       4218   stm32f1xx_hal_gpio.o
-       676          0          0          0          0      37000   stm32f1xx_hal_i2c.o
-       100          0          0          0          0       1211   stm32f1xx_hal_msp.o
-      2622          0          0          0          0       7394   stm32f1xx_hal_rcc.o
-       904          0          0          0          0       3102   stm32f1xx_hal_rcc_ex.o
-      1754          0          0          0          0      19129   stm32f1xx_hal_spi.o
-      4074         28          0          0          0      34501   stm32f1xx_hal_tim.o
-       414          0          0          0          0      14732   stm32f1xx_hal_tim_ex.o
-      2980          0          0          0          0      17730   stm32f1xx_hal_uart.o
-       318          0          0          0          0       2862   stm32f1xx_it.o
-         2          0         24          4          0       1559   system_stm32f1xx.o
-         0          0          0       1024          0        380   table.o
-       798          0          0          0        144       7156   tim.o
-       592          0          0          0        204       5696   usart.o
+       260          0          0          5          4       5549   stm32f1xx_hal.o
+      2328          0          0          0          0       9276   stm32f1xx_hal_adc.o
+      2512          8          0          0          0       7383   stm32f1xx_hal_adc_ex.o
+       482          0          0          0          0       7502   stm32f1xx_hal_cortex.o
+      1510          0          0          0          0       6243   stm32f1xx_hal_dma.o
+       844          0          0          0          0       4204   stm32f1xx_hal_gpio.o
+       676          0          0          0          0      36986   stm32f1xx_hal_i2c.o
+       100          0          0          0          0       1189   stm32f1xx_hal_msp.o
+      2622          0          0          0          0       7380   stm32f1xx_hal_rcc.o
+       904          0          0          0          0       3088   stm32f1xx_hal_rcc_ex.o
+      1754          0          0          0          0      19115   stm32f1xx_hal_spi.o
+      4074         28          0          0          0      34487   stm32f1xx_hal_tim.o
+       414          0          0          0          0      14718   stm32f1xx_hal_tim_ex.o
+      2980          0          0          0          0      17716   stm32f1xx_hal_uart.o
+       318          0          0          0          0       2840   stm32f1xx_it.o
+         2          0         24          4          0       1545   system_stm32f1xx.o
+         0          0          0       1024          0        370   table.o
+       798          0          0          0        144       7134   tim.o
+       592          0          0          0        204       5674   usart.o
 
     ----------------------------------------------------------------------
-     31656         64       1302       1040       2584     239387   Object Totals
+     31656         64       1302       1040       2584     238815   Object Totals
          0          0         32          0          0          0   (incl. Generated)
        160          0          2          3         10          0   (incl. Padding)
 
@@ -3898,8 +3898,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     32386         80       1302       1040       2584     239383   Grand Totals
-     32386         80       1302       1040       2584     239383   ELF Image Totals
+     32386         80       1302       1040       2584     238811   Grand Totals
+     32386         80       1302       1040       2584     238811   ELF Image Totals
      32386         80       1302       1040          0          0   ROM Totals
 
 ==============================================================================

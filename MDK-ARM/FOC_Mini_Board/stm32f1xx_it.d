@@ -7,15 +7,15 @@ foc_mini_board/stm32f1xx_it.o: Infrastructure\stm32f1xx_it.c \
   ..\Drivers\CMSIS\Device\ST\STM32F1xx\Include\stm32f1xx.h \
   ..\Drivers\CMSIS\Device\ST\STM32F1xx\Include\stm32f103xb.h \
   ..\Drivers\CMSIS\Include\core_cm3.h \
-  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdint.h \
+  D:\keil\ARM\ARMCLANG\Bin\..\include\stdint.h \
   ..\Drivers\CMSIS\Include\cmsis_version.h \
   ..\Drivers\CMSIS\Include\cmsis_compiler.h \
   ..\Drivers\CMSIS\Include\cmsis_armclang.h \
-  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\arm_compat.h \
-  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\arm_acle.h \
+  D:\keil\ARM\ARMCLANG\Bin\..\include\arm_compat.h \
+  D:\keil\ARM\ARMCLANG\Bin\..\include\arm_acle.h \
   ..\Drivers\CMSIS\Device\ST\STM32F1xx\Include\system_stm32f1xx.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\Legacy\stm32_hal_legacy.h \
-  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stddef.h \
+  D:\keil\ARM\ARMCLANG\Bin\..\include\stddef.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_rcc_ex.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_gpio.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_gpio_ex.h \
@@ -34,5 +34,5 @@ foc_mini_board/stm32f1xx_it.o: Infrastructure\stm32f1xx_it.c \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim_ex.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h \
   Infrastructure\stm32f1xx_it.h \
-  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdio.h Infrastructure\adc.h \
+  D:\keil\ARM\ARMCLANG\Bin\..\include\stdio.h Infrastructure\adc.h \
   Algorithm\foc.h Application\Function\modbus.h Infrastructure\hal_my.h
