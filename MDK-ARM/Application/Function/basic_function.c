@@ -131,7 +131,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 		//编码器线性度校正
 		if(Angle_Origin_End == 1)
 		{
-			
+				
 		}
 	}
 }
@@ -188,8 +188,10 @@ void Model_Control(FOC_Motor *motor)
 	{	
 		//校正模式：初始角度校正和编码器线性补偿
 		case 1:
-			motor->Ualph = 2048 * Control_Word.Angle_Initial_Voltage;//Ualph = 3V
-			motor->Ubeta = 0;
+			motor->Ud = 2048 * Control_Word.Angle_Initial_Voltage;//Ualph = 3V
+			motor->Uq = 0;
+			motor->Cos_Angle = 4096;
+			motor->Sin_Angle = 0;
 			if(Work_Status.bits.Angle_Offest == 0)
 			{
 				Work_Status.bits.Angle_Offest = 1;
