@@ -23,6 +23,7 @@ int32_t		Last_Encoder_Position;	//上一次编码器胡相对位置
 int32_t		Last_1MS_Speed;			//上一次1ms编码器位置计算得速度
 uint32_t 	ADC_Data[2];			//ADC采样DMA储存数据地址
 uint8_t		Angle_Origin_End;	//编码器原点修正完成标志
+uint16_t	Virtual_Angle;		//虚拟实际角度
 
 //底层配置
 //底层初始化配置
