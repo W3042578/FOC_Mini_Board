@@ -184,9 +184,10 @@ void FOC_Control(FOC_Motor *motor)
 	
 	//模式处理
 	Model_Control(motor);
-	if(Control_Word.Work_Model >= 4)//闭环才使用反park变换
+	if(Control_Word.Work_Model != 2)//占空比模式不使用反park变换和SVPWM计算三相占空比
+	{
 		Inverse_Park_Transform(motor);
-	if(Control_Word.Work_Model != 2)//2模式为占空比模式，不需要SVPWM计算三相占空比
 		SVPWM(motor);
+	}
 	PWM_Time_Count(motor);
 }	
