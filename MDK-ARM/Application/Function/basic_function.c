@@ -271,6 +271,7 @@ void Model_Control(FOC_Motor *motor)
 			PID_Control_Deal(&Current_Q_PID);
 			PID_Control_Deal(&Current_D_PID);
 			//输出控制电压
+			//考虑前馈解耦 电流PI输出电流 再由电流计算输出电压 需要获取电机Lq、Ld
 			motor->Uq = Current_Q_PID.Output_Sum;
 			motor->Ud = Current_D_PID.Output_Sum;
 		break;
