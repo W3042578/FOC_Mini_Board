@@ -111,6 +111,7 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 //编码器校准 获取编码器对应alpha轴零位修正角度值，判断编码器方向与q轴正方向是否一致
 void Get_Initial_Angle_Offest(FOC_Motor *motor)
 {
+	uint16_t virtual_eletri_angle;
 	//编码器零位校正
 	if(Control_Word.Work_Model == 1 && Control_Word.PWM_Enable == 1)//判断工作模式1且进入PWM使能
 	{
@@ -125,6 +126,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 		{
 			motor->Initial_Angle_Offset = motor->Initial_Angle_Offset >> (Control_Word.Number_Angle_Offest);
 			Angle_Origin_End = 1;	//编码器原点校正完成，准备进行线性度校正
+			Virtual_Angle = 0;	//清零虚拟机械角度
 			Control_Word.Work_Model = 0;		//校正完成退出校正模式并关闭PWM使能
 			Control_Word.PWM_Enable = 0;
 			Work_Status.bits.Angle_Offest = 0;	//编码器校正位清零 允许下一次进入零位校准
@@ -132,7 +134,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 		//编码器线性度校正
 		if(Angle_Origin_End == 1)
 		{
-				
+			Virtual_Angle = Virtual_Angle + 256;
 		}
 	}
 }
