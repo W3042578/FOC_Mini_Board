@@ -22,6 +22,7 @@ uint8_t		Last_Work_Model;		//上一次的工作模式
 int32_t		Last_Encoder_Position;	//上一次编码器胡相对位置
 int32_t		Last_1MS_Speed;			//上一次1ms编码器位置计算得速度
 uint32_t 	ADC_Data[2];			//ADC采样DMA储存数据地址
+uint8_t		Angle_Origin_End;	//编码器原点修正完成标志
 
 //底层配置
 //底层初始化配置
@@ -122,9 +123,15 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 		if(Number_Offest_Count == 0)//指定次数累加后平均获得零位校准值
 		{
 			motor->Initial_Angle_Offset = motor->Initial_Angle_Offset >> (Control_Word.Number_Angle_Offest);
+			Angle_Origin_End = 1;	//编码器原点校正完成，准备进行线性度校正
 			Control_Word.Work_Model = 0;		//校正完成退出校正模式并关闭PWM使能
 			Control_Word.PWM_Enable = 0;
 			Work_Status.bits.Angle_Offest = 0;	//编码器校正位清零 允许下一次进入零位校准
+		}
+		//编码器线性度校正
+		if(Angle_Origin_End == 1)
+		{
+			
 		}
 	}
 }
@@ -189,6 +196,7 @@ void Model_Control(FOC_Motor *motor)
 				motor->Initial_Angle_Offset = 0;
 				Encoder_Offset_Delay = 32;
 				Number_Offest_Count = 1<<(Control_Word.Number_Angle_Offest);
+				Angle_Origin_End = 0;		//重置原点修正指示位
 			}
 		break;
 		
