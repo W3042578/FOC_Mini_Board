@@ -208,7 +208,6 @@ void Model_Control(FOC_Motor *motor)
 			//虚拟角度变化
 			if(Angle_Origin_End == 1)
 			{
-				Hal_Delay(1);
 				Virtual_Angle = Virtual_Angle + 256;
 				virtual_eletri_angle = (motor->Polar * Virtual_Angle) & 0xFFFE;
 				//查表获取电角度对应三角函数值
