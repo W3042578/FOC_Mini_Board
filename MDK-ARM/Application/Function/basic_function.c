@@ -111,7 +111,6 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 //编码器校准 获取编码器对应alpha轴零位修正角度值，判断编码器方向与q轴正方向是否一致
 void Get_Initial_Angle_Offest(FOC_Motor *motor)
 {
-	uint16_t virtual_eletri_angle;
 	//编码器零位校正
 	if(Control_Word.Work_Model == 1 && Control_Word.PWM_Enable == 1)//判断工作模式1且进入PWM使能
 	{
@@ -122,6 +121,12 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 			motor->Initial_Angle_Offset = motor->Initial_Angle_Offset + Encoder1.Encoder_Angle;
 			Number_Offest_Count --;
 		}
+		
+		if(Angle_Origin_End == 1)	//获取对应虚拟角度的实际编码器数值 编码器线性度校正
+		{
+			
+		}
+		
 		if(Number_Offest_Count == 0)//指定次数累加后平均获得零位校准值
 		{
 			motor->Initial_Angle_Offset = motor->Initial_Angle_Offset >> (Control_Word.Number_Angle_Offest);
@@ -130,11 +135,6 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 			Control_Word.Work_Model = 0;		//校正完成退出校正模式并关闭PWM使能
 			Control_Word.PWM_Enable = 0;
 			Work_Status.bits.Angle_Offest = 0;	//编码器校正位清零 允许下一次进入零位校准
-		}
-		//编码器线性度校正
-		if(Angle_Origin_End == 1)
-		{
-			Virtual_Angle = Virtual_Angle + 256;
 		}
 	}
 }
@@ -172,6 +172,8 @@ void ADC_Current_Offest(FOC_Motor *motor)
 //工作模式控制
 void Model_Control(FOC_Motor *motor)
 {
+	uint16_t virtual_eletri_angle;	//虚拟电角度,编码器线性度校正用
+	
 	//模式切换判断
 	if(Last_Work_Model != Control_Word.Work_Model)
 	{
@@ -202,6 +204,15 @@ void Model_Control(FOC_Motor *motor)
 				Encoder_Offset_Delay = 32;
 				Number_Offest_Count = 1<<(Control_Word.Number_Angle_Offest);
 				Angle_Origin_End = 0;		//重置原点修正指示位
+			}
+			//虚拟角度变化
+			if(Angle_Origin_End == 1)
+			{
+				Virtual_Angle = Virtual_Angle + 256;
+				virtual_eletri_angle = (motor->Polar * Virtual_Angle) & 0xFFFE;
+				//查表获取电角度对应三角函数值
+				motor->Sin_Angle = SIN_COS_TABLE[(virtual_eletri_angle >> 7)];
+				motor->Cos_Angle = SIN_COS_TABLE[((virtual_eletri_angle >> 7)+128) & 0x1ff];
 			}
 		break;
 		
