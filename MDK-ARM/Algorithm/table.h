@@ -5,5 +5,5 @@
 
 
 extern	short	SIN_COS_TABLE[512];
-extern	short	Encoder_Line_Offest_Tablr[256];
+extern	short	Encoder_Line_Offest_Table[256];
 #endif

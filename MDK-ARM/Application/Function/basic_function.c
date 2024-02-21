@@ -72,24 +72,23 @@ void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
 //获取编码器角度并转换为电角度
 void Encoder_To_Electri_Angle(FOC_Motor *motor)
 {
-	uint16_t electri_angle;
 	uint32_t offest_angle;
 	
+
 	//角度获取与电流采样同周期
 	Encoder_Data_Deal(&Encoder1); //获取编码器角度，速度，位置
 	Start_Encoder_GET(&Encoder1); //开启编码器DMA，获取下一次使用角度
 	
-	
 	//电机原点位置对齐alpha轴
 	if(Encoder1.Encoder_Angle < motor->Initial_Angle_Offset)
-		offest_angle = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset + 65535;
+		motor->Mechanical_Angle = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset + 65535;
 	else
-		offest_angle = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset;
+		motor->Mechanical_Angle = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset;
 	
 	//电机速度补偿计算用角度
 	if(motor->Speed_Angle > 0)
 	{
-		offest_angle = offest_angle + motor->Speed_Angle;
+		offest_angle = motor->Mechanical_Angle + motor->Speed_Angle;
 		if(offest_angle > 65535)
 			offest_angle = offest_angle - 65535;
 	}
@@ -102,10 +101,10 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 	}
 	//使用与运算快速取余 t % 2`(n) 等价于 t & (2`(n) - 1)
 	//参考https://blog.csdn.net/lonyw/article/details/80519652
-	electri_angle = (motor->Polar * offest_angle) & 0xFFFE;
+	motor->Elecrical_Angle = (motor->Polar * offest_angle) & 0xFFFE;
 	//查表获取电角度对应三角函数值
-	motor->Sin_Angle = SIN_COS_TABLE[(electri_angle >> 7)];
-	motor->Cos_Angle = SIN_COS_TABLE[((electri_angle >> 7)+128) & 0x1ff];
+	motor->Sin_Angle = SIN_COS_TABLE[(motor->Elecrical_Angle >> 7)];
+	motor->Cos_Angle = SIN_COS_TABLE[((motor->Elecrical_Angle >> 7)+128) & 0x1ff];
 }
 
 //编码器校准 获取编码器对应alpha轴零位修正角度值，判断编码器方向与q轴正方向是否一致
@@ -114,27 +113,30 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 	//编码器零位校正
 	if(Control_Word.Work_Model == 1 && Control_Word.PWM_Enable == 1)//判断工作模式1且进入PWM使能
 	{
-		if(Encoder_Offset_Delay > 0)	//Encoder_Offset_Delay非零减到零
+		if(Encoder_Offset_Delay > 0)	//延时计数
 			Encoder_Offset_Delay --;
-		else	//Encoder_Offset_Delay为零后进行编码器累加计数工作，累加指定次数
+		else	//延时时间到达判断工作类型
 		{
-			motor->Initial_Angle_Offset = motor->Initial_Angle_Offset + Encoder1.Encoder_Angle;
-			Number_Offest_Count --;
-		}
-		
-		if(Angle_Origin_End == 1)	//获取对应虚拟角度的实际编码器数值 编码器线性度校正
-		{
-			
-		}
-		
-		if(Number_Offest_Count == 0)//指定次数累加后平均获得零位校准值
-		{
-			motor->Initial_Angle_Offset = motor->Initial_Angle_Offset >> (Control_Word.Number_Angle_Offest);
-			Angle_Origin_End = 1;	//编码器原点校正完成，准备进行线性度校正
-			Virtual_Angle = 0;	//清零虚拟机械角度
-			Control_Word.Work_Model = 0;		//校正完成退出校正模式并关闭PWM使能
-			Control_Word.PWM_Enable = 0;
-			Work_Status.bits.Angle_Offest = 0;	//编码器校正位清零 允许下一次进入零位校准
+			if(Angle_Origin_End == 0)	//强拖电机找零位未结束
+			{
+				motor->Initial_Angle_Offset = motor->Initial_Angle_Offset + Encoder1.Encoder_Angle;
+				Number_Offest_Count --;
+				if(Number_Offest_Count == 0)//指定次数累加后平均获得零位校准值
+				{
+					motor->Initial_Angle_Offset = motor->Initial_Angle_Offset >> (Control_Word.Number_Angle_Offest);
+					Angle_Origin_End = 1;				//编码器原点校正完成，准备进行线性度校正
+					Virtual_Angle = 0;					//清零虚拟机械角度
+					Control_Word.Work_Model = 0;		//校正完成退出校正模式并关闭PWM使能
+					Control_Word.PWM_Enable = 0;
+					Work_Status.bits.Angle_Offest = 0;	//编码器校正位清零 允许下一次进入零位校准
+				}
+			}
+			else//强拖电机找零位结束，准备获取对应虚拟角度的实际编码器数值进行编码器线性度校正
+			{
+				Encoder_Offset_Delay = 32;	//重置延时计数
+				//获取编码器修正零位后数值
+				Encoder_Line_Offest_Table[0] = motor->Mechanical_Angle;
+			}
 		}
 	}
 }
@@ -205,10 +207,11 @@ void Model_Control(FOC_Motor *motor)
 				Number_Offest_Count = 1<<(Control_Word.Number_Angle_Offest);
 				Angle_Origin_End = 0;		//重置原点修正指示位
 			}
-			//虚拟角度变化
+			//进入线性化补偿，需要虚拟角度变化
 			if(Angle_Origin_End == 1)
 			{
-				Virtual_Angle = Virtual_Angle + 256;
+				if(Encoder_Offset_Delay == 32)
+					Virtual_Angle = Virtual_Angle + 256;
 				virtual_eletri_angle = (motor->Polar * Virtual_Angle) & 0xFFFE;
 				//查表获取电角度对应三角函数值
 				motor->Sin_Angle = SIN_COS_TABLE[(virtual_eletri_angle >> 7)];
