@@ -24,6 +24,7 @@ int32_t		Last_1MS_Speed;			//上一次1ms编码器位置计算得速度
 uint32_t 	ADC_Data[2];			//ADC采样DMA储存数据地址
 uint8_t		Angle_Origin_End;	//编码器原点修正完成标志
 uint16_t	Virtual_Angle;		//虚拟实际角度
+uint16_t        Offest_Table_Count      //线性补偿计数
 
 //底层配置
 //底层初始化配置
@@ -125,6 +126,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 				{
 					motor->Initial_Angle_Offset = motor->Initial_Angle_Offset >> (Control_Word.Number_Angle_Offest);
 					Angle_Origin_End = 1;				//编码器原点校正完成，准备进行线性度校正
+					Offest_Table_Count ＝ 0；       //清零线性修正计数
 					Virtual_Angle = 0;					//清零虚拟机械角度
 					Control_Word.Work_Model = 0;		//校正完成退出校正模式并关闭PWM使能
 					Control_Word.PWM_Enable = 0;
@@ -135,7 +137,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 			{
 				Encoder_Offset_Delay = 32;	//重置延时计数
 				//获取编码器修正零位后数值
-				Encoder_Line_Offest_Table[0] = motor->Mechanical_Angle;
+				Encoder_Line_Offest_Table[Offest_Table_Count - 1] = motor->Mechanical_Angle;
 			}
 		}
 	}
@@ -211,7 +213,10 @@ void Model_Control(FOC_Motor *motor)
 			if(Angle_Origin_End == 1)
 			{
 				if(Encoder_Offset_Delay == 32)
+				{
 					Virtual_Angle = Virtual_Angle + 256;
+					Offest_Table_Count ＋＋;
+				}
 				virtual_eletri_angle = (motor->Polar * Virtual_Angle) & 0xFFFE;
 				//查表获取电角度对应三角函数值
 				motor->Sin_Angle = SIN_COS_TABLE[(virtual_eletri_angle >> 7)];
