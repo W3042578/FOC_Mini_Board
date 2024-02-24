@@ -3,7 +3,7 @@
 <title>Static Call Graph - [FOC_Mini_Board\FOC_Mini_Board.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image FOC_Mini_Board\FOC_Mini_Board.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6180002: Last Updated: Sat Feb 17 14:38:04 2024
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6180002: Last Updated: Sat Feb 24 23:55:04 2024
 <BR><P>
 <H3>Maximum Stack Usage =        248 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -330,7 +330,7 @@ Global Symbols
 <P><STRONG><a name="[102]"></a>__scatterload_rt2</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, init.o(.text), UNUSED)
 
 <P><STRONG><a name="[1c]"></a>ADC1_2_IRQHandler</STRONG> (Thumb, 28 bytes, Stack size 8 bytes, stm32f1xx_it.o(.text.ADC1_2_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = ADC1_2_IRQHandler &rArr; HAL_ADC_IRQHandler &rArr; HAL_ADCEx_InjectedConvCpltCallback &rArr; FOC_Control &rArr; PWM_Time_Count &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
+<BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = ADC1_2_IRQHandler &rArr; HAL_ADC_IRQHandler &rArr; HAL_ADCEx_InjectedConvCpltCallback &rArr; FOC_Control &rArr; Model_Control &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
 </UL>
 <BR>[Calls]<UL><LI><a href="#[53]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADC_IRQHandler
 </UL>
@@ -478,7 +478,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Encoder_To_Electri_Angle
 </UL>
 
-<P><STRONG><a name="[63]"></a>Encoder_To_Electri_Angle</STRONG> (Thumb, 244 bytes, Stack size 24 bytes, basic_function.o(.text.Encoder_To_Electri_Angle))
+<P><STRONG><a name="[63]"></a>Encoder_To_Electri_Angle</STRONG> (Thumb, 238 bytes, Stack size 24 bytes, basic_function.o(.text.Encoder_To_Electri_Angle))
 <BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = Encoder_To_Electri_Angle &rArr; Start_Encoder_GET &rArr; HAL_SPI_TransmitReceive_DMA &rArr; HAL_DMA_Start_IT &rArr; DMA_SetConfig
 </UL>
 <BR>[Calls]<UL><LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Encoder_Data_Deal
@@ -509,8 +509,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Parameter_Init
 </UL>
 
-<P><STRONG><a name="[66]"></a>FOC_Control</STRONG> (Thumb, 88 bytes, Stack size 16 bytes, foc.o(.text.FOC_Control))
-<BR><BR>[Stack]<UL><LI>Max Depth = 144<LI>Call Chain = FOC_Control &rArr; PWM_Time_Count &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
+<P><STRONG><a name="[66]"></a>FOC_Control</STRONG> (Thumb, 70 bytes, Stack size 16 bytes, foc.o(.text.FOC_Control))
+<BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = FOC_Control &rArr; Model_Control &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PWM_Time_Count
 <LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SVPWM
@@ -529,8 +529,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Commicate_Data_Init
 </UL>
 
-<P><STRONG><a name="[72]"></a>Get_Initial_Angle_Offest</STRONG> (Thumb, 168 bytes, Stack size 4 bytes, basic_function.o(.text.Get_Initial_Angle_Offest))
-<BR><BR>[Stack]<UL><LI>Max Depth = 4<LI>Call Chain = Get_Initial_Angle_Offest
+<P><STRONG><a name="[72]"></a>Get_Initial_Angle_Offest</STRONG> (Thumb, 306 bytes, Stack size 8 bytes, basic_function.o(.text.Get_Initial_Angle_Offest))
+<BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = Get_Initial_Angle_Offest
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADCEx_InjectedConvCpltCallback
 </UL>
@@ -554,7 +554,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[6f]"></a>HAL_ADCEx_InjectedConvCpltCallback</STRONG> (Thumb, 104 bytes, Stack size 24 bytes, main.o(.text.HAL_ADCEx_InjectedConvCpltCallback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = HAL_ADCEx_InjectedConvCpltCallback &rArr; FOC_Control &rArr; PWM_Time_Count &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
+<BR><BR>[Stack]<UL><LI>Max Depth = 176<LI>Call Chain = HAL_ADCEx_InjectedConvCpltCallback &rArr; FOC_Control &rArr; Model_Control &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
 </UL>
 <BR>[Calls]<UL><LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADCEx_InjectedGetValue
 <LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FOC_Control
@@ -632,7 +632,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[53]"></a>HAL_ADC_IRQHandler</STRONG> (Thumb, 390 bytes, Stack size 16 bytes, stm32f1xx_hal_adc.o(.text.HAL_ADC_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = HAL_ADC_IRQHandler &rArr; HAL_ADCEx_InjectedConvCpltCallback &rArr; FOC_Control &rArr; PWM_Time_Count &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
+<BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = HAL_ADC_IRQHandler &rArr; HAL_ADCEx_InjectedConvCpltCallback &rArr; FOC_Control &rArr; Model_Control &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
 </UL>
 <BR>[Calls]<UL><LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADC_LevelOutOfWindowCallback
 <LI><a href="#[58]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADC_ConvCpltCallback
@@ -1402,8 +1402,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_idleback
 </UL>
 
-<P><STRONG><a name="[69]"></a>Model_Control</STRONG> (Thumb, 686 bytes, Stack size 40 bytes, basic_function.o(.text.Model_Control))
-<BR><BR>[Stack]<UL><LI>Max Depth = 128<LI>Call Chain = Model_Control &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
+<P><STRONG><a name="[69]"></a>Model_Control</STRONG> (Thumb, 858 bytes, Stack size 48 bytes, basic_function.o(.text.Model_Control))
+<BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = Model_Control &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_d2iz
 <LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
