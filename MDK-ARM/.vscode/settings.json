@@ -12,6 +12,7 @@
         "object_commicate.h": "c",
         "modbus.h": "c",
         "basic_function.h": "c",
-        "parameter.h": "c"
+        "parameter.h": "c",
+        "table.h": "c"
     }
 }

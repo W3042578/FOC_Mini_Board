@@ -4,6 +4,6 @@
 #include "stm32f1xx_hal.h"
 
 
-extern	short	SIN_COS_TABLE[512];
-extern	short	Encoder_Line_Offest_Table[256];
+extern	uint16_t	SIN_COS_TABLE[512];
+extern	uint16_t	Encoder_Line_Offest_Table[256];
 #endif

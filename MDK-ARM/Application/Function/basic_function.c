@@ -111,6 +111,8 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 //编码器校准 获取编码器对应alpha轴零位修正角度值，判断编码器方向与q轴正方向是否一致
 void Get_Initial_Angle_Offest(FOC_Motor *motor)
 {
+	//编码器实际值与虚拟值偏差
+	int16_t Offest_Differen;
 	//编码器零位校正
 	if(Control_Word.Work_Model == 1 && Control_Word.PWM_Enable == 1)//判断工作模式1且进入PWM使能
 	{
@@ -137,7 +139,11 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 			{
 				Encoder_Offset_Delay = 32;	//重置延时计数
 				//获取编码器修正零位后数值
-				Encoder_Line_Offest_Table[Offest_Table_Count - 1] = motor->Mechanical_Angle;
+				Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
+				//偏差值过大判断为电机正方向与编码器方向相反
+				if(Offest_Differen > 256 || Offest_Differen < -256)
+					motor->Direction = 1;
+				Encoder_Line_Offest_Table[Offest_Table_Count - 1] = Offest_Differen;
 			}
 		}
 	}
