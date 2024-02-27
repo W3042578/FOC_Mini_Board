@@ -58,6 +58,10 @@ void STM32_Infrastructure_Init(void)
 
 	//使能串口空闲中断
 	__HAL_UART_ENABLE_IT(&huart1,UART_IT_IDLE);
+	
+	//使能驱动模块
+	HAL_GPIO_WritePin(Power_Reset_GPIO_Port,Power_Reset_Pin,GPIO_PIN_SET);
+	
 }
 
 //STM32 HAL 三相PWM比较值设置
@@ -73,7 +77,7 @@ void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
 //获取编码器角度并转换为电角度
 void Encoder_To_Electri_Angle(FOC_Motor *motor)
 {
-	uint32_t offest_angle;
+	int32_t offest_angle;
 	
 
 	//角度获取与电流采样同周期
@@ -87,19 +91,16 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 		motor->Mechanical_Angle = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset;
 	
 	//电机速度补偿计算用角度
-	if(motor->Speed_Angle > 0)
+	offest_angle = motor->Mechanical_Angle + motor->Speed_Angle;
+	if(offest_angle > 65535)
 	{
-		offest_angle = motor->Mechanical_Angle + motor->Speed_Angle;
-		if(offest_angle > 65535)
-			offest_angle = offest_angle - 65535;
+		offest_angle = offest_angle - 65535;
 	}
-	else
+	else if(offest_angle < 0)
 	{
-		if(offest_angle < motor->Speed_Angle)
-			offest_angle = offest_angle + 65535 - motor->Speed_Angle;
-		else
-			offest_angle = offest_angle - motor->Speed_Angle;
+		offest_angle = offest_angle + 65535;
 	}
+	
 	//使用与运算快速取余 t % 2`(n) 等价于 t & (2`(n) - 1)
 	//参考https://blog.csdn.net/lonyw/article/details/80519652
 	motor->Elecrical_Angle = (motor->Polar * offest_angle) & 0xFFFE;
@@ -328,7 +329,7 @@ void Enable_Logic_Control(void)
 	//紧急停止触发、停止PWM输出并关闭驱动模块工作
 	if(Control_Word.Energency_Stop == 1)
 	{
-		//关闭驱动模块
+		//关闭驱动模块PWM接受
 		HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_RESET);
 		//关闭三相PWM输出
 		HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
@@ -345,14 +346,14 @@ void Enable_Logic_Control(void)
 			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
 			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
-			//使能驱动模块
-			HAL_GPIO_WritePin(Power_Reset_GPIO_Port,Power_Reset_Pin,GPIO_PIN_SET);
+			//打开驱动模块PWM接受
+			HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_SET);
 			//PWM使能状态置1
 			Work_Status.bits.Enable_Status = 1;
 		}
 		else
 		{
-			//关闭驱动模块
+			//关闭驱动模块PWM接受
 			HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_RESET);
 			//关闭三相PWM输出
 			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);

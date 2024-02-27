@@ -153,56 +153,7 @@
           <Name>(105=-1,-1,-1,-1,0)</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint>
-        <Bp>
-          <Number>0</Number>
-          <Type>0</Type>
-          <LineNumber>290</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134220900</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>.\Infrastructure\main.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\FOC_Mini_Board\Infrastructure/main.c\290</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>128</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134232604</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>.\Algorithm\foc.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\FOC_Mini_Board\Algorithm/foc.c\128</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>291</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>0</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
-          <Filename>.\startup_stm32f103xb.s</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression></Expression>
-        </Bp>
-      </Breakpoint>
+      <Breakpoint/>
       <WatchWindow1>
         <Ww>
           <count>0</count>
@@ -232,40 +183,35 @@
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>FOC_PID_Current_Iq</ItemText>
+          <ItemText>Motor1</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Motor1</ItemText>
+          <ItemText>Rx_Encoder</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Rx_Encoder</ItemText>
+          <ItemText>Transfer1</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Transfer1</ItemText>
+          <ItemText>Tx_Encoder</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Tx_Encoder</ItemText>
+          <ItemText>hadc1</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>1</WinNumber>
-          <ItemText>hadc1</ItemText>
-        </Ww>
-        <Ww>
-          <count>11</count>
-          <WinNumber>1</WinNumber>
           <ItemText>hadc2</ItemText>
         </Ww>
         <Ww>
-          <count>12</count>
+          <count>11</count>
           <WinNumber>1</WinNumber>
           <ItemText>Control_Word,0x0A</ItemText>
         </Ww>
@@ -274,55 +220,40 @@
         <Ww>
           <count>0</count>
           <WinNumber>2</WinNumber>
-          <ItemText>FOC_PID_Current_Iq,0x0A</ItemText>
+          <ItemText>Control_Loop,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>2</WinNumber>
-          <ItemText>Control_Loop,0x0A</ItemText>
+          <ItemText>Motor1,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>2</WinNumber>
-          <ItemText>Motor1,0x0A</ItemText>
+          <ItemText>Transfer1,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>2</WinNumber>
-          <ItemText>Transfer1,0x0A</ItemText>
+          <ItemText>ADC_Data</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>2</WinNumber>
-          <ItemText>ADC_Data</ItemText>
+          <ItemText>Rx_Encoder</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>2</WinNumber>
-          <ItemText>Rx_Encoder</ItemText>
+          <ItemText>Tx_Encoder</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>2</WinNumber>
-          <ItemText>Tx_Encoder</ItemText>
-        </Ww>
-        <Ww>
-          <count>7</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>encoder1,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>8</count>
-          <WinNumber>2</WinNumber>
           <ItemText>Transfer1,0x0A</ItemText>
         </Ww>
         <Ww>
-          <count>9</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>Control_State</ItemText>
-        </Ww>
-        <Ww>
-          <count>10</count>
+          <count>7</count>
           <WinNumber>2</WinNumber>
           <ItemText>Control_Word,0x0A</ItemText>
         </Ww>
