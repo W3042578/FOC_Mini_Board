@@ -15,6 +15,7 @@
 //功能层&底层交互
 //主要存放出于功能层需要对底层修改的函数
 
+
 //定义全局变量
 uint16_t	Encoder_Offset_Delay;	//编码器初始角度对齐延迟
 uint16_t	Number_Offest_Count;	//编码器累加实际次数
@@ -25,6 +26,7 @@ uint32_t 	ADC_Data[2];			//ADC采样DMA储存数据地址
 uint8_t		Angle_Origin_End;	//编码器原点修正完成标志
 uint16_t	Virtual_Angle;		//虚拟实际角度
 uint16_t	Offest_Table_Count;	//线性补偿计数
+
 
 //底层配置
 //底层初始化配置
@@ -70,6 +72,33 @@ void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor->Ta);
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor->Tb);
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor->Tc);
+}
+
+
+//电流采样
+//获取两相电流采样修正值  包含偏置电压
+void ADC_Current_Offest(FOC_Motor *motor)
+{
+	uint32_t	Add_ADC_Offect_U,Add_ADC_Offect_V;
+	uint16_t	Number_ADC_Offect;
+	Work_Status.bits.Offest_Current = 1;
+	Add_ADC_Offect_U = Add_ADC_Offect_V = 0;
+	Number_ADC_Offect = 32;
+	motor->Ia_Offect = 0;				//校准值置零，避免采样回调函数中修正值影响直接采得的数据
+	motor->Ib_Offect = 0;
+
+	HAL_Delay(1000);
+	//平均减小误差
+	for(uint8_t i = 1;i<=Number_ADC_Offect;i++)
+	{
+		//累加考虑到电流获取负号，负负得正
+		Add_ADC_Offect_U = Add_ADC_Offect_U - motor->Ia;
+		Add_ADC_Offect_V = Add_ADC_Offect_V - motor->Ib;
+		HAL_Delay(2);//延迟2ms 62.5us获取一次电流采样值，确保2ms内采样值至少更新一次
+	}
+	motor->Ia_Offect = Add_ADC_Offect_U >> 5;
+	motor->Ib_Offect = Add_ADC_Offect_V >> 5;
+	motor->Ia = motor->Ib =0;	
 }
 
 
@@ -129,7 +158,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 				{
 					motor->Initial_Angle_Offset = motor->Initial_Angle_Offset >> (Control_Word.Number_Angle_Offest);
 					Angle_Origin_End = 1;				//编码器原点校正完成，准备进行线性度校正
-					Offest_Table_Count = 0;       //清零线性修正计数
+					Offest_Table_Count = 0;       		//清零线性修正计数
 					Virtual_Angle = 0;					//清零虚拟机械角度
 					Control_Word.Work_Model = 0;		//校正完成退出校正模式并关闭PWM使能
 					Control_Word.PWM_Enable = 0;
@@ -143,40 +172,12 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 				Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
 				//偏差值过大判断为电机正方向与编码器方向相反
 				if(Offest_Differen > 256 || Offest_Differen < -256)
-					motor->Direction = 1;
+					motor->Offest_Direction = 1;
 				Encoder_Line_Offest_Table[Offest_Table_Count - 1] = Offest_Differen;
 			}
 		}
 	}
 }
-
-
-//电流采样
-//获取两相电流采样修正值  包含偏置电压
-void ADC_Current_Offest(FOC_Motor *motor)
-{
-	uint32_t	Add_ADC_Offect_U,Add_ADC_Offect_V;
-	uint16_t	Number_ADC_Offect;
-	Work_Status.bits.Offest_Current = 1;
-	Add_ADC_Offect_U = Add_ADC_Offect_V = 0;
-	Number_ADC_Offect = 32;
-	motor->Ia_Offect = 0;				//校准值置零，避免采样回调函数中修正值影响直接采得的数据
-	motor->Ib_Offect = 0;
-
-	HAL_Delay(1000);
-	//平均减小误差
-	for(uint8_t i = 1;i<=Number_ADC_Offect;i++)
-	{
-		//累加考虑到电流获取负号，负负得正
-		Add_ADC_Offect_U = Add_ADC_Offect_U - motor->Ia;
-		Add_ADC_Offect_V = Add_ADC_Offect_V - motor->Ib;
-		HAL_Delay(2);//延迟2ms 62.5us获取一次电流采样值，确保2ms内采样值至少更新一次
-	}
-	motor->Ia_Offect = Add_ADC_Offect_U >> 5;
-	motor->Ib_Offect = Add_ADC_Offect_V >> 5;
-	motor->Ia = motor->Ib =0;	
-}
-
 
 
 //应用层功能
@@ -302,9 +303,10 @@ void Model_Control(FOC_Motor *motor)
 			PID_Control_Deal(&Current_Q_PID);
 			PID_Control_Deal(&Current_D_PID);
 			//输出控制电压
-			//考虑前馈解耦 电流PI输出电流 再由电流计算输出电压 需要获取电机Lq、Ld
 			motor->Uq = Current_Q_PID.Output_Sum;
 			motor->Ud = Current_D_PID.Output_Sum;
+			//电流前馈解耦
+			Current_Forward_Feedback(motor);
 		break;
 			
 		//默认0模式，不做输出
@@ -323,7 +325,7 @@ void Model_Control(FOC_Motor *motor)
 	}
 }
 
-//PWM使能控制
+//PWM逻辑使能控制
 void Enable_Logic_Control(void)
 {
 	//紧急停止触发、停止PWM输出并关闭驱动模块工作
@@ -363,6 +365,14 @@ void Enable_Logic_Control(void)
 			Work_Status.bits.Enable_Status = 0;
 		}
 	}
+}
+
+//电流前馈解耦 根据上一次Iq、Id电流计算当前Uq、Ud前馈量,提升响应
+void Current_Forward_Feedback(FOC_Motor *motor)
+{
+	//此处Id、Iq为上一次电流采样转换获得
+	motor->Uq = motor->Uq + motor->Elecrical_Speed * (motor->Flux_Linkage + motor->Ld * motor->Id);
+	motor->Ud = motor->Ud - motor->Elecrical_Speed * motor->Lq * motor->Id;
 }
 
 //电机控制死区补偿
