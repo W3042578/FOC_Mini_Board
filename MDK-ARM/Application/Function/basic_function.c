@@ -154,6 +154,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 			{
 				motor->Initial_Angle_Offset = motor->Initial_Angle_Offset + Encoder1.Encoder_Angle;
 				Number_Offest_Count --;
+				Encoder_Offset_Delay = 160;	//10ms 160*62.5us
 				if(Number_Offest_Count == 0)//指定次数累加后平均获得零位校准值
 				{
 					motor->Initial_Angle_Offset = motor->Initial_Angle_Offset >> (Control_Word.Number_Angle_Offest);
@@ -167,7 +168,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 			}
 			else//强拖电机找零位结束，准备获取对应虚拟角度的实际编码器数值进行编码器线性度校正
 			{
-				Encoder_Offset_Delay = 32;	//重置延时计数
+				Encoder_Offset_Delay = 9000;	//重置延时计数  9000*62.5us = 500ms
 				//获取编码器修正零位后数值
 				Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
 				//偏差值过大判断为电机正方向与编码器方向相反
@@ -213,14 +214,14 @@ void Model_Control(FOC_Motor *motor)
 			{
 				Work_Status.bits.Angle_Offest = 1;
 				motor->Initial_Angle_Offset = 0;
-				Encoder_Offset_Delay = 32;
+				Encoder_Offset_Delay = 320;		//20ms 320*62.5us
 				Number_Offest_Count = 1<<(Control_Word.Number_Angle_Offest);
 				Angle_Origin_End = 0;		//重置原点修正指示位
 			}
 			//进入线性化补偿，需要虚拟角度变化
 			if(Angle_Origin_End == 1)
 			{
-				if(Encoder_Offset_Delay == 32)
+				if(Encoder_Offset_Delay == 9000)
 				{
 					Virtual_Angle = Virtual_Angle + 256;
 					Offest_Table_Count ++;
