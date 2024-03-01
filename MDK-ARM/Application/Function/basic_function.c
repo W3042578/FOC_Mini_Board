@@ -161,9 +161,6 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 					Angle_Origin_End = 1;				//编码器原点校正完成，准备进行线性度校正
 					Offest_Table_Count = 0;       		//清零线性修正计数
 					Virtual_Angle = 0;					//清零虚拟机械角度
-					Control_Word.Work_Model = 0;		//校正完成退出校正模式并关闭PWM使能
-					Control_Word.PWM_Enable = 0;
-					Work_Status.bits.Angle_Offest = 0;	//编码器校正位清零 允许下一次进入零位校准
 				}
 			}
 			else//强拖电机找零位结束，准备获取对应虚拟角度的实际编码器数值进行编码器线性度校正
@@ -174,7 +171,11 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 				//偏差值过大判断为电机正方向与编码器方向相反
 				if(Offest_Differen > 256 || Offest_Differen < -256)
 					motor->Offest_Direction = 1;
-				Encoder_Line_Offest_Table[Offest_Table_Count - 1] = Offest_Differen;
+				Encoder_Line_Offest_Table[Offest_Table_Count] = Offest_Differen;
+				
+//				Control_Word.Work_Model = 0;		//校正完成退出校正模式并关闭PWM使能
+//				Control_Word.PWM_Enable = 0;
+//				Work_Status.bits.Angle_Offest = 0;	//编码器校正位清零 允许下一次进入零位校准
 			}
 		}
 	}
