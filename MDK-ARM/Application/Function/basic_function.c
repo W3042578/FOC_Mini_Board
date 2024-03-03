@@ -266,6 +266,7 @@ void Model_Control(FOC_Motor *motor)
 		break;
 		
 		//速度环模拟无感控制：模拟速度增加控制速度开环输出
+		//锁相环估算速度
 		case 7:
 			
 		break;
@@ -303,6 +304,11 @@ void Model_Control(FOC_Motor *motor)
 			
 		//电流环模式：PID控制电流Iq、Id闭环输出
 		case 4:
+			//判断是否进行MTPA控制
+			if(Control_Word.MTPA == 1)
+			{
+				
+			}
 			//输入反馈电流
 			Current_Q_PID.Feedback = motor->Iq;
 			Current_D_PID.Feedback = motor->Id;
@@ -318,7 +324,7 @@ void Model_Control(FOC_Motor *motor)
 			//电流前馈解耦
 			Current_Forward_Feedback(motor);
 		break;
-			
+		
 		//默认0模式，不做输出
 		default:
 			// Error_Message.bits.Control_Loop_Error = 1;
@@ -377,6 +383,14 @@ void Enable_Logic_Control(void)
 	}
 }
 
+
+//应用算法
+//最大转矩比控制MTPA
+void MTPA_Control(FOC_Motor *motor)
+{
+	//根据输入合成电流Is、Ld、Lq和转速计算最大力矩输出对应Id、Iq
+	
+}
 //电流前馈解耦 根据上一次Iq、Id电流计算当前Uq、Ud前馈量,提升响应
 void Current_Forward_Feedback(FOC_Motor *motor)
 {
@@ -391,6 +405,7 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 	//根据回馈电流极性判断SVPWM生成三相占空比正负时间补偿
 	
 }
+
 
 //1ms速度计算
 void Speed_1MS(void)
