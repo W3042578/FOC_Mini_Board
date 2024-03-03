@@ -38,3 +38,8 @@ int32_t Butterworth_Second(int32_t data)
 	
 	return output;
 }
+
+
+//模拟滤波器IIR
+//滑动滤波器
+
