@@ -33,21 +33,24 @@ void Hardware_Init(void)
 
 
 //控制字初始化
-void Control_Word_Init(_Control_Word *Data)
+void Control_Word_Init(_Control_Word *Word)
 {
-	Data->Work_Model = 0;			//1:校准  2:占空比  3:电压开环  4:电流环 5:速度环 6:位置环 7:速度环无感
-	Data->PWM_Enable = 0;			//0:PWM关闭使能		1:PWM开始使能
-	Data->Energency_Stop = 0;		//1:进入紧急停止
-	Data->Work_Direction = 0;		//0:当前方向 1:当前反向
-	Data->Open_Loop_Voltage = 0;	//开环电压
-	Data->Max_Voltage = 16;			//最大电压限制
-	Data->Angle_Initial_Voltage = 5;//编码器线性校正和初始位置置零Ud电压
-	Data->Number_Angle_Offest = 5;	//次数 = 2的n次方
-	Data->Clear_Position = 0;		//重置当前位置为0
+	Word->Work_Model = 0;			//1:校准  2:占空比  3:电压开环  4:电流环 5:速度环 6:位置环 7:速度环无感
+	Word->PWM_Enable = 0;			//0:PWM关闭使能		1:PWM开始使能
+	Word->Energency_Stop = 0;		//1:进入紧急停止
+	Word->Work_Direction = 0;		//0:当前方向 1:当前反向
+	Word->Open_Loop_Voltage = 0;	//开环电压
+	Word->Max_Voltage = 16;			//最大电压限制
+	Word->Angle_Initial_Voltage = 5;//编码器线性校正和初始位置置零Ud电压
+	Word->Number_Angle_Offest = 5;	//次数 = 2的n次方
+	Word->Clear_Position = 0;		//重置当前位置为0
 	
-	Data->Duty_Model_A = 50;		//占空比模式三相初始值
-	Data->Duty_Model_B = 50;
-	Data->Duty_Model_C = 50;
+	Word->Duty_Model_A = 50;		//占空比模式三相初始值
+	Word->Duty_Model_B = 50;
+	Word->Duty_Model_C = 50;
+
+	Word->MTPA = 0;			//初始化不使用MTPA和电流前馈
+	Word->Current_Forward = 0;
 }
 
 //错误状态初始化
