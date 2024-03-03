@@ -304,11 +304,9 @@ void Model_Control(FOC_Motor *motor)
 			
 		//电流环模式：PID控制电流Iq、Id闭环输出
 		case 4:
-			//判断是否进行MTPA控制
-			if(Control_Word.MTPA == 1)
-			{
-				
-			}
+			//判断是否进行MTPA控制且控制模式为电流环
+			if((Control_Word.MTPA == 1) && (Control_Word.Work_Model == 4))
+				MTPA_Control(motor);
 			//输入反馈电流
 			Current_Q_PID.Feedback = motor->Iq;
 			Current_D_PID.Feedback = motor->Id;
@@ -321,8 +319,9 @@ void Model_Control(FOC_Motor *motor)
 			//输出控制电压
 			motor->Uq = Current_Q_PID.Output_Sum;
 			motor->Ud = Current_D_PID.Output_Sum;
-			//电流前馈解耦
-			Current_Forward_Feedback(motor);
+			
+			if(Control_Word.Current_Forward == 1)//判断是否进行电流前馈解耦
+				Current_Forward_Feedback(motor);
 		break;
 		
 		//默认0模式，不做输出
@@ -391,6 +390,7 @@ void MTPA_Control(FOC_Motor *motor)
 	//根据输入合成电流Is、Ld、Lq和转速计算最大力矩输出对应Id、Iq
 	
 }
+
 //电流前馈解耦 根据上一次Iq、Id电流计算当前Uq、Ud前馈量,提升响应
 void Current_Forward_Feedback(FOC_Motor *motor)
 {
