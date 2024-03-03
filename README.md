@@ -25,7 +25,7 @@ keil工程启动文件在MDK-ARM文件中
 
 其中Algorithm包含基本FOC算法、PID控制环和角度正余弦查表
 
-Application包含编码器SPI通讯、串口modbus通讯、滤波、通讯变量字典（usart_control文件和SSD1306未使用）
+Application包含编码器SPI通讯、串口modbus通讯、滤波、通讯变量字典
 
 Hardware包含硬件和底层的参数配置
 
@@ -62,8 +62,7 @@ The main files are divided into four categories: Algorithm, Application, Hardwar
 
 Among them, Algorithm includes basic FOC algorithm, PID control loop, and angle sine and cosine lookup table
 
-Application includes encoder SPI communication, serial port modbus communication, filtering, and communication variable dictionary (not used in usartself-control file and SSD1306)
-
+Application includes encoder SPI communication, serial port modbus communication, filtering, and communication variable dictionary 
 Hardware includes hardware and underlying parameter configurations
 
 Infrastructure includes underlying file configurations, which are partially modified and copied from CubeMx after generating the underlying code
