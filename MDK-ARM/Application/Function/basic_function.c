@@ -220,7 +220,7 @@ void Model_Control(FOC_Motor *motor)
 			if(Angle_Origin_End == 1)
 			{
 				//对16取余 1ms虚拟角度累加一次  16*62.5us = 1ms
-				if(Encoder_Offset_Delay & 0x000f == 0)
+				if((Encoder_Offset_Delay & 0x000f) == 0)
 				{
 					Virtual_Angle = Virtual_Angle + 1;   
 				}
