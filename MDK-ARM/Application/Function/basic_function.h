@@ -38,10 +38,15 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor);
 void Model_Control(FOC_Motor *motor);
 //PWM逻辑使能控制
 void Enable_Logic_Control(void);
+
+//应用算法
+//最大转矩比控制MTPA
+void MTPA_Control(FOC_Motor *motor);
 //电流前馈解耦
 void Current_Forward_Feedback(FOC_Motor *motor);
 //死区补偿
 void Dead_Time_Compensate(FOC_Motor *motor);
+
 //1ms速度计算
 void Speed_1MS(void);
 //1ms中断回调函数
