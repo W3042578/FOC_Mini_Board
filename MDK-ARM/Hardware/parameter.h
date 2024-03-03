@@ -12,20 +12,23 @@
 
 typedef  struct
 {
-	uint8_t 	Work_Model;		//1:校准  2:占空比  3:电压开环  4:电流环 5:速度环 6:位置环 7:速度环无感 
-	uint8_t 	PWM_Enable;		//0:PWM关闭使能		1:PWM开始使能				
-	uint8_t 	Energency_Stop;		//0：不使用急停 1:触发急停
-	uint8_t 	Work_Direction;		//0:正转		1:反转
+	uint8_t 	Work_Model:2;		//1:校准  2:占空比  3:电压开环  4:电流环 5:速度环 6:位置环 7:速度环无感 
+	uint8_t 	PWM_Enable:1;		//0:PWM关闭使能		1:PWM开始使能				
+	uint8_t 	Energency_Stop:1;	//0：不使用急停 1:触发急停
+	uint8_t 	Work_Direction:1;	//0:正转		1:反转
 
 	uint8_t		Open_Loop_Voltage;	//开环电压
 	uint8_t 	Max_Voltage;		//最大电压限制
 	uint8_t		Angle_Initial_Voltage;	//编码器线性校正和初始位置置零Ud电压
 	uint8_t   	Number_Angle_Offest;	//初始角校正累加次数= 2的n次方
-	uint8_t		Clear_Position;		//重置当前位置为0
+	uint8_t		Clear_Position:1;	//重置当前位置为0
 
 	uint8_t		Duty_Model_A;		//占空比模式三相输入值
 	uint8_t		Duty_Model_B;
 	uint8_t		Duty_Model_C;
+
+	uint8_t		MTPA:1;			//电流环MTPA模式控制
+	uint8_t		Current_Forward:1;	//电流环前馈解耦控制
 	
 }_Control_Word;
 
