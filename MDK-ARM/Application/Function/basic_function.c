@@ -387,7 +387,7 @@ void Enable_Logic_Control(void)
 //最大转矩比控制MTPA
 void MTPA_Control(FOC_Motor *motor)
 {
-	//根据输入合成电流Is、Ld、Lq和转速计算最大力矩输出对应Id、Iq
+	//根据输入合成电流Is,已知Ld、Lq和永磁体磁链计算最大力矩输出对应Id、Iq
 	
 }
 
