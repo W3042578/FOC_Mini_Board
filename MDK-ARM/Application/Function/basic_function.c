@@ -23,9 +23,10 @@ uint8_t		Last_Work_Model;		//上一次的工作模式
 int32_t		Last_Encoder_Position;	//上一次编码器胡相对位置
 int32_t		Last_1MS_Speed;			//上一次1ms编码器位置计算得速度
 uint32_t 	ADC_Data[2];			//ADC采样DMA储存数据地址
-uint8_t		Angle_Origin_End;	//编码器原点修正完成标志
-uint16_t	Virtual_Angle;		//虚拟实际角度
-uint16_t	Offest_Table_Count;	//线性补偿计数
+uint8_t		Angle_Origin_End;		//编码器原点修正完成标志
+uint8_t		Angle_Positive_End;		//编码器正转校正结束
+uint16_t	Virtual_Angle;			//虚拟实际角度
+uint16_t	Offest_Table_Count;		//线性补偿计数
 
 
 //底层配置
@@ -159,6 +160,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 				{
 					motor->Initial_Angle_Offset = motor->Initial_Angle_Offset >> (Control_Word.Number_Angle_Offest);
 					Angle_Origin_End = 1;				//编码器原点校正完成，准备进行线性度校正
+					Angle_Positive_End = 0;				//清零正转校正结束位，准备开始正转校正
 					Offest_Table_Count = 0;       		//清零线性修正计数
 					Virtual_Angle = 0;					//清零虚拟机械角度
 					Encoder_Offset_Delay = 4096;		//开启运动校正延迟设置
@@ -166,13 +168,18 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 			}
 			else//强拖电机找零位结束，准备获取对应虚拟角度的实际编码器数值进行编码器线性度校正
 			{
-				Encoder_Offset_Delay = 4096;	//重置延时计数  4096*62.5us = 256ms
+				//重置延时计数  4096*62.5us = 256ms
+				Encoder_Offset_Delay = 4096;
 				//获取编码器修正零位后数值
 				Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
 				//偏差值过大判断为电机正方向与编码器方向相反
 				if(Offest_Differen > 256 || Offest_Differen < -256)
 					motor->Offest_Direction = 1;
-				Encoder_Line_Offest_Table[Offest_Table_Count] = Offest_Differen;
+				//正向校正时记录偏差
+				if(Angle_Positive_End == 0)
+					Encoder_Line_Offest_Table[Offest_Table_Count] = Offest_Differen;
+				else	//反向校正时记录偏差平均值
+					Encoder_Line_Offest_Table[Offest_Table_Count] = (Offest_Differen + Encoder_Line_Offest_Table[Offest_Table_Count]) >>1;
 			}
 		}
 	}
@@ -216,7 +223,7 @@ void Model_Control(FOC_Motor *motor)
 				Number_Offest_Count = 1<<(Control_Word.Number_Angle_Offest);
 				Angle_Origin_End = 0;		//重置原点修正指示位
 			}
-			//进入线性化补偿，需要虚拟角度变化
+			//进入线性化校正，需要虚拟角度变化
 			if(Angle_Origin_End == 1)
 			{
 				//对16取余 1ms虚拟角度累加一次  16*62.5us = 1ms
@@ -224,11 +231,21 @@ void Model_Control(FOC_Motor *motor)
 				{
 					Virtual_Angle = Virtual_Angle + 1;   
 				}
+				//每次重置延时计数记录实际角度与虚拟值差  4096*62.5us = 256ms
 				if(Encoder_Offset_Delay == 4096)
 				{
-					Offest_Table_Count ++;
+					//判断为正转校正则编码校正计数+1
+					if(Angle_Positive_End == 0)	
+						Offest_Table_Count ++;
+					else	//否则为反转校正，计数-1
+						Offest_Table_Count --;
 					//判断位置补偿计数是否完成一圈
 					if(Offest_Table_Count == 256)
+					{
+						Angle_Positive_End = 1;
+					}
+					//正方向校正完进行负方向校正，计数回零结束 
+					if(Angle_Positive_End == 1 && Offest_Table_Count == 0)
 					{
 						Control_Word.Work_Model = 0;		//校正完成退出校正模式并关闭PWM使能
 						Control_Word.PWM_Enable = 0;
