@@ -199,7 +199,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 						Offest_Table_Count ++;
 					}
 					//8*62.5us = 500us
-					Offest_Time_Basic = 4;
+					Offest_Time_Basic = 8;
 					//判断虚拟角度值是否允许增加 ，避免溢出回零
 					if(Virtual_Angle < 65535)
 					{
@@ -229,13 +229,13 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 						if(Offest_Differen > 256 || Offest_Differen < -256)
 							motor->Offest_Direction = 1;
 						//正向校正时记录偏差	
-						Encoder_Line_Offest_Table[Offest_Table_Count] = Offest_Differen;
+						Encoder_Line_Offest_Table[Offest_Table_Count] = (Offest_Differen + Encoder_Line_Offest_Table[Offest_Table_Count])>>1;
 						if(Offest_Table_Count > 0)
 						//记录数组序号增加
 						Offest_Table_Count --;
 					}
 					//8*62.5us = 500us
-					Offest_Time_Basic = 4;
+					Offest_Time_Basic = 8;
 					//判断虚拟角度值是否允许减少 ，避免溢出回零
 					if(Virtual_Angle > 0)
 					{
@@ -319,7 +319,7 @@ void Model_Control(FOC_Motor *motor)
 				motor->Cos_Angle = 4096;
 			}
 			//线性校正
-			else if (Offest_Model == 2 || Offest_Model == 3)	
+			else if ((Offest_Model == 2) || (Offest_Model == 3))
 			{
 				//计算虚拟机械角转虚拟电角度
 				virtual_eletri_angle = (motor->Polar * Virtual_Angle) & 0xFFFE;

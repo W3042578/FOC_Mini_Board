@@ -27,92 +27,11 @@ Project File Date:  03/16/2024
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\keil\ARM\ARM_Compiler_5.06u7\Bin'
 Build target 'FOC_Mini_Board'
-compiling object_commicate.c...
-Application\Function\object_commicate.c(15): error:  #136: union "_Control_Word"  has no field "Work_Model"
-  	{0x0001,	0x00,	1,	&Control_Word.Work_Model,				255,	0,	NULL},
-Application\Function\object_commicate.c(16): error:  #136: union "_Control_Word"  has no field "Number_Angle_Offest"
-  	{0x0002,	0x00,	1,	&Control_Word.Number_Angle_Offest,		255,	0,	NULL},//初始角校正累加数
-Application\Function\object_commicate.c(17): error:  #136: union "_Control_Word"  has no field "PWM_Enable"
-  	{0x0003,	0x00,	1,	&Control_Word.PWM_Enable,				255,	0,	NULL},//0不触�? 1:触发
-Application\Function\object_commicate.c(18): error:  #136: union "_Control_Word"  has no field "Energency_Stop"
-  	{0x0004,	0x00,	1,	&Control_Word.Energency_Stop,			255,	0,	NULL},//0不触�? 1:触发
-Application\Function\object_commicate.c(19): error:  #136: union "_Control_Word"  has no field "Open_Loop_Voltage"
-  	{0x0005,	0x00,	1,	&Control_Word.Open_Loop_Voltage,		255,	0,	NULL},
-Application\Function\object_commicate.c(20): error:  #136: union "_Control_Word"  has no field "Work_Direction"
-  	{0x0006,	0x00,	1,	&Control_Word.Work_Direction,			255,	0,	NULL},//0:�?		1:�?
-Application\Function\object_commicate.c(21): error:  #136: union "_Control_Word"  has no field "Max_Voltage"
-  	{0x0007,	0x00,	1,	&Control_Word.Max_Voltage,				255,	0,	NULL},
-Application\Function\object_commicate.c: 0 warnings, 7 errors
-compiling foc.c...
-Algorithm\foc.c(118): error:  #136: union "_Control_Word"  has no field "Work_Model"
-  	if(Control_Word.Work_Model == 2)
-Algorithm\foc.c(120): error:  #136: union "_Control_Word"  has no field "Duty_Model_A"
-  		motor->Ta = 2.56 *(((100 - Control_Word.Duty_Model_A) * motor->Ts)>>8);
-Algorithm\foc.c(121): error:  #136: union "_Control_Word"  has no field "Duty_Model_B"
-  		motor->Tb = 2.56 *(((100 - Control_Word.Duty_Model_B) * motor->Ts)>>8);
-Algorithm\foc.c(122): error:  #136: union "_Control_Word"  has no field "Duty_Model_C"
-  		motor->Tc = 2.56 *(((100 - Control_Word.Duty_Model_C) * motor->Ts)>>8);
-Algorithm\foc.c(187): error:  #136: union "_Control_Word"  has no field "Work_Model"
-  	if(Control_Word.Work_Model != 2)//占空比模式不使用反park变换和SVPWM计算三相占空�?
-Algorithm\foc.c: 0 warnings, 5 errors
 compiling basic_function.c...
-Application\Function\basic_function.c(150): error:  #136: union "_Control_Word"  has no field "Work_Model"
-  	if(Control_Word.Work_Model == 1 && Control_Word.PWM_Enable == 1)//判断工作模式1且进入PWM使能
-Application\Function\basic_function.c(150): error:  #136: union "_Control_Word"  has no field "PWM_Enable"
-  	if(Control_Word.Work_Model == 1 && Control_Word.PWM_Enable == 1)//判断工作模式1且进入PWM使能
-Application\Function\basic_function.c(168): error:  #136: union "_Control_Word"  has no field "Number_Angle_Offest"
-  					if(Number_Offest_Count > (1 << Control_Word.Number_Angle_Offest))
-Application\Function\basic_function.c(171): error:  #136: union "_Control_Word"  has no field "Number_Angle_Offest"
-  						motor->Initial_Angle_Offset = Offest_Integral >> (Control_Word.Number_Angle_Offest);
-Application\Function\basic_function.c(248): error:  #136: union "_Control_Word"  has no field "Work_Model"
-  						Control_Word.Work_Model = 0;
-Application\Function\basic_function.c(250): error:  #136: union "_Control_Word"  has no field "PWM_Enable"
-  						Control_Word.PWM_Enable = 0;
-Application\Function\basic_function.c(275): error:  #136: union "_Control_Word"  has no field "Work_Model"
-  	if(Last_Work_Model != Control_Word.Work_Model)
-Application\Function\basic_function.c(277): error:  #136: union "_Control_Word"  has no field "PWM_Enable"
-  		if(Control_Word.PWM_Enable == 1)//PWM使能输出情况下不允许更改工作模式
-Application\Function\basic_function.c(278): error:  #136: union "_Control_Word"  has no field "Work_Model"
-  			Control_Word.Work_Model = Last_Work_Model;
-Application\Function\basic_function.c(289): error:  #136: union "_Control_Word"  has no field "Work_Model"
-  	switch(Control_Word.Work_Model)
-Application\Function\basic_function.c(294): error:  #136: union "_Control_Word"  has no field "Angle_Initial_Voltage"
-  			motor->Ud = 2048 * Control_Word.Angle_Initial_Voltage;//Ualph = 3V
-Application\Function\basic_function.c(333): error:  #136: union "_Control_Word"  has no field "Duty_Model_A"
-  			if(Control_Word.Duty_Model_A > 96)
-Application\Function\basic_function.c(335): error:  #136: union "_Control_Word"  has no field "Duty_Model_A"
-  				Control_Word.Duty_Model_A = 96;
-Application\Function\basic_function.c(337): error:  #136: union "_Control_Word"  has no field "Duty_Model_B"
-  			if(Control_Word.Duty_Model_B > 96)
-Application\Function\basic_function.c(339): error:  #136: union "_Control_Word"  has no field "Duty_Model_B"
-  				Control_Word.Duty_Model_B = 96;
-Application\Function\basic_function.c(341): error:  #136: union "_Control_Word"  has no field "Duty_Model_C"
-  			if(Control_Word.Duty_Model_C > 96)
-Application\Function\basic_function.c(343): error:  #136: union "_Control_Word"  has no field "Duty_Model_C"
-  				Control_Word.Duty_Model_C = 96;
-Application\Function\basic_function.c(350): error:  #136: union "_Control_Word"  has no field "Open_Loop_Voltage"
-  			motor->Uq = Control_Word.Open_Loop_Voltage * 2048;
-Application\Function\basic_function.c(393): error:  #136: union "_Control_Word"  has no field "MTPA"
-  			if((Control_Word.MTPA == 1) && (Control_Word.Work_Model == 4))
-Application\Function\basic_function.c(393): error:  #136: union "_Control_Word"  has no field "Work_Model"
-  			if((Control_Word.MTPA == 1) && (Control_Word.Work_Model == 4))
-Application\Function\basic_function.c(408): error:  #136: union "_Control_Word"  has no field "Current_Forward"
-  			if(Control_Word.Current_Forward == 1)//判断是否进行电流前馈解�?
-Application\Function\basic_function.c(418): error:  #136: union "_Control_Word"  has no field "Work_Model"
-  	Last_Work_Model = Control_Word.Work_Model;
-Application\Function\basic_function.c(432): error:  #136: union "_Control_Word"  has no field "PWM_Enable"
-  	if((Control_Word.PWM_Enable == 1) && (Control_Word.Energency_Stop != 1))
-Application\Function\basic_function.c(432): error:  #136: union "_Control_Word"  has no field "Energency_Stop"
-  	if((Control_Word.PWM_Enable == 1) && (Control_Word.Energency_Stop != 1))
-Application\Function\basic_function.c: 0 warnings, 24 errors
-compiling modbus.c...
-compiling encoder.c...
-Application\Encoder\encoder.c(34): warning:  #550-D: variable "Angle_Multi"  was set but never used
-      uint16_t    Angle_Single,Angle_Multi;
-Application\Encoder\encoder.c: 1 warning, 0 errors
-compiling main.c...
-compiling parameter.c...
-"FOC_Mini_Board\FOC_Mini_Board.axf" - 36 Error(s), 1 Warning(s).
+linking...
+Program Size: Code=18848 RO-data=1300 RW-data=1108 ZI-data=3052  
+FromELF: creating hex file...
+"FOC_Mini_Board\FOC_Mini_Board.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -135,7 +54,6 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.6.0
-Target not created.
 Build Time Elapsed:  00:00:02
 </pre>
 </body>

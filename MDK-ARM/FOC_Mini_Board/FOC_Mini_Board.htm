@@ -3,7 +3,7 @@
 <title>Static Call Graph - [FOC_Mini_Board\FOC_Mini_Board.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image FOC_Mini_Board\FOC_Mini_Board.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sat Mar 16 15:24:58 2024
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sun Mar 17 21:56:01 2024
 <BR><P>
 <H3>Maximum Stack Usage =        160 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -417,11 +417,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Parameter_Init
 </UL>
 
-<P><STRONG><a name="[d9]"></a>Control_Loop_Init</STRONG> (Thumb, 60 bytes, Stack size 0 bytes, control_loop.o(i.Control_Loop_Init))
+<P><STRONG><a name="[d7]"></a>Control_Data_Init</STRONG> (Thumb, 26 bytes, Stack size 0 bytes, parameter.o(i.Control_Data_Init))
 <BR><BR>[Called By]<UL><LI><a href="#[d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Parameter_Init
 </UL>
 
-<P><STRONG><a name="[d7]"></a>Control_Word_Init</STRONG> (Thumb, 38 bytes, Stack size 0 bytes, parameter.o(i.Control_Word_Init))
+<P><STRONG><a name="[d9]"></a>Control_Loop_Init</STRONG> (Thumb, 60 bytes, Stack size 0 bytes, control_loop.o(i.Control_Loop_Init))
 <BR><BR>[Called By]<UL><LI><a href="#[d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Parameter_Init
 </UL>
 
@@ -478,12 +478,12 @@ Global Symbols
 <P><STRONG><a name="[7]"></a>DebugMon_Handler</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f1xx_it.o(i.DebugMon_Handler))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f103xb.o(RESET)
 </UL>
-<P><STRONG><a name="[60]"></a>Enable_Logic_Control</STRONG> (Thumb, 110 bytes, Stack size 16 bytes, basic_function.o(i.Enable_Logic_Control))
-<BR><BR>[Stack]<UL><LI>Max Depth = 36<LI>Call Chain = Enable_Logic_Control &rArr; HAL_TIM_PWM_Stop &rArr; TIM_CCxChannelCmd
+<P><STRONG><a name="[60]"></a>Enable_Logic_Control</STRONG> (Thumb, 180 bytes, Stack size 24 bytes, basic_function.o(i.Enable_Logic_Control))
+<BR><BR>[Stack]<UL><LI>Max Depth = 44<LI>Call Chain = Enable_Logic_Control &rArr; HAL_TIM_PWM_Stop &rArr; TIM_CCxChannelCmd
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
-<LI><a href="#[62]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Stop
-<LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Start
+<LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Stop
+<LI><a href="#[62]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Start
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADCEx_InjectedConvCpltCallback
 </UL>
@@ -516,7 +516,7 @@ Global Symbols
 <LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_ADC1_Init
 </UL>
 
-<P><STRONG><a name="[66]"></a>FOC_Control</STRONG> (Thumb, 56 bytes, Stack size 8 bytes, foc.o(i.FOC_Control))
+<P><STRONG><a name="[66]"></a>FOC_Control</STRONG> (Thumb, 60 bytes, Stack size 8 bytes, foc.o(i.FOC_Control))
 <BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = FOC_Control &rArr; PWM_Time_Count &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SVPWM
@@ -534,8 +534,8 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Commicate_Data_Init
 </UL>
 
-<P><STRONG><a name="[72]"></a>Get_Initial_Angle_Offest</STRONG> (Thumb, 288 bytes, Stack size 32 bytes, basic_function.o(i.Get_Initial_Angle_Offest))
-<BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = Get_Initial_Angle_Offest
+<P><STRONG><a name="[72]"></a>Get_Initial_Angle_Offest</STRONG> (Thumb, 304 bytes, Stack size 36 bytes, basic_function.o(i.Get_Initial_Angle_Offest))
+<BR><BR>[Stack]<UL><LI>Max Depth = 36<LI>Call Chain = Get_Initial_Angle_Offest
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADCEx_InjectedConvCpltCallback
 </UL>
@@ -1072,7 +1072,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_IRQHandler
 </UL>
 
-<P><STRONG><a name="[61]"></a>HAL_TIM_PWM_Start</STRONG> (Thumb, 148 bytes, Stack size 8 bytes, stm32f1xx_hal_tim.o(i.HAL_TIM_PWM_Start))
+<P><STRONG><a name="[62]"></a>HAL_TIM_PWM_Start</STRONG> (Thumb, 148 bytes, Stack size 8 bytes, stm32f1xx_hal_tim.o(i.HAL_TIM_PWM_Start))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = HAL_TIM_PWM_Start &rArr; TIM_CCxChannelCmd
 </UL>
 <BR>[Calls]<UL><LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_CCxChannelCmd
@@ -1081,7 +1081,7 @@ Global Symbols
 <LI><a href="#[60]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Enable_Logic_Control
 </UL>
 
-<P><STRONG><a name="[62]"></a>HAL_TIM_PWM_Stop</STRONG> (Thumb, 108 bytes, Stack size 12 bytes, stm32f1xx_hal_tim.o(i.HAL_TIM_PWM_Stop))
+<P><STRONG><a name="[61]"></a>HAL_TIM_PWM_Stop</STRONG> (Thumb, 108 bytes, Stack size 12 bytes, stm32f1xx_hal_tim.o(i.HAL_TIM_PWM_Stop))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = HAL_TIM_PWM_Stop &rArr; TIM_CCxChannelCmd
 </UL>
 <BR>[Calls]<UL><LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_CCxChannelCmd
@@ -1343,7 +1343,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_idleback
 </UL>
 
-<P><STRONG><a name="[69]"></a>Model_Control</STRONG> (Thumb, 382 bytes, Stack size 40 bytes, basic_function.o(i.Model_Control))
+<P><STRONG><a name="[69]"></a>Model_Control</STRONG> (Thumb, 386 bytes, Stack size 40 bytes, basic_function.o(i.Model_Control))
 <BR><BR>[Stack]<UL><LI>Max Depth = 52<LI>Call Chain = Model_Control &rArr; PID_Control_Deal
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PID_Control_Deal
@@ -1373,7 +1373,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[b0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Interrupt_1MS
 </UL>
 
-<P><STRONG><a name="[6c]"></a>PWM_Time_Count</STRONG> (Thumb, 290 bytes, Stack size 24 bytes, foc.o(i.PWM_Time_Count))
+<P><STRONG><a name="[6c]"></a>PWM_Time_Count</STRONG> (Thumb, 296 bytes, Stack size 24 bytes, foc.o(i.PWM_Time_Count))
 <BR><BR>[Stack]<UL><LI>Max Depth = 112<LI>Call Chain = PWM_Time_Count &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_i2d
@@ -1383,11 +1383,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FOC_Control
 </UL>
 
-<P><STRONG><a name="[d5]"></a>Parameter_Init</STRONG> (Thumb, 60 bytes, Stack size 8 bytes, parameter.o(i.Parameter_Init))
+<P><STRONG><a name="[d5]"></a>Parameter_Init</STRONG> (Thumb, 66 bytes, Stack size 8 bytes, parameter.o(i.Parameter_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = Parameter_Init &rArr; Commicate_Data_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Hardware_Init
-<LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Control_Word_Init
+<LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Control_Data_Init
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PID_Control_Init
 <LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Control_Loop_Init
 <LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Commicate_Data_Init
@@ -1418,7 +1418,7 @@ Global Symbols
 <LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADC_Start
 <LI><a href="#[5f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 <LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_DMA
-<LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Start
+<LI><a href="#[62]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Start
 <LI><a href="#[e3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Start_IT
 </UL>
 <BR>[Called By]<UL><LI><a href="#[35]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -1485,8 +1485,8 @@ Global Symbols
 <P><STRONG><a name="[af]"></a>TIM_CCxChannelCmd</STRONG> (Thumb, 26 bytes, Stack size 8 bytes, stm32f1xx_hal_tim.o(i.TIM_CCxChannelCmd))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = TIM_CCxChannelCmd
 </UL>
-<BR>[Called By]<UL><LI><a href="#[62]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Stop
-<LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Start
+<BR>[Called By]<UL><LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Stop
+<LI><a href="#[62]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Start
 </UL>
 
 <P><STRONG><a name="[98]"></a>TIM_ETR_SetConfig</STRONG> (Thumb, 20 bytes, Stack size 8 bytes, stm32f1xx_hal_tim.o(i.TIM_ETR_SetConfig))

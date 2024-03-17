@@ -42,7 +42,7 @@ void Control_Word_Init(union _Control_Word *Word)
 void Control_Data_Init(_Control_Data *Data)
 {
 	Data->Open_Loop_Voltage = 0;		//开环电压置零
-	Data->Angle_Initial_Voltage = 0;	//编码器线性校正Ud电压
+	Data->Angle_Initial_Voltage = 3;	//编码器线性校正Ud电压
 	Data->Number_Angle_Offest = 5;		//初始角校正累加次数= 2的n次方
 	Data->Max_Voltage = 12;				//最大母线电压限制
 	Data->Duty_Model_A = 50;			//占空比模式三相输入值
