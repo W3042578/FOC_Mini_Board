@@ -7,9 +7,9 @@
 
 union _Error_Message Error_Message;		//错误信息指示位
 union _Work_Status Work_Status;			//工作状态指示位
+union _Control_Word Control_Word; 		//通许变量位
 
-_Control_Word Control_Word; 			//通许变量、控制变量定义
-
+_Control_Data Control_Data;				//控制变量定义
 
 int16_t Number_Encoder_Direction;		//待定
 
@@ -33,24 +33,21 @@ void Hardware_Init(void)
 
 
 //控制字初始化
-void Control_Word_Init(_Control_Word *Word)
+void Control_Word_Init(union _Control_Word *Word)
 {
-	Word->Work_Model = 0;			//1:校准  2:占空比  3:电压开环  4:电流环 5:速度环 6:位置环 7:速度环无感
-	Word->PWM_Enable = 0;			//0:PWM关闭使能		1:PWM开始使能
-	Word->Energency_Stop = 0;		//1:进入紧急停止
-	Word->Work_Direction = 0;		//0:当前方向 1:当前反向
-	Word->Open_Loop_Voltage = 0;	//开环电压
-	Word->Max_Voltage = 16;			//最大电压限制
-	Word->Angle_Initial_Voltage = 5;//编码器线性校正和初始位置置零Ud电压
-	Word->Number_Angle_Offest = 5;	//次数 = 2的n次方
-	Word->Clear_Position = 0;		//重置当前位置为0
-	
-	Word->Duty_Model_A = 50;		//占空比模式三相初始值
-	Word->Duty_Model_B = 50;
-	Word->Duty_Model_C = 50;
+	Word->All = 0;
+}
 
-	Word->MTPA = 0;			//初始化不使用MTPA和电流前馈
-	Word->Current_Forward = 0;
+//控制字初始化
+void Control_Data_Init(_Control_Data *Data)
+{
+	Data->Open_Loop_Voltage = 0;		//开环电压置零
+	Data->Angle_Initial_Voltage = 0;	//编码器线性校正Ud电压
+	Data->Number_Angle_Offest = 5;		//初始角校正累加次数= 2的n次方
+	Data->Max_Voltage = 12;				//最大母线电压限制
+	Data->Duty_Model_A = 50;			//占空比模式三相输入值
+	Data->Duty_Model_B = 50;
+	Data->Duty_Model_C = 50;
 }
 
 //错误状态初始化
@@ -76,6 +73,8 @@ void Parameter_Init(void)
 	
 	//控制字初始化
 	Control_Word_Init(&Control_Word);
+	//控制变量初始化
+	Control_Data_Init(&Control_Data);
 	
 	//错误状态初始化
 	Error_Message_Init(&Error_Message);

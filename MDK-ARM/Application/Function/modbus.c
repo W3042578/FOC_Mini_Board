@@ -60,8 +60,8 @@ static const uint8_t Modbus_CRC_Low[] = {
 0x41, 0x81, 0x80, 0x40
 };
 
-uint8_t Tx_Data[TX_BUFF_LONG];	//定义串口接受和发送缓冲区长度
-uint8_t Rx_Data[RX_BUFF_LONG];
+uint8_t		Tx_Data[TX_BUFF_LONG];	//定义串口接受和发送缓冲区长度
+uint8_t		Rx_Data[RX_BUFF_LONG];
 uint8_t 	Modbus_Length_In;	//接受到的一帧Modbus数据长度，有多少个byte
 MODBUS 		Modbus;				//Modbus数据处理结构体
 uint8_t		Modbus_Buffer[30];	//Modbus发送缓冲区长度

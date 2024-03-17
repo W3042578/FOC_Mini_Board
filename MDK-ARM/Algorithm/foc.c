@@ -115,11 +115,11 @@ void SVPWM(FOC_Motor *motor)
 void PWM_Time_Count(FOC_Motor *motor)
 {
 	//占空比模式三相PWM直接按照给入值计算输出比较值
-	if(Control_Word.Work_Model == 2)
+	if(Control_Word.bits.Work_Model == 2)
 	{
-		motor->Ta = 2.56 *(((100 - Control_Word.Duty_Model_A) * motor->Ts)>>8);
-		motor->Tb = 2.56 *(((100 - Control_Word.Duty_Model_B) * motor->Ts)>>8);
-		motor->Tc = 2.56 *(((100 - Control_Word.Duty_Model_C) * motor->Ts)>>8);
+		motor->Ta = 2.56 *(((100 - Control_Data.Duty_Model_A) * motor->Ts)>>8);
+		motor->Tb = 2.56 *(((100 - Control_Data.Duty_Model_B) * motor->Ts)>>8);
+		motor->Tc = 2.56 *(((100 - Control_Data.Duty_Model_C) * motor->Ts)>>8);
 	}
 	//非占空比模式三相根据Tx,Ty计算PWM输出比较值
 	else
@@ -184,7 +184,7 @@ void FOC_Control(FOC_Motor *motor)
 	
 	//模式处理
 	Model_Control(motor);
-	if(Control_Word.Work_Model != 2)//占空比模式不使用反park变换和SVPWM计算三相占空比
+	if(Control_Word.bits.Work_Model != 2)//占空比模式不使用反park变换和SVPWM计算三相占空比
 	{
 		Inverse_Park_Transform(motor);
 		SVPWM(motor);

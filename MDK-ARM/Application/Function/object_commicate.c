@@ -11,14 +11,14 @@ uint16_t Commicate_Data_All_Number;	//通许数据量
 //索引		子索引		字节数byte		变量地址		最大值		最小值		函数指针
 const commicate_code Commicate_Code[] =
 {
-	{0x0000,	0x00,	1,	&Modbus.Test,																	255,	0,	NULL},
-	{0x0001,	0x00,	1,	&Control_Word.Work_Model,				255,	0,	NULL},
-	{0x0002,	0x00,	1,	&Control_Word.Number_Angle_Offest,		255,	0,	NULL},//初始角校正累加数
-	{0x0003,	0x00,	1,	&Control_Word.PWM_Enable,				255,	0,	NULL},//0不触发 1:触发
-	{0x0004,	0x00,	1,	&Control_Word.Energency_Stop,			255,	0,	NULL},//0不触发 1:触发
-	{0x0005,	0x00,	1,	&Control_Word.Open_Loop_Voltage,		255,	0,	NULL},
-	{0x0006,	0x00,	1,	&Control_Word.Work_Direction,			255,	0,	NULL},//0:正		1:反
-	{0x0007,	0x00,	1,	&Control_Word.Max_Voltage,				255,	0,	NULL},
+	{0x0000,	0x00,	1,	&Modbus.Test,							255,	0,	NULL},
+	{0x0001,	0x00,	1,	&Control_Word.All,						255,	0,	NULL},
+	{0x0002,	0x00,	1,	&Control_Data.Number_Angle_Offest,		255,	0,	NULL},//初始角校正累加数
+	{0x0003,	0x00,	1,	&Control_Word.All,						255,	0,	NULL},//0不触发 1:触发
+	{0x0004,	0x00,	1,	&Control_Word.All,						255,	0,	NULL},//0不触发 1:触发
+	{0x0005,	0x00,	1,	&Control_Data.Open_Loop_Voltage,		255,	0,	NULL},
+	{0x0006,	0x00,	1,	&Control_Word.All,						255,	0,	NULL},//0:正		1:反
+	{0x0007,	0x00,	1,	&Control_Data.Max_Voltage,				255,	0,	NULL},
 	{0x0008,	0x00,	2,	&Control_Loop.Target_Q_Current,			65535,	0,	NULL},
 	{0x0009,	0x00,	2,	&Transfer1[0],							65535,	0,	NULL},
 	{0x000A,	0x00,	2,	&Control_Loop.Target_Position,			65535,	0,	NULL},

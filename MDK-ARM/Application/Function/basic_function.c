@@ -17,17 +17,22 @@
 
 
 //定义全局变量
-uint16_t	Encoder_Offset_Delay;	//编码器初始角度对齐延迟
-uint16_t	Number_Offest_Count;	//编码器累加实际次数
+//前一时刻状态变量保存
 uint8_t		Last_Work_Model;		//上一次的工作模式
-int32_t		Last_Encoder_Position;	//上一次编码器胡相对位置
+uint8_t		Last_PWM_Enable;		//上一次使能状态
+int32_t		Last_Encoder_Position;	//上一次编码器的位置
 int32_t		Last_1MS_Speed;			//上一次1ms编码器位置计算得速度
+
+//电流采样
 uint32_t 	ADC_Data[2];			//ADC采样DMA储存数据地址
-uint8_t		Angle_Origin_End;		//编码器原点修正完成标志
-uint8_t		Angle_Positive_End;		//编码器正转校正结束
+
+//编码器校准
+uint16_t	Offest_Time_Basic;		//时基值	8kHz = 1:125us	16kHz = 1:62.5us	32kHz = 1:31.25us
+uint16_t	Number_Offest_Count;	//编码器累加实际次数
+uint32_t	Offest_Integral;		//编码器累加存储值
 uint16_t	Virtual_Angle;			//虚拟实际角度
 uint16_t	Offest_Table_Count;		//线性补偿计数
-
+uint8_t		Offest_Model;			//校正内置模式 1：零位校正 2：线性正向 3：线性反向
 
 //底层配置
 //底层初始化配置
@@ -142,44 +147,120 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 //编码器校准 获取编码器对应alpha轴零位修正角度值，判断编码器方向与q轴正方向是否一致
 void Get_Initial_Angle_Offest(FOC_Motor *motor)
 {
-	//编码器实际值与虚拟值偏差
-	int16_t Offest_Differen;
+	int16_t Offest_Differen;	//编码器实际值与虚拟值偏差
 	//编码器零位校正
-	if(Control_Word.Work_Model == 1 && Control_Word.PWM_Enable == 1)//判断工作模式1且进入PWM使能
+	if(Control_Word.bits.Work_Model == 1 && Control_Word.bits.PWM_Enable == 1)//判断工作模式1且进入PWM使能
 	{
-		if(Encoder_Offset_Delay > 0)	//延时计数
-			Encoder_Offset_Delay --;
-		else	//延时时间到达判断工作类型
+		if(Offest_Time_Basic > 0)	//时基延时计数
+			Offest_Time_Basic --;	//时基值	8kHz = 1:125us	16kHz = 1:62.5us	32kHz = 1:31.25us
+		else	//时基值到达
 		{
-			if(Angle_Origin_End == 0)	//强拖电机找零位未结束
+			//校正内置模式判断
+			//校正模式中包含三种模式：1）初始角校正 2）线性正向 3）线性反向
+			switch (Offest_Model)
 			{
-				motor->Initial_Angle_Offset = motor->Initial_Angle_Offset + Encoder1.Encoder_Angle;
-				Number_Offest_Count --;
-				Encoder_Offset_Delay = 800;	//0.05s 800*62.5us
-				if(Number_Offest_Count == 0)//指定次数累加后平均获得零位校准值
-				{
-					motor->Initial_Angle_Offset = motor->Initial_Angle_Offset >> (Control_Word.Number_Angle_Offest);
-					Angle_Origin_End = 1;				//编码器原点校正完成，准备进行线性度校正
-					Angle_Positive_End = 0;				//清零正转校正结束位，准备开始正转校正
-					Offest_Table_Count = 0;       		//清零线性修正计数
-					Virtual_Angle = 0;					//清零虚拟机械角度
-					Encoder_Offset_Delay = 4096;		//开启运动校正延迟设置
-				}
-			}
-			else//强拖电机找零位结束，准备获取对应虚拟角度的实际编码器数值进行编码器线性度校正
-			{
-				//重置延时计数  4096*62.5us = 256ms
-				Encoder_Offset_Delay = 4096;
-				//获取编码器修正零位后数值
-				Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
-				//偏差值过大判断为电机正方向与编码器方向相反
-				if(Offest_Differen > 256 || Offest_Differen < -256)
-					motor->Offest_Direction = 1;
-				//正向校正时记录偏差
-				if(Angle_Positive_End == 0)
-					Encoder_Line_Offest_Table[Offest_Table_Count] = Offest_Differen;
-				else	//反向校正时记录偏差平均值
-					Encoder_Line_Offest_Table[Offest_Table_Count] = (Offest_Differen + Encoder_Line_Offest_Table[Offest_Table_Count]) >>1;
+				case 1:		//零位校正记录
+					//零位校正值累加
+					Offest_Integral = Offest_Integral + Encoder1.Encoder_Angle;
+					//零位每次记录时基值 320*62.5us = 20ms
+					Offest_Time_Basic = 320;
+					//累加次数结束
+					Number_Offest_Count ++;
+					//根据累加次数判断是否结束零位校正
+					if(Number_Offest_Count > (1 << Control_Data.Number_Angle_Offest))
+					{
+						//更新零位修正值
+						motor->Initial_Angle_Offset = Offest_Integral >> (Control_Data.Number_Angle_Offest);
+						//累加次数清零
+						Number_Offest_Count = 0;
+						//进入线性正向
+						Offest_Model = 2;
+						//清零线性校正数组计数
+						Offest_Table_Count = 0;
+						//清零线性校正虚拟角
+						Virtual_Angle = 0;
+						//清零数组序号
+						Offest_Table_Count = 0;
+					}
+					break;
+
+				case 2:		//线性正向记录
+					//虚拟角度对256快速取余
+					if((Virtual_Angle & 0x00ff) == 0)
+					{
+						//获取编码器修正零位后数值
+						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
+						//偏差值过大判断为电机正方向与编码器方向相反
+						if(Offest_Differen > 256 || Offest_Differen < -256)
+							motor->Offest_Direction = 1;
+						//正向校正时记录偏差	
+						Encoder_Line_Offest_Table[Offest_Table_Count] = Offest_Differen;
+						//记录数组序号增加
+						Offest_Table_Count ++;
+					}
+					//8*62.5us = 500us
+					Offest_Time_Basic = 4;
+					//判断虚拟角度值是否允许增加 ，避免溢出回零
+					if(Virtual_Angle < 65535)
+					{
+						//虚拟角度值增加
+						Virtual_Angle ++;
+					}
+					else if(Virtual_Angle == 65535)
+					{
+						//进入线性反向
+						Offest_Model = 3;
+						//进入模式3前等待时间 320 * 62.5us = 20ms
+						Offest_Time_Basic = 320;
+						//数组序号回退一步从255开始
+						Offest_Table_Count --;
+					}
+					break;
+
+				case 3:		//线性反向记录
+					//虚拟角度对256快速取余
+					if((Virtual_Angle & 0x00ff) == 0)
+					{
+						//获取编码器修正零位后数值
+						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
+						//获取编码器修正零位后数值
+						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
+						//偏差值过大判断为电机正方向与编码器方向相反
+						if(Offest_Differen > 256 || Offest_Differen < -256)
+							motor->Offest_Direction = 1;
+						//正向校正时记录偏差	
+						Encoder_Line_Offest_Table[Offest_Table_Count] = Offest_Differen;
+						if(Offest_Table_Count > 0)
+						//记录数组序号增加
+						Offest_Table_Count --;
+					}
+					//8*62.5us = 500us
+					Offest_Time_Basic = 4;
+					//判断虚拟角度值是否允许减少 ，避免溢出回零
+					if(Virtual_Angle > 0)
+					{
+						//虚拟角度值增加
+						Virtual_Angle --;
+					}
+					else if(Virtual_Angle == 0)	//校正完成
+					{
+						//初始化校正模式
+						Offest_Model = 1;
+						//清除控制模式
+						Control_Word.bits.Work_Model = 0;
+						//退出校正模式并关闭PWM使能		
+						Control_Word.bits.PWM_Enable = 0;
+						//编码器校正位清零 允许下一次进入零位校准
+						Work_Status.bits.Angle_Offest = 0;
+						//清零Ud Uq
+						motor->Ud = 0;
+						motor->Uq = 0;
+					}
+					break;
+
+				default: 	//校正模式错误
+					Error_Message.bits.Encoder_Offset = 1;
+					break;
 			}
 		}
 	}
@@ -191,12 +272,12 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 void Model_Control(FOC_Motor *motor)
 {
 	uint16_t virtual_eletri_angle;	//虚拟电角度,编码器线性度校正用
-	
+		
 	//模式切换判断
-	if(Last_Work_Model != Control_Word.Work_Model)
+	if(Last_Work_Model != Control_Word.bits.Work_Model)
 	{
-		if(Control_Word.PWM_Enable == 1)//PWM使能输出情况下不允许更改工作模式
-			Control_Word.Work_Model = Last_Work_Model;
+		if(Control_Word.bits.PWM_Enable == 1)//PWM使能输出情况下不允许更改工作模式
+			Control_Word.bits.Work_Model = Last_Work_Model;
 		else							//PWM非使能允许模式切换，但需要清零各PID器中的积分量
 		{
 			Current_Q_PID.Integral_Sum = 0;
@@ -205,53 +286,42 @@ void Model_Control(FOC_Motor *motor)
 			Position_PI.Integral_Sum = 0;
 		}
 	}
-		
+	
 	//根据控制字判断工作环
-	switch(Control_Word.Work_Model)
+	switch(Control_Word.bits.Work_Model)
 	{	
-		//校正模式：初始角度校正和编码器线性补偿
+		//校正模式：初始角度校正和线性补偿
+		//校正模式中包含三种模式：1）初始角校正 2）线性正向 3）线性反向
 		case 1:
-			motor->Ud = 2048 * Control_Word.Angle_Initial_Voltage;//Ualph = 3V
+			motor->Ud = 2048 * Control_Data.Angle_Initial_Voltage;//Ualph = 3V
 			motor->Uq = 0;
-			motor->Cos_Angle = 4096;
-			motor->Sin_Angle = 0;
+			//判断进入校正起始
 			if(Work_Status.bits.Angle_Offest == 0)
 			{
+				//校正模式仅起始进入一次
 				Work_Status.bits.Angle_Offest = 1;
+				//校正内置模式从零位校正开始
+				Offest_Model = 1;	
+				//清零零位校正角
 				motor->Initial_Angle_Offset = 0;
-				Encoder_Offset_Delay = 320;		//20ms 320*62.5us
-				Number_Offest_Count = 1<<(Control_Word.Number_Angle_Offest);
-				Angle_Origin_End = 0;		//重置原点修正指示位
+				//清零编码器累加值
+				Offest_Integral = 0;
+				//零位第一次记录时基值 200ms 3200*62.5us 设置大些让电机拖动稳定后再记录
+				Offest_Time_Basic = 3200;	
 			}
-			//进入线性化校正，需要虚拟角度变化
-			if(Angle_Origin_End == 1)
+
+			//校正内置模式判断
+			//零位校正
+			if(Offest_Model == 1)	
+			{	
+				//设置零位对应静态坐标电压
+				motor->Sin_Angle = 0;
+				motor->Cos_Angle = 4096;
+			}
+			//线性校正
+			else if (Offest_Model == 2 || Offest_Model == 3)	
 			{
-				//对16取余 1ms虚拟角度累加一次  16*62.5us = 1ms
-				if((Encoder_Offset_Delay & 0x000f) == 0)
-				{
-					Virtual_Angle = Virtual_Angle + 1;   
-				}
-				//每次重置延时计数记录实际角度与虚拟值差  4096*62.5us = 256ms
-				if(Encoder_Offset_Delay == 4096)
-				{
-					//判断为正转校正则编码校正计数+1
-					if(Angle_Positive_End == 0)	
-						Offest_Table_Count ++;
-					else	//否则为反转校正，计数-1
-						Offest_Table_Count --;
-					//判断位置补偿计数是否完成一圈
-					if(Offest_Table_Count == 256)
-					{
-						Angle_Positive_End = 1;
-					}
-					//正方向校正完进行负方向校正，计数回零结束 
-					if(Angle_Positive_End == 1 && Offest_Table_Count == 0)
-					{
-						Control_Word.Work_Model = 0;		//校正完成退出校正模式并关闭PWM使能
-						Control_Word.PWM_Enable = 0;
-						Work_Status.bits.Angle_Offest = 0;	//编码器校正位清零 允许下一次进入零位校准
-					}
-				}
+				//计算虚拟机械角转虚拟电角度
 				virtual_eletri_angle = (motor->Polar * Virtual_Angle) & 0xFFFE;
 				//查表获取电角度对应三角函数值
 				motor->Sin_Angle = SIN_COS_TABLE[(virtual_eletri_angle >> 7)];
@@ -262,24 +332,24 @@ void Model_Control(FOC_Motor *motor)
 		//占空比模式：按照设置输出指定单相满额占空比（考虑采样最大98%）
 		case 2:
 			//对输入占空比数值作限制
-			if(Control_Word.Duty_Model_A > 96)
+			if(Control_Data.Duty_Model_A > 96)
 			{
-				Control_Word.Duty_Model_A = 96;
+				Control_Data.Duty_Model_A = 96;
 			}
-			if(Control_Word.Duty_Model_B > 96)
+			if(Control_Data.Duty_Model_B > 96)
 			{
-				Control_Word.Duty_Model_B = 96;
+				Control_Data.Duty_Model_B = 96;
 			}
-			if(Control_Word.Duty_Model_C > 96)
+			if(Control_Data.Duty_Model_C > 96)
 			{
-				Control_Word.Duty_Model_C = 96;
+				Control_Data.Duty_Model_C = 96;
 			}
 		break;
 		
 		//电压开环模式：按照设置的Uq、Ud电压开环控制
 		case 3:
 			motor->Ud = 0;
-			motor->Uq = Control_Word.Open_Loop_Voltage * 2048;
+			motor->Uq = Control_Data.Open_Loop_Voltage * 2048;
 		break;
 		
 		//速度环模拟无感控制：模拟速度增加控制速度开环输出
@@ -322,7 +392,7 @@ void Model_Control(FOC_Motor *motor)
 		//电流环模式：PID控制电流Iq、Id闭环输出
 		case 4:
 			//判断是否进行MTPA控制且控制模式为电流环
-			if((Control_Word.MTPA == 1) && (Control_Word.Work_Model == 4))
+			if((Control_Word.bits.MTPA == 1) && (Control_Word.bits.Work_Model == 4))
 				MTPA_Control(motor);
 			//输入反馈电流
 			Current_Q_PID.Feedback = motor->Iq;
@@ -337,7 +407,7 @@ void Model_Control(FOC_Motor *motor)
 			motor->Uq = Current_Q_PID.Output_Sum;
 			motor->Ud = Current_D_PID.Output_Sum;
 			
-			if(Control_Word.Current_Forward == 1)//判断是否进行电流前馈解耦
+			if(Control_Word.bits.Current_Forward == 1)//判断是否进行电流前馈解耦
 				Current_Forward_Feedback(motor);
 		break;
 		
@@ -347,7 +417,7 @@ void Model_Control(FOC_Motor *motor)
 		break;
 	}
 	//保存上一次控制模式
-	Last_Work_Model = Control_Word.Work_Model;
+	Last_Work_Model = Control_Word.bits.Work_Model;
 	//环路计数累加
 	Control_Loop.Loop_Count ++;
 	//环路计数到达限制清零
@@ -360,10 +430,9 @@ void Model_Control(FOC_Motor *motor)
 //PWM逻辑使能控制
 void Enable_Logic_Control(void)
 {
-	//紧急停止触发、停止PWM输出并关闭驱动模块工作
-	if(Control_Word.Energency_Stop == 1)
+	//触发紧急停止不再考虑PWM使能状态是否改变，立即停止
+	if(Control_Word.bits.Energency_Stop == 1)
 	{
-		//关闭驱动模块PWM接受
 		HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_RESET);
 		//关闭三相PWM输出
 		HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
@@ -372,9 +441,10 @@ void Enable_Logic_Control(void)
 		//PWM使能状态置0
 		Work_Status.bits.Enable_Status = 0;
 	}
-	else
+	//非紧急停止情况下，判断当前使能状态是否改变
+	else if(Last_PWM_Enable != Control_Word.bits.PWM_Enable)
 	{
-		if(Control_Word.PWM_Enable == 1)
+		if(Control_Word.bits.PWM_Enable == 1)
 		{
 			//开启三相PWM输出
 			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
@@ -396,6 +466,8 @@ void Enable_Logic_Control(void)
 			//PWM使能状态置0
 			Work_Status.bits.Enable_Status = 0;
 		}
+		//更新当前PWM使能状态
+		Last_PWM_Enable = Control_Word.bits.PWM_Enable;
 	}
 }
 

@@ -26,7 +26,7 @@ typedef struct _FOC_MOTOR
 		
 	uint32_t	Mechanical_Angle;	//机械角度
 	uint32_t 	Elecrical_Angle;	//电气角度
-	uint32_t 	Initial_Angle_Offset;	//起始位置修正角，对齐alpha轴
+	uint32_t 	Initial_Angle_Offset;	//零位修正角，对齐alpha轴
 	int32_t		Speed_Angle;		//机械转速
 	int32_t		Elecrical_Speed;	//电气转速We 单位rad/s
 	int16_t 	Sin_Angle;			//电角度sin、cos值
