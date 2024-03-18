@@ -180,6 +180,9 @@ void FOC_Control(FOC_Motor *motor)
 	Encoder_To_Electri_Angle(motor);
 	//获取反馈电流Iq,Id
 	Clark_Transform(motor);
+	//根据Ialpha，Ibeta判断电流极性作死区补偿
+	Dead_Time_Compensate(motor);
+	//换算Iq,Id
 	Park_Transform(motor);
 	
 	//模式处理
