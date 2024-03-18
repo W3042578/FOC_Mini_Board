@@ -491,7 +491,7 @@ void Current_Forward_Feedback(FOC_Motor *motor)
 //电机控制死区补偿
 void Dead_Time_Compensate(FOC_Motor *motor)
 {
-	//计算合成电流Is在静态坐标下离beta轴角度，根据角度判断三相电流极性，再根据极性设置补偿时间增减
+	//计算合成电流Is在静态坐标下离alpha轴角度，根据角度判断三相电流极性，再根据极性设置补偿时间增减
 	
 	
 }
