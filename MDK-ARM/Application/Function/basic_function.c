@@ -546,7 +546,6 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 			motor->Tb = motor->Ta + motor->Td >> 1;
 		break;	
 	}
-	
 }
 
 
