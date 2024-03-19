@@ -3,6 +3,13 @@
 
 #include "table.h"
 
+//数字滤波器
+//滑动滤波
+void Sliding_Filter(int16 * data_in,int16 * data_out,uint8 sliding_rate)
+{
+	
+}
+
 //有限脉冲响应数字滤波器FIR
 
 
