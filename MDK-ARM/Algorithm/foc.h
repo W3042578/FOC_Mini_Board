@@ -5,8 +5,8 @@
 
 typedef struct _FOC_MOTOR
 {
+//电机参数
 	uint8_t	 	Polar;			//极对数
-	uint16_t 	Ts;				//拟合SVPWM电压参考矢量周期
 	uint32_t	Ld,Lq;			//d和q轴电感量
 	uint32_t	Flux_Linkage;	//永磁体磁链 单位：Wb
 
@@ -18,6 +18,8 @@ typedef struct _FOC_MOTOR
 	int16_t 	Ialph,Ibeta;
 	int16_t 	Id,Iq;
 	uint32_t 	Umax;			//pwm输出无法实现100%占空比
+//SVPWM
+	uint16_t 	Ts;				//拟合SVPWM电压参考矢量周期
 	uint32_t 	Uref;			//Ualph和Ubeta直接给出的合成电压平方值
 	int32_t 	U1,U2,U3,m32;	//三相线上电压状态
 	uint8_t 	Sa,Sb,Sc;
