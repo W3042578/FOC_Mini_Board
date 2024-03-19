@@ -349,7 +349,10 @@ void Model_Control(FOC_Motor *motor)
 		//电压开环模式：按照设置的Uq、Ud电压开环控制
 		case 3:
 			motor->Ud = 0;
-			motor->Uq = Control_Data.Open_Loop_Voltage * 2048;
+			if(Control_Word.bits.Work_Direction == 0)	//正转
+				motor->Uq = Control_Data.Open_Loop_Voltage * 2048;
+			else						//反转
+				motor->Uq = - Control_Data.Open_Loop_Voltage * 2048;
 		break;
 		
 		//速度环模拟无感控制：模拟速度增加控制速度开环输出
