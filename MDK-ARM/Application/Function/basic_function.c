@@ -516,6 +516,9 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 	switch(dead_sector)
 	{
 		case 1:
+			motor->Ta = motor->Ta + motor->Td;
+		
+			
 		
 	}
 	
