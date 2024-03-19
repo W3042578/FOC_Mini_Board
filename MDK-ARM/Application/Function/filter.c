@@ -4,6 +4,9 @@
 #include "table.h"
 
 //有限脉冲响应数字滤波器FIR
+
+
+//无限脉冲响应数字滤波器IIR
 //二阶巴特沃夫低通滤波器参数
 static int32_t  fr,ohm,c;
 static int32_t 	b0,b1,b2,a1,a2;
