@@ -164,6 +164,18 @@ void PWM_Time_Count(FOC_Motor *motor)
 				motor->Tc = motor->Ts >>1;
 			break;
 		}
+		
+		//电机控制死区补偿
+		Dead_Time_Compensate(motor);
+
+		//未输出状态避免死区补偿影响
+		if((motor->Sector == 0) || (motor->Sector == 7))
+		{
+			motor->Ta = motor->Ts >>1;//默认输出50%占空比
+			motor->Tb = motor->Ts >>1;
+			motor->Tc = motor->Ts >>1;	
+		}
+		
 	}
 	//避免0PWM输出时定时器模块工作不正常
 	if(motor->Ta == 0)
@@ -189,8 +201,6 @@ void FOC_Control(FOC_Motor *motor)
 	{
 		Inverse_Park_Transform(motor);
 		SVPWM(motor);
-		//根据Ialpha，Ibeta判断电流极性作死区补偿
-		Dead_Time_Compensate(motor);
 	}
 	PWM_Time_Count(motor);
 }	
