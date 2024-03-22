@@ -428,7 +428,7 @@ void Model_Control(FOC_Motor *motor)
 	{
 		Control_Loop.Loop_Count = 0;
 		//1ms速度计算
-		
+		Speed_1MS();
 	}
 }
 
@@ -520,8 +520,9 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 	}
 	//死区时间小于三相占空比才作用
 	if((motor->Ta > motor->Td) && (motor->Tb > motor->Td) && (motor->Tc > motor->Td))
-	switch(dead_sector)
 	{
+		switch(dead_sector)
+		{
 		case 1:
 			motor->Ta = motor->Ta + motor->Td >> 1;
 			motor->Tb = motor->Tb - motor->Td >> 1;
@@ -555,6 +556,7 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 		default:
 			
 		break;
+		}
 	}
 }
 
@@ -582,12 +584,10 @@ void Speed_1MS(void)
 	Motor1.Speed_Angle = Encoder1.Encoder_1MS_Speed >> 3;
 }
 
-//1ms中断回调函数 外部输入输出数据、温度保护、电机状态保护、速度计算处理
+//外部输入输出数据、温度保护、电机状态保护、速度计算处理
 void Interrupt_1MS(void)
 {
-	//考虑到编码器给出为绝对值位置信号，速度的求解需要结合时间，将编码器速度计算放在定时器中
-	//Speed_1MS();
-	//更新PID控制参数数据
+	
 	PID_Control_Update();
 }
 
