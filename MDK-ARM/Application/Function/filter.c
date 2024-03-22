@@ -51,7 +51,7 @@ static int32_t 	b0,b1,b2,a1,a2;
 static int32_t	data_delay[3];
 
 
-//无浮点硬件加速，作定点数转化处理
+//巴特沃斯低通滤波器  无浮点硬件加速，作定点数转化处理
 //参考https://zhuanlan.zhihu.com/p/357619650
 void Filter_Init(void)
 {
