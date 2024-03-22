@@ -4,11 +4,22 @@
 #include "table.h"
 
 //数字滤波器
-//滑动滤波
-//data_in：输入数据指针	data_out：输出数据指针	data_count：数据个数	sliding_rate：滑动倍数
-void Sliding_Filter(int16 * data_in,int16 * data_out,int16 data_count,uint8 sliding_rate)
+//滑动滤波器	滑动窗口 = 2*滑动倍数 + 1	小于滑动窗口数据两端不作处理
+//data_in：输入数据指针	data_out：输出数据指针	data_count：数据个数	sliding_rate：滑动倍数  
+void Sliding_Filter(int16_t * data_in, int16_t * data_out, int16_t data_count, uint8_t sliding_rate)
 {
-	
+	int32_t sum, average;
+	for(uint16_t i = 0; i < data_count; i++)
+	{
+		if(i == 0)
+		{
+			average = *data;
+		}
+		else
+		{
+			
+		}
+	}
 }
 
 //有限脉冲响应数字滤波器FIR
