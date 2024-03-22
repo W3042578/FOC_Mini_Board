@@ -4,20 +4,39 @@
 #include "table.h"
 
 //数字滤波器
-//滑动滤波器	滑动窗口 = 2*滑动倍数 + 1	小于滑动窗口数据两端不作处理
+//滑动滤波器	滑动窗口 = 2*滑动倍数 + 1	小于滑动窗口g个数的两端数据不作处理
 //data_in：输入数据指针	data_out：输出数据指针	data_count：数据个数	sliding_rate：滑动倍数  
 void Sliding_Filter(int16_t * data_in, int16_t * data_out, int16_t data_count, uint8_t sliding_rate)
 {
 	int32_t sum, average;
-	for(uint16_t i = 0; i < data_count; i++)
+	for(uint16_t i = 0; i < (data_count - sliding_rate); i++)
 	{
-		if(i == 0)
+		if(i < sliding_rate)	//小于滑动窗口个数的两端数据不作处理
 		{
-			average = *data;
+			*(data_out + i) = *(data_in + i);
 		}
-		else
+		else	//开始滑动滤波
 		{
-			
+			for(uint16_t t = i - sliding_rate; t < (i + sliding_rate); t++)
+			{
+				average = average + *(data_in + t);
+			}
+			//根据不同滑动倍数选择快速除法移位
+			switch(sliding_rate)
+			{
+				case 1://5.333 = 16/3
+					*(data + i) = (5.333 * average) >> 4;
+				break;
+				case 2://3.2 = 16/5
+					*(data + i) = (3.2 * average) >> 4;
+				break;
+				case 3://3.2 = 16/5
+					*(data + i) = (4.571 * average) >> 5;
+				break;
+				default://其他情况直接除法运算 运算极为低效
+					*(data_out + i) = average / (2 * sliding_rate + 1);
+				break；
+			}
 		}
 	}
 }
