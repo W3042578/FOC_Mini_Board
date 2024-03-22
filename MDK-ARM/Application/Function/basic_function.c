@@ -580,8 +580,8 @@ void Speed_1MS(void)
 	Last_Encoder_Position = Encoder1.Encode_Position;
 	Last_1MS_Speed = Encoder1.Encoder_1MS_Speed;
 	//1ms速度计算1个电流环周期机械角速度并乘2
-	//乘2因为当前周期获取得的速度为上一个周期发送指令获取得，在下一周期生效
-	Motor1.Speed_Angle = Encoder1.Encoder_1MS_Speed >> 3;
+	//乘3因为当前周期获取得的速度为上一个周期发送指令获取得，在下一周期生效
+	Motor1.Speed_Angle = (3 * Encoder1.Encoder_1MS_Speed) >> 4;
 }
 
 //外部输入输出数据、温度保护、电机状态保护、速度计算处理
