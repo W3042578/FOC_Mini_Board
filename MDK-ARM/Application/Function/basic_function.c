@@ -424,9 +424,11 @@ void Model_Control(FOC_Motor *motor)
 	//环路计数累加
 	Control_Loop.Loop_Count ++;
 	//环路计数到达限制清零
-	if(Control_Loop.Loop_Count > 8)
+	if(Control_Loop.Loop_Count > 16)
 	{
 		Control_Loop.Loop_Count = 0;
+		//1ms速度计算
+		
 	}
 }
 
@@ -516,6 +518,7 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 		else
 			dead_sector = 3;
 	}
+	//死区时间小于三相占空比才作用
 	if((motor->Ta > motor->Td) && (motor->Tb > motor->Td) && (motor->Tc > motor->Td))
 	switch(dead_sector)
 	{
@@ -583,7 +586,7 @@ void Speed_1MS(void)
 void Interrupt_1MS(void)
 {
 	//考虑到编码器给出为绝对值位置信号，速度的求解需要结合时间，将编码器速度计算放在定时器中
-	Speed_1MS();
+	//Speed_1MS();
 	//更新PID控制参数数据
 	PID_Control_Update();
 }
