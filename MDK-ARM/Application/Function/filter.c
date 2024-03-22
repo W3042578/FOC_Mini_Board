@@ -25,17 +25,17 @@ void Sliding_Filter(int16_t * data_in, int16_t * data_out, int16_t data_count, u
 			switch(sliding_rate)
 			{
 				case 1://5.333 = 16/3
-					*(data + i) = (5.333 * average) >> 4;
+					*(data_out + i) = (int16_t)(5.333 * average) >> 4;
 				break;
 				case 2://3.2 = 16/5
-					*(data + i) = (3.2 * average) >> 4;
+					*(data_out + i) = (int16_t)(3.2 * average) >> 4;
 				break;
 				case 3://3.2 = 16/5
-					*(data + i) = (4.571 * average) >> 5;
+					*(data_out + i) = (int16_t)(4.571 * average) >> 5;
 				break;
 				default://其他情况直接除法运算 运算极为低效
-					*(data_out + i) = average / (2 * sliding_rate + 1);
-				break；
+					*(data_out + i) = (int16_t)(average / (2 * sliding_rate + 1));
+				break;
 			}
 		}
 	}

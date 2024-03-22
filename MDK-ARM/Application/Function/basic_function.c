@@ -500,20 +500,20 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 	//电流极性扇区判断
 	uint8_t	dead_sector;
 
-	if(motor->Ialpha > 0)
+	if(motor->Ialph > 0)
 	{
-		if((2 * motor->Ibeta - motor->Ialpha <= 0) && (2 * motor->Ibeta + motor->Ialpha > 0))
+		if((2 * motor->Ibeta - motor->Ialph <= 0) && (2 * motor->Ibeta + motor->Ialph > 0))
 			dead_sector = 1;
-		else if(2 * motor->Ibeta - motor->Ialpha > 0)
+		else if(2 * motor->Ibeta - motor->Ialph > 0)
 			dead_sector = 2;
 		else
 			dead_sector = 6;
 	}
 	else
 	{
-		if((2 * motor->Ibeta - motor->Ialpha >= 0) && (2 * motor->Ibeta + motor->Ialpha < 0))
+		if((2 * motor->Ibeta - motor->Ialph >= 0) && (2 * motor->Ibeta + motor->Ialph < 0))
 			dead_sector = 4;
-		else if(2 * motor->Ibeta - motor->Ialpha < 0)
+		else if(2 * motor->Ibeta - motor->Ialph < 0)
 			dead_sector = 5;
 		else
 			dead_sector = 3;

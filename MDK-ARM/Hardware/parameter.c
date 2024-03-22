@@ -25,7 +25,7 @@ void Hardware_Init(void)
 	Motor1.Polar = 11;
 	Motor1.Udc = 12;			//母线电压为 12V
 	//此处Td为16位数据，最大值65536，Motor1_Dead_Time不能超过3.5us,否则数据会溢出导致计算错误
-	Motor1.Td = 8.192 * Motor1_Dead_Time *（Motor1.Ts + 1）>> 9;
+	Motor1.Td = (uint16_t)(8.192 * Motor1_Dead_Time * (Motor1.Ts + 1))>> 9;
 		
 	//编码器
 	Encoder1.Type = 1; 			//SPI通讯编码器
