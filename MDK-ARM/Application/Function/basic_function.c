@@ -516,38 +516,42 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 		else
 			dead_sector = 3;
 	}
+	if((motor->Ta > motor->Td) && (motor->Tb > motor->Td) && (motor->Tc > motor->Td))
 	switch(dead_sector)
 	{
 		case 1:
 			motor->Ta = motor->Ta + motor->Td >> 1;
 			motor->Tb = motor->Tb - motor->Td >> 1;
-			motor->Tb = motor->Ta - motor->Td >> 1;
+			motor->Tc = motor->Tc - motor->Td >> 1;
 		break;
 		case 2:
 			motor->Ta = motor->Ta + motor->Td >> 1;
 			motor->Tb = motor->Tb + motor->Td >> 1;
-			motor->Tb = motor->Ta - motor->Td >> 1;
+			motor->Tc = motor->Tc - motor->Td >> 1;
 		break;
 		case 3:
 			motor->Ta = motor->Ta - motor->Td >> 1;
 			motor->Tb = motor->Tb + motor->Td >> 1;
-			motor->Tb = motor->Ta - motor->Td >> 1;
+			motor->Tc = motor->Tc - motor->Td >> 1;
 		break;
 		case 4:
 			motor->Ta = motor->Ta - motor->Td >> 1;
 			motor->Tb = motor->Tb + motor->Td >> 1;
-			motor->Tb = motor->Ta + motor->Td >> 1;
+			motor->Tc = motor->Tc + motor->Td >> 1;
 		break;
 		case 5:
 			motor->Ta = motor->Ta - motor->Td >> 1;
 			motor->Tb = motor->Tb - motor->Td >> 1;
-			motor->Tb = motor->Ta + motor->Td >> 1;
+			motor->Tc = motor->Tc + motor->Td >> 1;
 		break;
 		case 6:
 			motor->Ta = motor->Ta + motor->Td >> 1;
 			motor->Tb = motor->Tb - motor->Td >> 1;
-			motor->Tb = motor->Ta + motor->Td >> 1;
-		break;	
+			motor->Tc = motor->Tc + motor->Td >> 1;
+		break;
+		default:
+			
+		break;
 	}
 }
 
