@@ -183,7 +183,7 @@
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Motor1</ItemText>
+          <ItemText>Motor1,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
@@ -218,37 +218,22 @@
         <Ww>
           <count>12</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Angle_Origin_End,0x0A</ItemText>
+          <ItemText>Encoder_Line_Offest_Table,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>13</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Number_Offest_Count,0x0A</ItemText>
+          <ItemText>Control_Data,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>14</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Encoder_Offset_Delay,0x0A</ItemText>
+          <ItemText>Encoder1,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Encoder_Line_Offest_Table,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>16</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Virtual_Angle,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>17</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Offest_Table_Count,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>18</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Control_Data,0x0A</ItemText>
+          <ItemText>Last_Encoder_Position,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>

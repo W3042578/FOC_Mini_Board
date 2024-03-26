@@ -135,7 +135,10 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 	{
 		offest_angle = offest_angle + 65535;
 	}
-	
+	else if(offest_angle < - 65535)
+	{
+		//速度错误
+	}
 	//使用与运算快速取余 t % 2`(n) 等价于 t & (2`(n) - 1)
 	//参考https://blog.csdn.net/lonyw/article/details/80519652
 	motor->Elecrical_Angle = (motor->Polar * offest_angle) & 0xFFFE;
@@ -147,7 +150,7 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 //编码器校准 获取编码器对应alpha轴零位修正角度值，判断编码器方向与q轴正方向是否一致
 void Get_Initial_Angle_Offest(FOC_Motor *motor)
 {
-	int16_t Offest_Differen;	//编码器实际值与虚拟值偏差
+	int32_t Offest_Differen;	//编码器实际值与虚拟值偏差
 	//编码器零位校正
 	if(Control_Word.bits.Work_Model == 1 && Control_Word.bits.PWM_Enable == 1)//判断工作模式1且进入PWM使能
 	{
@@ -175,12 +178,16 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 						Number_Offest_Count = 0;
 						//进入线性正向
 						Offest_Model = 2;
+						//清零当前位置
+						Encoder1.Encode_Position = 0;
 						//清零线性校正数组计数
 						Offest_Table_Count = 0;
 						//清零线性校正虚拟角
 						Virtual_Angle = 0;
 						//清零数组序号
 						Offest_Table_Count = 0;
+						
+						Offest_Time_Basic = 4;
 					}
 					break;
 
@@ -189,17 +196,20 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 					if((Virtual_Angle & 0x00ff) == 0)
 					{
 						//获取编码器修正零位后数值
-						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
+//						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
+//						Offest_Differen = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset - Virtual_Angle;
+						Offest_Differen = Encoder1.Encoder_Angle;
+//						Offest_Differen = Virtual_Angle;
 						//偏差值过大判断为电机正方向与编码器方向相反
 						if(Offest_Differen > 256 || Offest_Differen < -256)
 							motor->Offest_Direction = 1;
 						//正向校正时记录偏差	
-						Encoder_Line_Offest_Table[Offest_Table_Count] = Offest_Differen;
+						Encoder_Line_Offest_Table[Offest_Table_Count] = Offest_Differen>>1;
 						//记录数组序号增加
 						Offest_Table_Count ++;
 					}
 					//8*62.5us = 500us
-					Offest_Time_Basic = 8;
+					Offest_Time_Basic = 4;
 					//判断虚拟角度值是否允许增加 ，避免溢出回零
 					if(Virtual_Angle < 65535)
 					{
@@ -211,7 +221,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 						//进入线性反向
 						Offest_Model = 3;
 						//进入模式3前等待时间 320 * 62.5us = 20ms
-						Offest_Time_Basic = 320;
+						Offest_Time_Basic = 4;
 						//数组序号回退一步从255开始
 						Offest_Table_Count --;
 					}
@@ -222,20 +232,22 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 					if((Virtual_Angle & 0x00ff) == 0)
 					{
 						//获取编码器修正零位后数值
-						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
-						//获取编码器修正零位后数值
-						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
+//						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
+//						Offest_Differen = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset;
+						Offest_Differen = Encoder1.Encoder_Angle;
+//						Offest_Differen = Virtual_Angle;
 						//偏差值过大判断为电机正方向与编码器方向相反
 						if(Offest_Differen > 256 || Offest_Differen < -256)
 							motor->Offest_Direction = 1;
 						//正向校正时记录偏差	
-						Encoder_Line_Offest_Table[Offest_Table_Count] = (Offest_Differen + Encoder_Line_Offest_Table[Offest_Table_Count])>>1;
+//						Encoder_Line_Offest_Table[Offest_Table_Count] = (Offest_Differen + Encoder_Line_Offest_Table[Offest_Table_Count])>>1;
+						Encoder_Line_Offest_Table[Offest_Table_Count] = Offest_Differen >>1;
 						if(Offest_Table_Count > 0)
 						//记录数组序号增加
 						Offest_Table_Count --;
 					}
 					//8*62.5us = 500us
-					Offest_Time_Basic = 8;
+					Offest_Time_Basic = 4;
 					//判断虚拟角度值是否允许减少 ，避免溢出回零
 					if(Virtual_Angle > 0)
 					{
@@ -286,7 +298,6 @@ void Model_Control(FOC_Motor *motor)
 			Position_PI.Integral_Sum = 0;
 		}
 	}
-	
 	//根据控制字判断工作环
 	switch(Control_Word.bits.Work_Model)
 	{	
@@ -524,34 +535,34 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 		switch(dead_sector)
 		{
 		case 1:
-			motor->Ta = motor->Ta + motor->Td >> 1;
-			motor->Tb = motor->Tb - motor->Td >> 1;
-			motor->Tc = motor->Tc - motor->Td >> 1;
+			motor->Ta = motor->Ta + (motor->Td >> 1);
+			motor->Tb = motor->Tb - (motor->Td >> 1);
+			motor->Tc = motor->Tc - (motor->Td >> 1);
 		break;
 		case 2:
-			motor->Ta = motor->Ta + motor->Td >> 1;
-			motor->Tb = motor->Tb + motor->Td >> 1;
-			motor->Tc = motor->Tc - motor->Td >> 1;
+			motor->Ta = motor->Ta + (motor->Td >> 1);
+			motor->Tb = motor->Tb + (motor->Td >> 1);
+			motor->Tc = motor->Tc - (motor->Td >> 1);
 		break;
 		case 3:
-			motor->Ta = motor->Ta - motor->Td >> 1;
-			motor->Tb = motor->Tb + motor->Td >> 1;
-			motor->Tc = motor->Tc - motor->Td >> 1;
+			motor->Ta = motor->Ta - (motor->Td >> 1);
+			motor->Tb = motor->Tb + (motor->Td >> 1);
+			motor->Tc = motor->Tc - (motor->Td >> 1);
 		break;
 		case 4:
-			motor->Ta = motor->Ta - motor->Td >> 1;
-			motor->Tb = motor->Tb + motor->Td >> 1;
-			motor->Tc = motor->Tc + motor->Td >> 1;
+			motor->Ta = motor->Ta - (motor->Td >> 1);
+			motor->Tb = motor->Tb + (motor->Td >> 1);
+			motor->Tc = motor->Tc + (motor->Td >> 1);
 		break;
 		case 5:
-			motor->Ta = motor->Ta - motor->Td >> 1;
-			motor->Tb = motor->Tb - motor->Td >> 1;
-			motor->Tc = motor->Tc + motor->Td >> 1;
+			motor->Ta = motor->Ta - (motor->Td >> 1);
+			motor->Tb = motor->Tb - (motor->Td >> 1);
+			motor->Tc = motor->Tc + (motor->Td >> 1);
 		break;
 		case 6:
-			motor->Ta = motor->Ta + motor->Td >> 1;
-			motor->Tb = motor->Tb - motor->Td >> 1;
-			motor->Tc = motor->Tc + motor->Td >> 1;
+			motor->Ta = motor->Ta + (motor->Td >> 1);
+			motor->Tb = motor->Tb - (motor->Td >> 1);
+			motor->Tc = motor->Tc + (motor->Td >> 1);
 		break;
 		default:
 			
@@ -564,6 +575,7 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 //1ms速度计算
 void Speed_1MS(void)
 {
+	int32_t Speed;
 	//判断是否首次进入1ms中断
 	if(Work_Status.bits.Interrupt_1MS_Init == 0)
 	{
@@ -572,16 +584,27 @@ void Speed_1MS(void)
 		Last_Encoder_Position = Encoder1.Encode_Position;
 	}
 	//1ms速度等于 当前位置 - 1ms前位置
-	Encoder1.Encoder_1MS_Speed = Encoder1.Encode_Position - Last_Encoder_Position;
+	Speed = Encoder1.Encode_Position - Last_Encoder_Position;
+	//对单次速度变化作限制
+	if(Last_1MS_Speed - Speed > 250)
+		Speed = Last_1MS_Speed;
+	if(Speed - Last_1MS_Speed > 250)
+		Speed = Last_1MS_Speed;
+
 	//编码器速度范围限制,超出限制以上一次速度代替
-	if((Encoder1.Encoder_1MS_Speed > 16384) || (Encoder1.Encoder_1MS_Speed < -16384))
-		Encoder1.Encoder_1MS_Speed = Last_1MS_Speed;
+	if((Speed > 32763) || (Speed < -32763))
+		Speed = Last_1MS_Speed;
+	
 	//更新过去1ms时间编码器位置、1ms编码器速度
 	Last_Encoder_Position = Encoder1.Encode_Position;
-	Last_1MS_Speed = Encoder1.Encoder_1MS_Speed;
+	Last_1MS_Speed = Speed;
+	
+	//输出直接编码器速度
+	Encoder1.Encoder_1MS_Speed = Speed;
+
 	//1ms速度计算1个电流环周期机械角速度并乘2
 	//乘3因为当前周期获取得的速度为上一个周期发送指令获取得，在下一周期生效
-	Motor1.Speed_Angle = (3 * Encoder1.Encoder_1MS_Speed) >> 4;
+	Motor1.Speed_Angle = (3 * Speed) >> 4;
 }
 
 //外部输入输出数据、温度保护、电机状态保护、速度计算处理

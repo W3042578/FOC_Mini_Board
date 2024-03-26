@@ -117,9 +117,9 @@ void PWM_Time_Count(FOC_Motor *motor)
 	//占空比模式三相PWM直接按照给入值计算输出比较值
 	if(Control_Word.bits.Work_Model == 2)
 	{
-		motor->Ta = 2.56 *(((100 - Control_Data.Duty_Model_A) * motor->Ts)>>8);
-		motor->Tb = 2.56 *(((100 - Control_Data.Duty_Model_B) * motor->Ts)>>8);
-		motor->Tc = 2.56 *(((100 - Control_Data.Duty_Model_C) * motor->Ts)>>8);
+		motor->Ta = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_A) * motor->Ts)) >> 8;
+		motor->Tb = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_B) * motor->Ts)) >> 8;
+		motor->Tc = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_C) * motor->Ts)) >> 8;
 	}
 	//非占空比模式三相根据Tx,Ty计算PWM输出比较值
 	else

@@ -1,14 +1,14 @@
 
 #include "filter.h"
-
 #include "table.h"
+
 
 //数字滤波器
 //滑动滤波器	滑动窗口 = 2*滑动倍数 + 1	小于滑动窗口g个数的两端数据不作处理
 //data_in：输入数据指针	data_out：输出数据指针	data_count：数据个数	sliding_rate：滑动倍数  
 void Sliding_Filter(int16_t * data_in, int16_t * data_out, int16_t data_count, uint8_t sliding_rate)
 {
-	int32_t sum, average;
+	int32_t	average;
 	for(uint16_t i = 0; i < (data_count - sliding_rate); i++)
 	{
 		if(i < sliding_rate)	//小于滑动窗口个数的两端数据不作处理

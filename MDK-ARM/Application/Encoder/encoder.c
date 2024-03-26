@@ -61,7 +61,7 @@ void Encoder_Data_Deal(_Encoder *encoder)
 	
     Angle_Difference = encoder->Encoder_Angle - encoder->Encoder_Angle_Buffer;
     //对差值范围进行限制，绝对式编码器回欢计数
-    if(Angle_Difference > 32768)
+    if(Angle_Difference >= 32768)
 	    Angle_Difference = 65536 - Angle_Difference;
     if(Angle_Difference < -32768)
 	    Angle_Difference = 65536 + Angle_Difference;

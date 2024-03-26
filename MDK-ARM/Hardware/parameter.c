@@ -13,7 +13,7 @@ _Control_Data Control_Data;				//控制变量定义
 
 int16_t Number_Encoder_Direction;		//待定
 
-#define Motor1_Dead_Time	2		//电机死区时间 单位us
+#define Motor1_Dead_Time	0.5		//电机死区时间 单位us
 //硬件参数初始化
 void Hardware_Init(void)
 {
@@ -47,7 +47,7 @@ void Control_Word_Init(union _Control_Word *Word)
 void Control_Data_Init(_Control_Data *Data)
 {
 	Data->Open_Loop_Voltage = 0;		//开环电压置零
-	Data->Angle_Initial_Voltage = 3;	//编码器线性校正Ud电压
+	Data->Angle_Initial_Voltage = 5;	//编码器线性校正Ud电压
 	Data->Number_Angle_Offest = 5;		//初始角校正累加次数= 2的n次方
 	Data->Max_Voltage = 12;				//最大母线电压限制
 	Data->Duty_Model_A = 50;			//占空比模式三相输入值
