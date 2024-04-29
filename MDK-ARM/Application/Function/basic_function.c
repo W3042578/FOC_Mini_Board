@@ -116,17 +116,17 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 	
 
 	//角度获取与电流采样同周期
-	Encoder_Data_Deal(&Encoder1); //获取编码器角度，速度，位置
-	Start_Encoder_GET(&Encoder1); //开启编码器DMA，获取下一次使用角度
-	
+	Encoder_Get_Angle(&Encoder1); //获取编码器角度，速度，位置
+
 	//电机原点位置对齐alpha轴
-	if(Encoder1.Encoder_Angle < motor->Initial_Angle_Offset)
-		motor->Mechanical_Angle = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset + 65535;
+	if(Encoder1.Encoder_Pulse < motor->Initial_Angle_Offset)
+		motor->Mechanical_Angle = Encoder1.Encoder_Pulse - motor->Initial_Angle_Offset + 65535;
 	else
-		motor->Mechanical_Angle = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset;
+		motor->Mechanical_Angle = Encoder1.Encoder_Pulse - motor->Initial_Angle_Offset;
 	
 	//电机速度补偿计算用角度
-	offest_angle = motor->Mechanical_Angle + motor->Speed_Angle;
+	// offest_angle = motor->Mechanical_Angle + motor->Speed_Angle;
+	offest_angle = motor->Mechanical_Angle;
 	if(offest_angle > 65535)
 	{
 		offest_angle = offest_angle - 65535;
@@ -139,6 +139,8 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 	{
 		//速度错误
 	}
+	//wang TEST
+//	offest_angle = 16300;
 	//使用与运算快速取余 t % 2`(n) 等价于 t & (2`(n) - 1)
 	//参考https://blog.csdn.net/lonyw/article/details/80519652
 	motor->Elecrical_Angle = (motor->Polar * offest_angle) & 0xFFFE;
@@ -164,7 +166,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 			{
 				case 1:		//零位校正记录
 					//零位校正值累加
-					Offest_Integral = Offest_Integral + Encoder1.Encoder_Angle;
+					Offest_Integral = Offest_Integral + Encoder1.Encoder_Pulse;
 					//零位每次记录时基值 320*62.5us = 20ms
 					Offest_Time_Basic = 320;
 					//累加次数结束
@@ -198,7 +200,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 						//获取编码器修正零位后数值
 //						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
 //						Offest_Differen = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset - Virtual_Angle;
-						Offest_Differen = Encoder1.Encoder_Angle;
+						Offest_Differen = Encoder1.Encoder_Pulse;
 //						Offest_Differen = Virtual_Angle;
 						//偏差值过大判断为电机正方向与编码器方向相反
 						if(Offest_Differen > 256 || Offest_Differen < -256)
@@ -234,14 +236,14 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 						//获取编码器修正零位后数值
 //						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
 //						Offest_Differen = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset;
-						Offest_Differen = Encoder1.Encoder_Angle;
+						Offest_Differen = Encoder1.Encoder_Pulse;
 //						Offest_Differen = Virtual_Angle;
 						//偏差值过大判断为电机正方向与编码器方向相反
 						if(Offest_Differen > 256 || Offest_Differen < -256)
 							motor->Offest_Direction = 1;
 						//正向校正时记录偏差	
 //						Encoder_Line_Offest_Table[Offest_Table_Count] = (Offest_Differen + Encoder_Line_Offest_Table[Offest_Table_Count])>>1;
-						Encoder_Line_Offest_Table[Offest_Table_Count] = Offest_Differen >>1;
+						Encoder_Line_Offest_Table[Offest_Table_Count] = (Encoder_Line_Offest_Table[Offest_Table_Count] + (Offest_Differen >>1))>>1;
 						if(Offest_Table_Count > 0)
 						//记录数组序号增加
 						Offest_Table_Count --;
@@ -394,7 +396,7 @@ void Model_Control(FOC_Motor *motor)
 			if((Control_Loop.Loop_Count & 0x02) == 0)
 			{
 				//速度回馈
-				Speed_PI.Feedback = Encoder1.Encoder_1MS_Speed * 1.0923; //1.0923 = 65536/60000 1rpm转1dec/ms
+				// Speed_PI.Feedback = Encoder1.Encoder_1MS_Speed * 1.0923; //1.0923 = 65536/60000 1rpm转1dec/ms
 				//目标速度 单位：rpm
 				Speed_PI.Feedback = Control_Loop.Target_Speed;
 				//PI计算
@@ -600,7 +602,7 @@ void Speed_1MS(void)
 	Last_1MS_Speed = Speed;
 	
 	//输出直接编码器速度
-	Encoder1.Encoder_1MS_Speed = Speed;
+	// Encoder1.Encoder_1MS_Speed = Speed;
 
 	//1ms速度计算1个电流环周期机械角速度并乘2
 	//乘3因为当前周期获取得的速度为上一个周期发送指令获取得，在下一周期生效

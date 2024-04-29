@@ -188,50 +188,40 @@
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Rx_Encoder</ItemText>
+          <ItemText>Transfer1</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Transfer1</ItemText>
+          <ItemText>hadc1</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Tx_Encoder</ItemText>
+          <ItemText>hadc2</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>hadc1</ItemText>
+          <ItemText>Control_Word,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>1</WinNumber>
-          <ItemText>hadc2</ItemText>
+          <ItemText>Encoder_Line_Offest_Table,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Control_Word,0x0A</ItemText>
+          <ItemText>Control_Data,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>12</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Encoder_Line_Offest_Table,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>13</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Control_Data,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>14</count>
-          <WinNumber>1</WinNumber>
           <ItemText>Encoder1,0x0A</ItemText>
         </Ww>
         <Ww>
-          <count>15</count>
+          <count>13</count>
           <WinNumber>1</WinNumber>
           <ItemText>Last_Encoder_Position,0x0A</ItemText>
         </Ww>

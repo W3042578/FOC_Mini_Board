@@ -10,20 +10,20 @@ typedef struct _FOC_MOTOR
 	uint32_t	Ld,Lq;			//d和q轴电感量
 	uint32_t	Flux_Linkage;	//永磁体磁链 单位：Wb
 
-	int8_t 		Udc;			//母线电压
-	int32_t 	Ud,Uq;
-	int32_t 	Ualph,Ubeta;
+	int16_t 	Udc;			//母线电压
+	int16_t 	Ud,Uq;
+	int16_t 	Ualph,Ubeta;
 	int16_t 	Ia,Ib;
 	int16_t 	Ia_Offect,Ib_Offect;
 	int16_t 	Ialph,Ibeta;
 	int16_t 	Id,Iq;
-	uint32_t 	Umax;			//pwm输出无法实现100%占空比
+	uint16_t 	Umax;			//pwm输出无法实现100%占空比
 //SVPWM
 	uint16_t 	Ts;				//拟合SVPWM电压参考矢量周期
 	uint32_t 	Uref;			//Ualph和Ubeta直接给出的合成电压平方值
-	int32_t 	U1,U2,U3,m32;	//三相线上电压状态
+	int16_t 	U1,U2,U3,m32;	//三相线上电压状态
 	uint8_t 	Sa,Sb,Sc;
-	int32_t 	Tx,Ty;			
+	int16_t 	Tx,Ty;			
 	uint8_t 	Sector;			//扇区
 		
 	uint16_t	Mechanical_Angle;	//机械角度

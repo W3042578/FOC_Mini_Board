@@ -26,11 +26,6 @@ void Hardware_Init(void)
 	Motor1.Udc = 12;			//母线电压为 12V
 	//此处Td为16位数据，最大值65536，Motor1_Dead_Time不能超过3.5us,否则数据会溢出导致计算错误
 	Motor1.Td = (uint16_t)(8.192 * Motor1_Dead_Time * (Motor1.Ts + 1))>> 9;
-		
-	//编码器
-	Encoder1.Type = 1; 			//SPI通讯编码器
-	Encoder1.Single_Bit = 14;	//14位单圈
-	Encoder1.Multi_Bit = 0;		//多圈位为0
 	
 	
 }
@@ -41,12 +36,13 @@ void Hardware_Init(void)
 void Control_Word_Init(union _Control_Word *Word)
 {
 	Word->All = 0;
+	Word->bits.Encoder_Type = MT6813;
 }
 
 //控制字初始化
 void Control_Data_Init(_Control_Data *Data)
 {
-	Data->Open_Loop_Voltage = 0;		//开环电压置零
+	Data->Open_Loop_Voltage = 2;		//开环电压置零
 	Data->Angle_Initial_Voltage = 5;	//编码器线性校正Ud电压
 	Data->Number_Angle_Offest = 5;		//初始角校正累加次数= 2的n次方
 	Data->Max_Voltage = 12;				//最大母线电压限制
@@ -95,4 +91,37 @@ void Parameter_Init(void)
 
 	//控制环参数初始化
 	Control_Loop_Init(&Control_Loop);
+
+	//编码器数据初始化
+	Encoder_Init(&Encoder1);
+}
+
+//Q7数据格式：int16位数据、1符号位、8整数位、7小数位
+//表示范围-256.9921875 ~ +256.9921875
+int16_t _Data_16_Transfer(float * data_in)
+{
+	int16_t data_out;
+	data_out = *data_in * (1<<8);
+	return data_out;
+}
+
+//状态位操作
+void _SET(uint8_t * data,uint8_t bit)
+{
+	*data = (*data) | bit;
+}
+void _CLEAN(uint8_t * data,uint8_t bit)
+{
+	*data = (*data) & (~bit);
+}
+uint8_t _TEST(uint8_t * data,uint8_t bit)
+{
+	if((*data) & bit != 0)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }

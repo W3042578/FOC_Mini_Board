@@ -6,9 +6,16 @@
 #include "stm32f1xx_hal.h"
  
 
-#define MT6815
 #define Speed_Transfer	6.5536			//速度转换比例  1rpm -> 1 dec_diff/1ms = 6.5536
 
+#define 	BIT0 		0x01
+#define 	BIT1 		0x02
+#define 	BIT2 		0x04
+#define 	BIT3 		0x08
+#define 	BIT4 		0x10
+#define 	BIT5 		0x20
+#define 	BIT6 		0x40
+#define 	BIT7 		0x80
 
 union _Control_Word
 {
@@ -22,6 +29,7 @@ union _Control_Word
 		uint8_t		Clear_Position:1;	//重置当前位置为0
 		uint8_t		MTPA:1;				//电流环MTPA模式控制
 		uint8_t		Current_Forward:1;	//电流环前馈解耦控制
+		uint8_t		Encoder_Type:2;		//编码器类型
 	}bits;
 };
 
@@ -92,5 +100,13 @@ void Hardware_Init(void);//硬件参数初始化
 void Error_Message_Init(union _Error_Message *Message);//控制字初始化
 void Work_Status_Init(union _Work_Status *Status);//错误状态初始化
 void Parameter_Init(void);		//上层参数初始化
+
+//输入浮点数转换整形
+int16_t _Data_16_Transfer(float * data_in);
+
+//标志位处理
+void _SET(uint8_t * data,uint8_t bit);
+void _CLEAN(uint8_t * data,uint8_t bit);
+uint8_t _TEST(uint8_t * data,uint8_t bit);
 
 #endif

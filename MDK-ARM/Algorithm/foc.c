@@ -9,8 +9,9 @@
 FOC_Motor Motor1;		
 
 //编码器输入数据统一为16位，进行查表
-//电流12位采样，1A输入对应2048,1V电压控制为2048,保持单位统一
+//电流12位采样
 //电流Clark变换 等幅值变换
+//Q7数据格式：int16位数据、1符号位、8整数位、7小数位
 void Clark_Transform(FOC_Motor *motor)
 {
 	motor->Ialph = motor->Ia;
@@ -96,19 +97,16 @@ void SVPWM(FOC_Motor *motor)
 			motor->Ty = 0;
 		break;
 	}
-	//Tx,Ty转换为时间比例，使用Ts表示浮点1
-	motor->Tx = (motor->Tx * 1774 / motor->Udc) >> 9; //1774>>10=1774/1024=sqrt(3) Tx按2048*实际电压值给入,Udc同比例放大2048,4096*sqrt(3)*Tx/Udc*2048
-	motor->Ty = (motor->Ty * 1774 / motor->Udc) >> 9;
+	//Tx,Ty转换为时间比例，使用Ts计数值表示
+	motor->Tx = (motor->Tx * motor->Ts * 1774 / motor->Udc) >> 9; //1774>>10=1774/1024=sqrt(3)
+	motor->Ty = (motor->Ty * motor->Ts * 1774 / motor->Udc) >> 9;
 	//两相邻矢量作用时间限制，过调制限制或者弱磁MTPA
-	if((motor->Tx + motor->Ty) > 3932)//调制限制 4096为1  0.96 * 4096 = 3932  限制满输出，留出采样时间
+	if((motor->Tx + motor->Ty) > motor->Ts)//调制限制 4096为1  0.96 * 4096 = 3932  限制满输出，留出采样时间
 	{
-		uint32_t data_32 = motor->Tx + motor->Ty;
-		motor->Tx = motor->Tx * 3932 / data_32;
-		motor->Ty = motor->Ty * 3932 / data_32;
+		uint16_t data_16 = motor->Tx + motor->Ty;
+		motor->Tx = motor->Tx  / data_16;
+		motor->Ty = motor->Ty  / data_16;
 	}
-	//将比例转为由Ts计数值表示
-	motor->Tx = (motor->Tx * motor->Ts) >> 12;
-	motor->Ty = (motor->Ty * motor->Ts) >> 12;
 }
 
 //T0、Tx、Ty比例分配三相PWM计数值
@@ -165,16 +163,16 @@ void PWM_Time_Count(FOC_Motor *motor)
 			break;
 		}
 		
-		//电机控制死区补偿
-		Dead_Time_Compensate(motor);
+//		//电机控制死区补偿
+		// Dead_Time_Compensate(motor);
 
 		//未输出状态避免死区补偿影响
-		if((motor->Sector == 0) || (motor->Sector == 7))
-		{
-			motor->Ta = motor->Ts >>1;//默认输出50%占空比
-			motor->Tb = motor->Ts >>1;
-			motor->Tc = motor->Ts >>1;	
-		}
+		// if((motor->Sector == 0) || (motor->Sector == 7))
+		// {
+		// 	motor->Ta = motor->Ts >>1;//默认输出50%占空比
+		// 	motor->Tb = motor->Ts >>1;
+		// 	motor->Tc = motor->Ts >>1;	
+		// }
 		
 	}
 	//避免0PWM输出时定时器模块工作不正常
