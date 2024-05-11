@@ -18,7 +18,7 @@ int16_t Number_Encoder_Direction;		//待定
 void Hardware_Init(void)
 {
 	//MCU配置
-	//设置工作时间Ts = 2*(2+1)*(1499+1)/72M = 125us  中心对齐模式x2
+	//设置工作时间Ts = 2*(2+1)*(1499+1)/72M = 125us  中心对齐模式x2  f103 72M主频
 	Motor1.Ts = 2249;//16k频率下定时器计数值  满额2249  
 	
 	//电机
