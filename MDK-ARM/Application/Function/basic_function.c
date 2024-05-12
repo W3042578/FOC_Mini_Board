@@ -15,27 +15,9 @@
 //功能层&底层交互
 //主要存放出于功能层需要对底层修改的函数
 
-
-//定义全局变量
-//前一时刻状态变量保存
-uint8_t		Last_Work_Model;		//上一次的工作模式
-uint8_t		Last_PWM_Enable;		//上一次使能状态
-int32_t		Last_Encoder_Position;	//上一次编码器的位置
-int32_t		Last_1MS_Speed;			//上一次1ms编码器位置计算得速度
-
-//电流采样
-uint32_t 	ADC_Data[2];			//ADC采样DMA储存数据地址
-
-//编码器校准
-uint16_t	Offest_Time_Basic;		//时基值	8kHz = 1:125us	16kHz = 1:62.5us	32kHz = 1:31.25us
-uint16_t	Number_Offest_Count;	//编码器累加实际次数
-uint32_t	Offest_Integral;		//编码器累加存储值
-uint16_t	Virtual_Angle;			//虚拟实际角度
-uint16_t	Offest_Table_Count;		//线性补偿计数
-uint8_t		Offest_Model;			//校正内置模式 1：零位校正 2：线性正向 3：线性反向
-
 //底层配置
 //底层初始化配置
+uint32_t ADC_Data[2];	//同步常规采样参数
 void STM32_Infrastructure_Init(void)
 {
 	//校准ADC采样
@@ -72,14 +54,13 @@ void STM32_Infrastructure_Init(void)
 	
 }
 
-//STM32 HAL 三相PWM比较值设置
+//STM32 HAL 三相PWM比较值设置输出
 void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
 {
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor->Ta);
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor->Tb);
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_3,motor->Tc);
 }
-
 
 //电流采样
 //获取两相电流采样修正值  包含偏置电压
@@ -106,7 +87,6 @@ void ADC_Current_Offest(FOC_Motor *motor)
 	motor->Ib_Offect = Add_ADC_Offect_V >> 5;
 	motor->Ia = motor->Ib =0;	
 }
-
 
 //编码器&角度
 //获取编码器角度并转换为电角度
@@ -150,52 +130,53 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)
 }
 
 //编码器校准 获取编码器对应alpha轴零位修正角度值，判断编码器方向与q轴正方向是否一致
+Encoder_Offest Encoder_Offest1;		//编码器修正参数
 void Get_Initial_Angle_Offest(FOC_Motor *motor)
 {
 	int32_t Offest_Differen;	//编码器实际值与虚拟值偏差
 	//编码器零位校正
 	if(Control_Word.bits.Work_Model == 1 && Control_Word.bits.PWM_Enable == 1)//判断工作模式1且进入PWM使能
 	{
-		if(Offest_Time_Basic > 0)	//时基延时计数
-			Offest_Time_Basic --;	//时基值	8kHz = 1:125us	16kHz = 1:62.5us	32kHz = 1:31.25us
+		if(Encoder_Offest1.Offest_Time_Basic > 0)	//时基延时计数
+			Encoder_Offest1.Offest_Time_Basic --;	//时基值	8kHz = 1:125us	16kHz = 1:62.5us	32kHz = 1:31.25us
 		else	//时基值到达
 		{
 			//校正内置模式判断
 			//校正模式中包含三种模式：1）初始角校正 2）线性正向 3）线性反向
-			switch (Offest_Model)
+			switch (Encoder_Offest1.Offest_Model)
 			{
 				case 1:		//零位校正记录
 					//零位校正值累加
-					Offest_Integral = Offest_Integral + Encoder1.Encoder_Pulse;
+					Encoder_Offest1.Offest_Integral = Encoder_Offest1.Offest_Integral + Encoder1.Encoder_Pulse;
 					//零位每次记录时基值 320*62.5us = 20ms
-					Offest_Time_Basic = 320;
+					Encoder_Offest1.Offest_Time_Basic = 320;
 					//累加次数结束
-					Number_Offest_Count ++;
+					Encoder_Offest1.Number_Offest_Count ++;
 					//根据累加次数判断是否结束零位校正
-					if(Number_Offest_Count > (1 << Control_Data.Number_Angle_Offest))
+					if(Encoder_Offest1.Number_Offest_Count > (1 << Control_Data.Number_Angle_Offest))
 					{
 						//更新零位修正值
-						motor->Initial_Angle_Offset = Offest_Integral >> (Control_Data.Number_Angle_Offest);
+						motor->Initial_Angle_Offset = Encoder_Offest1.Offest_Integral >> (Control_Data.Number_Angle_Offest);
 						//累加次数清零
-						Number_Offest_Count = 0;
+						Encoder_Offest1.Number_Offest_Count = 0;
 						//进入线性正向
-						Offest_Model = 2;
+						Encoder_Offest1.Offest_Model = 2;
 						//清零当前位置
 						Encoder1.Encode_Position = 0;
 						//清零线性校正数组计数
-						Offest_Table_Count = 0;
+						Encoder_Offest1.Offest_Table_Count = 0;
 						//清零线性校正虚拟角
-						Virtual_Angle = 0;
+						Encoder_Offest1.Virtual_Angle = 0;
 						//清零数组序号
-						Offest_Table_Count = 0;
+						Encoder_Offest1.Offest_Table_Count = 0;
 						
-						Offest_Time_Basic = 4;
+						Encoder_Offest1.Offest_Time_Basic = 4;
 					}
 					break;
 
 				case 2:		//线性正向记录
 					//虚拟角度对256快速取余
-					if((Virtual_Angle & 0x00ff) == 0)
+					if((Encoder_Offest1.Virtual_Angle & 0x00ff) == 0)
 					{
 						//获取编码器修正零位后数值
 //						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
@@ -206,32 +187,32 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 						if(Offest_Differen > 256 || Offest_Differen < -256)
 							motor->Offest_Direction = 1;
 						//正向校正时记录偏差	
-						Encoder_Line_Offest_Table[Offest_Table_Count] = Offest_Differen>>1;
+						Encoder_Line_Offest_Table[Encoder_Offest1.Offest_Table_Count] = Offest_Differen>>1;
 						//记录数组序号增加
-						Offest_Table_Count ++;
+						Encoder_Offest1.Offest_Table_Count ++;
 					}
 					//8*62.5us = 500us
-					Offest_Time_Basic = 4;
+					Encoder_Offest1.Offest_Time_Basic = 4;
 					//判断虚拟角度值是否允许增加 ，避免溢出回零
-					if(Virtual_Angle < 65535)
+					if(Encoder_Offest1.Virtual_Angle < 65535)
 					{
 						//虚拟角度值增加
-						Virtual_Angle ++;
+						Encoder_Offest1.Virtual_Angle ++;
 					}
-					else if(Virtual_Angle == 65535)
+					else if(Encoder_Offest1.Virtual_Angle == 65535)
 					{
 						//进入线性反向
-						Offest_Model = 3;
+						Encoder_Offest1.Offest_Model = 3;
 						//进入模式3前等待时间 320 * 62.5us = 20ms
-						Offest_Time_Basic = 4;
+						Encoder_Offest1.Offest_Time_Basic = 4;
 						//数组序号回退一步从255开始
-						Offest_Table_Count --;
+						Encoder_Offest1.Offest_Table_Count --;
 					}
 					break;
 
 				case 3:		//线性反向记录
 					//虚拟角度对256快速取余
-					if((Virtual_Angle & 0x00ff) == 0)
+					if((Encoder_Offest1.Virtual_Angle & 0x00ff) == 0)
 					{
 						//获取编码器修正零位后数值
 //						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
@@ -243,23 +224,24 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 							motor->Offest_Direction = 1;
 						//正向校正时记录偏差	
 //						Encoder_Line_Offest_Table[Offest_Table_Count] = (Offest_Differen + Encoder_Line_Offest_Table[Offest_Table_Count])>>1;
-						Encoder_Line_Offest_Table[Offest_Table_Count] = (Encoder_Line_Offest_Table[Offest_Table_Count] + (Offest_Differen >>1))>>1;
-						if(Offest_Table_Count > 0)
+						Encoder_Line_Offest_Table[Encoder_Offest1.Offest_Table_Count] = (Encoder_Line_Offest_Table[Encoder_Offest1.Offest_Table_Count] + \
+						(Offest_Differen >>1))>>1;
+						if(Encoder_Offest1.Offest_Table_Count > 0)
 						//记录数组序号增加
-						Offest_Table_Count --;
+						Encoder_Offest1.Offest_Table_Count --;
 					}
 					//8*62.5us = 500us
-					Offest_Time_Basic = 4;
+					Encoder_Offest1.Offest_Time_Basic = 4;
 					//判断虚拟角度值是否允许减少 ，避免溢出回零
-					if(Virtual_Angle > 0)
+					if(Encoder_Offest1.Virtual_Angle > 0)
 					{
 						//虚拟角度值增加
-						Virtual_Angle --;
+						Encoder_Offest1.Virtual_Angle --;
 					}
-					else if(Virtual_Angle == 0)	//校正完成
+					else if(Encoder_Offest1.Virtual_Angle == 0)	//校正完成
 					{
 						//初始化校正模式
-						Offest_Model = 1;
+						Encoder_Offest1.Offest_Model = 1;
 						//清除控制模式
 						Control_Word.bits.Work_Model = 0;
 						//退出校正模式并关闭PWM使能		
@@ -280,18 +262,28 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 	}
 }
 
-
 //应用层功能
 //工作模式控制
-void Model_Control(FOC_Motor *motor)
+#define		EOCODER_OFFEST		0x01
+#define		DUTY_CONTROL		0x02
+#define		OPEN_VOLATGE		0x03
+#define		NORMAL_CURRENT		0x04
+#define		NORMAL_SPEED		0x05
+#define		NORMAL_POSITION		0x06
+#define		PHASE_LOCK			0x07
+Motor_Status Motor_Status1;		//电机状态参数
+uint8_t Model_Control(FOC_Motor *motor)
 {
-	uint16_t virtual_eletri_angle;	//虚拟电角度,编码器线性度校正用
-		
+	uint16_t 	virtual_eletri_angle;	//虚拟电角度,编码器线性度校正用
+	uint8_t		work_model;			//电流环工作模式
+
+	work_model = Control_Word.bits.Work_Model;
+
 	//模式切换判断
-	if(Last_Work_Model != Control_Word.bits.Work_Model)
+	if(Motor_Status1.Last_Work_Model != Control_Word.bits.Work_Model)
 	{
 		if(Control_Word.bits.PWM_Enable == 1)//PWM使能输出情况下不允许更改工作模式
-			Control_Word.bits.Work_Model = Last_Work_Model;
+			Control_Word.bits.Work_Model = Motor_Status1.Last_Work_Model;
 		else							//PWM非使能允许模式切换，但需要清零各PID器中的积分量
 		{
 			Current_Q_PID.Integral_Sum = 0;
@@ -300,13 +292,17 @@ void Model_Control(FOC_Motor *motor)
 			Position_PI.Integral_Sum = 0;
 		}
 	}
+	
 	//根据控制字判断工作环
-	switch(Control_Word.bits.Work_Model)
+	switch(work_model)
 	{	
 		//校正模式：初始角度校正和线性补偿
-		//校正模式中包含三种模式：1）初始角校正 2）线性正向 3）线性反向
-		case 1:
-			motor->Ud = 2048 * Control_Data.Angle_Initial_Voltage;//Ualph = 3V
+#define		OFFEST_INIT			0x01	//初始角校正
+#define		POSITIVE_OFFEST		0x02	//线性正向
+#define		NEGITIVE_OFFEST		0x03	//线性反向
+
+		case EOCODER_OFFEST:
+			motor->Ud = Control_Data.Angle_Initial_Voltage * (1 << _INIT_SCALE);//Ualph = 3V
 			motor->Uq = 0;
 			//判断进入校正起始
 			if(Work_Status.bits.Angle_Offest == 0)
@@ -314,28 +310,29 @@ void Model_Control(FOC_Motor *motor)
 				//校正模式仅起始进入一次
 				Work_Status.bits.Angle_Offest = 1;
 				//校正内置模式从零位校正开始
-				Offest_Model = 1;	
+				Encoder_Offest1.Offest_Model = 1;	
 				//清零零位校正角
 				motor->Initial_Angle_Offset = 0;
 				//清零编码器累加值
-				Offest_Integral = 0;
+				Encoder_Offest1.Offest_Integral = 0;
 				//零位第一次记录时基值 200ms 3200*62.5us 设置大些让电机拖动稳定后再记录
-				Offest_Time_Basic = 3200;	
+				Encoder_Offest1.Offest_Time_Basic = 3200;	
 			}
 
 			//校正内置模式判断
 			//零位校正
-			if(Offest_Model == 1)	
+			if(Encoder_Offest1.Offest_Model == OFFEST_INIT)	
 			{	
 				//设置零位对应静态坐标电压
 				motor->Sin_Angle = 0;
 				motor->Cos_Angle = 4096;
 			}
 			//线性校正
-			else if ((Offest_Model == 2) || (Offest_Model == 3))
+			else if ((Encoder_Offest1.Offest_Model == POSITIVE_OFFEST) || \
+			(Encoder_Offest1.Offest_Model == NEGITIVE_OFFEST))
 			{
 				//计算虚拟机械角转虚拟电角度
-				virtual_eletri_angle = (motor->Polar * Virtual_Angle) & 0xFFFE;
+				virtual_eletri_angle = (motor->Polar * Encoder_Offest1.Virtual_Angle) & 0xFFFE;
 				//查表获取电角度对应三角函数值
 				motor->Sin_Angle = SIN_COS_TABLE[(virtual_eletri_angle >> 7)];
 				motor->Cos_Angle = SIN_COS_TABLE[((virtual_eletri_angle >> 7)+128) & 0x1ff];
@@ -343,7 +340,7 @@ void Model_Control(FOC_Motor *motor)
 		break;
 		
 		//占空比模式：按照设置输出指定单相满额占空比（考虑采样最大98%）
-		case 2:
+		case DUTY_CONTROL:
 			//对输入占空比数值作限制
 			if(Control_Data.Duty_Model_A > 96)
 			{
@@ -357,25 +354,28 @@ void Model_Control(FOC_Motor *motor)
 			{
 				Control_Data.Duty_Model_C = 96;
 			}
+			motor->Ta = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_A) * motor->Ts)) >> 8;
+			motor->Tb = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_B) * motor->Ts)) >> 8;
+			motor->Tc = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_C) * motor->Ts)) >> 8;
 		break;
 		
 		//电压开环模式：按照设置的Uq、Ud电压开环控制
-		case 3:
+		case OPEN_VOLATGE:
 			motor->Ud = 0;
 			if(Control_Word.bits.Work_Direction == 0)	//正转
-				motor->Uq = Control_Data.Open_Loop_Voltage * 2048;
+				motor->Uq = Control_Data.Open_Loop_Voltage * (1 << _INIT_SCALE);
 			else						//反转
-				motor->Uq = - Control_Data.Open_Loop_Voltage * 2048;
+				motor->Uq = - Control_Data.Open_Loop_Voltage * (1 << _INIT_SCALE);
 		break;
 		
 		//速度环模拟无感控制：模拟速度增加控制速度开环输出
 		//锁相环估算速度
-		case 7:
+		case PHASE_LOCK:
 			
 		break;
 		
 		//位置环模式：PID控制相对位置闭环输出
-		case 6:
+		case NORMAL_POSITION:
 			//快速对4取余，速度环频率为电流环0.25倍
 			if((Control_Loop.Loop_Count & 0x04) == 0)
 			{
@@ -391,7 +391,7 @@ void Model_Control(FOC_Motor *motor)
 		
 
 		//速度环模式：PID控制速度闭环输出
-		case 5:
+		case NORMAL_SPEED:
 			//快速对2取余，速度环频率为电流环一半
 			if((Control_Loop.Loop_Count & 0x02) == 0)
 			{
@@ -406,7 +406,7 @@ void Model_Control(FOC_Motor *motor)
 			}
 			
 		//电流环模式：PID控制电流Iq、Id闭环输出
-		case 4:
+		case NORMAL_CURRENT:
 			//判断是否进行MTPA控制且控制模式为电流环
 			if((Control_Word.bits.MTPA == 1) && (Control_Word.bits.Work_Model == 4))
 				MTPA_Control(motor);
@@ -433,7 +433,7 @@ void Model_Control(FOC_Motor *motor)
 		break;
 	}
 	//保存上一次控制模式
-	Last_Work_Model = Control_Word.bits.Work_Model;
+	Motor_Status1.Last_Work_Model = Control_Word.bits.Work_Model;
 	//环路计数累加
 	Control_Loop.Loop_Count ++;
 	//环路计数到达限制清零
@@ -443,6 +443,8 @@ void Model_Control(FOC_Motor *motor)
 		//1ms速度计算
 		Speed_1MS();
 	}
+
+	return work_model;
 }
 
 //PWM逻辑使能控制
@@ -460,7 +462,7 @@ void Enable_Logic_Control(void)
 		Work_Status.bits.Enable_Status = 0;
 	}
 	//非紧急停止情况下，判断当前使能状态是否改变
-	else if(Last_PWM_Enable != Control_Word.bits.PWM_Enable)
+	else if(Motor_Status1.Last_PWM_Enable != Control_Word.bits.PWM_Enable)
 	{
 		if(Control_Word.bits.PWM_Enable == 1)
 		{
@@ -485,93 +487,11 @@ void Enable_Logic_Control(void)
 			Work_Status.bits.Enable_Status = 0;
 		}
 		//更新当前PWM使能状态
-		Last_PWM_Enable = Control_Word.bits.PWM_Enable;
+		Motor_Status1.Last_PWM_Enable = Control_Word.bits.PWM_Enable;
 	}
 }
 
 
-//应用算法
-//最大转矩比控制MTPA
-void MTPA_Control(FOC_Motor *motor)
-{
-	//根据输入合成电流Is,已知Ld、Lq和永磁体磁链计算最大力矩输出对应Id、Iq
-	
-}
-
-//电流前馈解耦 根据上一次Iq、Id电流计算当前Uq、Ud前馈量,提升响应
-void Current_Forward_Feedback(FOC_Motor *motor)
-{
-	//此处Id、Iq为上一次电流采样转换获得
-	motor->Uq = motor->Uq + motor->Elecrical_Speed * (motor->Flux_Linkage + motor->Ld * motor->Id);
-	motor->Ud = motor->Ud - motor->Elecrical_Speed * motor->Lq * motor->Id;
-}
-
-//电机控制死区补偿
-void Dead_Time_Compensate(FOC_Motor *motor)
-{
-	//计算合成电流Is在静态坐标下离alpha轴角度，根据角度判断三相电流极性，再根据极性设置补偿时间增减
-	//电流极性扇区判断
-	uint8_t	dead_sector;
-
-	if(motor->Ialph > 0)
-	{
-		if((2 * motor->Ibeta - motor->Ialph <= 0) && (2 * motor->Ibeta + motor->Ialph > 0))
-			dead_sector = 1;
-		else if(2 * motor->Ibeta - motor->Ialph > 0)
-			dead_sector = 2;
-		else
-			dead_sector = 6;
-	}
-	else
-	{
-		if((2 * motor->Ibeta - motor->Ialph >= 0) && (2 * motor->Ibeta + motor->Ialph < 0))
-			dead_sector = 4;
-		else if(2 * motor->Ibeta - motor->Ialph < 0)
-			dead_sector = 5;
-		else
-			dead_sector = 3;
-	}
-	//死区时间小于三相占空比才作用
-	if((motor->Ta > motor->Td) && (motor->Tb > motor->Td) && (motor->Tc > motor->Td))
-	{
-		switch(dead_sector)
-		{
-		case 1:
-			motor->Ta = motor->Ta + (motor->Td >> 1);
-			motor->Tb = motor->Tb - (motor->Td >> 1);
-			motor->Tc = motor->Tc - (motor->Td >> 1);
-		break;
-		case 2:
-			motor->Ta = motor->Ta + (motor->Td >> 1);
-			motor->Tb = motor->Tb + (motor->Td >> 1);
-			motor->Tc = motor->Tc - (motor->Td >> 1);
-		break;
-		case 3:
-			motor->Ta = motor->Ta - (motor->Td >> 1);
-			motor->Tb = motor->Tb + (motor->Td >> 1);
-			motor->Tc = motor->Tc - (motor->Td >> 1);
-		break;
-		case 4:
-			motor->Ta = motor->Ta - (motor->Td >> 1);
-			motor->Tb = motor->Tb + (motor->Td >> 1);
-			motor->Tc = motor->Tc + (motor->Td >> 1);
-		break;
-		case 5:
-			motor->Ta = motor->Ta - (motor->Td >> 1);
-			motor->Tb = motor->Tb - (motor->Td >> 1);
-			motor->Tc = motor->Tc + (motor->Td >> 1);
-		break;
-		case 6:
-			motor->Ta = motor->Ta + (motor->Td >> 1);
-			motor->Tb = motor->Tb - (motor->Td >> 1);
-			motor->Tc = motor->Tc + (motor->Td >> 1);
-		break;
-		default:
-			
-		break;
-		}
-	}
-}
 
 
 //1ms速度计算
@@ -583,23 +503,23 @@ void Speed_1MS(void)
 	{
 		Work_Status.bits.Interrupt_1MS_Init = 1;
 		//令过去位置对于当前位置，避免起步错误速度
-		Last_Encoder_Position = Encoder1.Encode_Position;
+		Motor_Status1.Last_Encoder_Position = Encoder1.Encode_Position;
 	}
 	//1ms速度等于 当前位置 - 1ms前位置
-	Speed = Encoder1.Encode_Position - Last_Encoder_Position;
+	Speed = Encoder1.Encode_Position - Motor_Status1.Last_Encoder_Position;
 	//对单次速度变化作限制
-	if(Last_1MS_Speed - Speed > 250)
-		Speed = Last_1MS_Speed;
-	if(Speed - Last_1MS_Speed > 250)
-		Speed = Last_1MS_Speed;
+	if(Motor_Status1.Last_1MS_Speed - Speed > 250)
+		Speed = Motor_Status1.Last_1MS_Speed;
+	if(Speed - Motor_Status1.Last_1MS_Speed > 250)
+		Speed = Motor_Status1.Last_1MS_Speed;
 
 	//编码器速度范围限制,超出限制以上一次速度代替
 	if((Speed > 32763) || (Speed < -32763))
-		Speed = Last_1MS_Speed;
+		Speed = Motor_Status1.Last_1MS_Speed;
 	
 	//更新过去1ms时间编码器位置、1ms编码器速度
-	Last_Encoder_Position = Encoder1.Encode_Position;
-	Last_1MS_Speed = Speed;
+	Motor_Status1.Last_Encoder_Position = Encoder1.Encode_Position;
+	Motor_Status1.Last_1MS_Speed = Speed;
 	
 	//输出直接编码器速度
 	// Encoder1.Encoder_1MS_Speed = Speed;

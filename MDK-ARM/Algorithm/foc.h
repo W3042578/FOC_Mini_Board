@@ -3,6 +3,8 @@
 
 #include "stm32f1xx_hal.h"
 
+//为避免整形数据相除带小数部分丢失，进行数据比例放大 1:2^(_INIT_SCALE)
+#define		_INIT_SCALE		12 
 typedef struct _FOC_MOTOR
 {
 //电机参数
@@ -10,7 +12,7 @@ typedef struct _FOC_MOTOR
 	uint32_t	Ld,Lq;			//d和q轴电感量
 	uint32_t	Flux_Linkage;	//永磁体磁链 单位：Wb
 
-	int16_t 	Udc;			//母线电压
+	uint16_t 	Udc;			//母线电压
 	int16_t 	Ud,Uq;
 	int16_t 	Ualph,Ubeta;
 	int16_t 	Ia,Ib;
@@ -18,14 +20,7 @@ typedef struct _FOC_MOTOR
 	int16_t 	Ialph,Ibeta;
 	int16_t 	Id,Iq;
 	uint16_t 	Umax;			//pwm输出无法实现100%占空比
-//SVPWM
 	uint16_t 	Ts;				//拟合SVPWM电压参考矢量周期
-	uint32_t 	Uref;			//Ualph和Ubeta直接给出的合成电压平方值
-	int16_t 	U1,U2,U3,m32;	//三相线上电压状态
-	uint8_t 	Sa,Sb,Sc;
-	int16_t 	Tx,Ty;			
-	uint8_t 	Sector;			//扇区
-		
 	uint16_t	Mechanical_Angle;	//机械角度
 	uint16_t 	Elecrical_Angle;	//电气角度
 	uint32_t 	Initial_Angle_Offset;	//零位修正角，对齐alpha轴
@@ -48,9 +43,15 @@ void Clark_Transform(FOC_Motor *motor);
 void Park_Transform(FOC_Motor *motor);
 void Inverse_Park_Transform(FOC_Motor *motor);
 void SVPWM(FOC_Motor *motor);
-void PWM_Time_Count(FOC_Motor *motor);
 void FOC_Control(FOC_Motor *motor);
 
+//应用算法
+//最大转矩比控制MTPA
+void MTPA_Control(FOC_Motor *motor);
+//电流前馈解耦
+void Current_Forward_Feedback(FOC_Motor *motor);
+//死区补偿
+void Dead_Time_Compensate(FOC_Motor *motor);
 
 
 #endif
