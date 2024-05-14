@@ -28,7 +28,7 @@ typedef struct _FOC_MOTOR
 	int32_t		Elecrical_Speed;	//电气转速We 单位rad/s
 	int16_t 	Sin_Angle;			//电角度sin、cos值
 	int16_t 	Cos_Angle;
-	int32_t 	Ta,Tb,Tc;			//三相分配上桥打开时间（1：上桥打开，下桥关闭，0：下桥打开，上桥关闭）
+	uint16_t 	Ta,Tb,Tc;			//三相分配上桥打开时间（1：上桥打开，下桥关闭，0：下桥打开，上桥关闭）
 	uint16_t	Td;			//死区时间对应计数值
 	
 	uint8_t 	Direction;			//电机工作方向

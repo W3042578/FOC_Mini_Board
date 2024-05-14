@@ -7,15 +7,16 @@
 
 //定义电机结构体Motor1
 FOC_Motor Motor1;		
-
+// uint16_t test1,test2,test3;
 //编码器输入数据统一为16位，进行查表
 //电流12位采样
-//电流Clark变换 等幅值变换
-//Q7数据格式：int16位数据、1符号位、8整数位、7小数位
+#define SQRT3		1.73206
+#define SQRT3_2		0.86603
+#define SQRT3_3		0.57735
 void Clark_Transform(FOC_Motor *motor)
 {
 	motor->Ialph = motor->Ia;
-	motor->Ibeta = (591 * motor->Ia + 1182 * motor->Ib)>>10;//591/1024=sqrt(3)/3
+	motor->Ibeta = SQRT3_3 * motor->Ia + (motor->Ib >> 1);
 }
 
 //电流Park变换
@@ -39,16 +40,16 @@ void Inverse_Park_Transform(FOC_Motor *motor)
 void SVPWM(FOC_Motor *motor)
 {
 	
-	int16_t u1,u2,u3;			//SVPWM扇区判断电压
-	int16_t u_lead,u_backward;	//矢量圆分解先后电压
-	uint16_t time_lead,time_backward;	//矢量圆分解电压作用时间
-	uint8_t n_sector,sector;	//扇区判断数
-	uint8_t sector_single = 0;	//扇区判断标志位
-	
+	int16_t 	u1,u2,u3;			//SVPWM扇区判断电压
+	int16_t 	u_lead,u_backward;	//矢量圆分解先后电压
+	uint16_t 	time_lead,time_backward;	//矢量圆分解电压作用时间
+	uint8_t 	sector;				//扇区判断数
+	uint8_t 	sector_single = 0;	//扇区判断标志位
+
 	//扇区判断
 	u1 = motor->Ubeta;
-	u2 = (3547 * motor->Ualph - 2048 * motor->Ubeta) >>12;  // 3547/4096=sqrt(3)/2
-	u3 = (-3547 * motor->Ualph - 2048 * motor->Ubeta) >>12;
+	u2 = SQRT3_2 * motor->Ualph - (motor->Ubeta >> 1);
+	u3 = -SQRT3_2 * motor->Ualph - (motor->Ubeta >> 1);
 	
 	if(u1 > 0)
 		sector_single |= 0x01;
@@ -59,11 +60,11 @@ void SVPWM(FOC_Motor *motor)
 	else
 		sector_single &= 0xFD;
 	if(u3 > 0)
-		sector_single &= 0x04;
+		sector_single |= 0x04;
 	else
 		sector_single &= 0xFB;
 	//扇区电压作用量计算
-	switch(n_sector)
+	switch(sector_single)
 	{
 		case 1: 
 			sector = 2;
@@ -101,15 +102,18 @@ void SVPWM(FOC_Motor *motor)
 			u_backward = 0;
 		break;
 	}
+	
 	//使用Ts计数值表示满占空比
-	time_lead = ((u_lead * motor->Ts * 1774 / motor->Udc) >> 10) >> (_INIT_SCALE); //1774>>10=1774/1024=sqrt(3)
-	time_backward = ((u_backward * motor->Ts * 1774 / motor->Udc) >> 10) >> (_INIT_SCALE);
+	time_lead = ((uint32_t)(SQRT3 * u_lead * motor->Ts / motor->Udc)) >> _INIT_SCALE;
+	time_backward = ((uint32_t)(SQRT3 * u_backward * motor->Ts /motor->Udc)) >> _INIT_SCALE;
+
 	//两相邻矢量作用时间限制，过调制限制或者弱磁MTPA
-	if((time_lead + time_backward) > (0.96 * motor->Ts))//调制限制 4096为1  0.96 * 4096 = 3932  限制满输出，留出采样时间
+	uint16_t time_all = time_backward + time_lead;
+	uint16_t time_limit = 0.96 * motor->Ts;
+	if(time_all > time_limit)//限制满输出，留出采样时间,超出缩放
 	{
-		uint16_t data_16 = time_lead + time_backward;
-		time_lead = time_lead  / data_16;
-		time_backward = time_backward  / data_16;
+		time_lead = time_limit * time_lead  / time_all;
+		time_backward = time_limit * time_backward  / time_all;
 	}
 
 	//分配三相PWM计数值
