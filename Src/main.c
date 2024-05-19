@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2023 STMicroelectronics.
+  * Copyright (c) 2024 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -28,10 +28,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "stdio.h"
-#include "control_loop.h"
-#include "parameter.h"
-#include "basic_function.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,6 +38,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,9 +50,6 @@
 
 /* USER CODE BEGIN PV */
 
-//编码器获取数据查看验证 测试用
-uint16_t Transfer1[3];
-//uint16_t Angle_Transfer[2];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,22 +61,6 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-//重定向c库函数printf到串口DEBUG_USART，重定向后可使用printf函数
-int fputc(int ch, FILE *f)
-{
-	/* 发送一个字节数据到串口DEBUG_USART */
-	HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 1000);	
-	
-	return (ch);
-}
- 
-//重定向c库函数scanf到串口DEBUG_USART，重写向后可使用scanf、getchar等函数
-int fgetc(FILE *f)
-{		
-	int ch;
-	HAL_UART_Receive(&huart1, (uint8_t *)&ch, 1, 1000);	
-	return (ch);
-}
 /* USER CODE END 0 */
 
 /**
@@ -107,12 +86,12 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-	
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-//  MX_DMA_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_ADC1_Init();
   MX_ADC2_Init();
@@ -121,21 +100,6 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-	
-  //底层初始化配置
-  STM32_Infrastructure_Init();
-
-	//上层参数初始化
-	Parameter_Init();
-	
-	//获取两相电流采样修正值
-	ADC_Current_Offest(&Motor1);
-
-	//点灯
-	HAL_GPIO_WritePin(LED_ERR_GPIO_Port, LED_ERR_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(LED_Status_GPIO_Port, LED_Status_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(LED_RUN_GPIO_Port, LED_RUN_Pin, GPIO_PIN_RESET);
-
 
   /* USER CODE END 2 */
 
@@ -146,9 +110,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		
-	  HAL_Delay(10);
-
   }
   /* USER CODE END 3 */
 }
@@ -200,45 +161,6 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-//ADC注入采样完成回调函数
-void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
-{
-	
-	HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_SET);//环路执行周期测试
-
-	//获取a,b相电流采样值  开环给零电压测试 离开电机方向为负因此电流计算取符号
-	Motor1.Ia = -(HAL_ADCEx_InjectedGetValue(&hadc1,ADC_INJECTED_RANK_1) - Motor1.Ia_Offect);
-	Motor1.Ib = -(HAL_ADCEx_InjectedGetValue(&hadc2,ADC_INJECTED_RANK_1) - Motor1.Ib_Offect);
-	
-
-	//PWM使能控制
-	Enable_Logic_Control();
-	
-	//进行FOC控制
-	FOC_Control(&Motor1);
-	
-	//STM32 HAL 三相PWM比较值设置
-	STM32_HAL_PWM_SET_Compare(&Motor1);
-	
-	//初始角校准,累加求和
-	Get_Initial_Angle_Offest(&Motor1);
-	
-	//在同步注入中断回调中hal库默认关闭该中断使能，因此在执行完注入中断后再次打开中断使能
-	__HAL_ADC_ENABLE_IT(&hadc1, ADC_IT_JEOC);
-	
-	HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_RESET); //环路执行周期测试
-
-}
-//定时器中断回调函数 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-	if(htim == &htim2)
-	{
-		//1ms中断回调函数
-		Interrupt_1MS();
-	}	
-}
 
 /* USER CODE END 4 */
 
