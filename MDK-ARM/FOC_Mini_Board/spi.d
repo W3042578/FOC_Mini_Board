@@ -2,7 +2,7 @@ foc_mini_board\spi.o: Infrastructure\spi.c
 foc_mini_board\spi.o: Infrastructure\spi.h
 foc_mini_board\spi.o: Infrastructure\main.h
 foc_mini_board\spi.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
-foc_mini_board\spi.o: ../Inc/stm32f1xx_hal_conf.h
+foc_mini_board\spi.o: ./Infrastructure/stm32f1xx_hal_conf.h
 foc_mini_board\spi.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
 foc_mini_board\spi.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h
 foc_mini_board\spi.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h

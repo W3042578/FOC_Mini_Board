@@ -1,4 +1,4 @@
-foc_mini_board\system_stm32f1xx.o: ../Src/system_stm32f1xx.c
+foc_mini_board\system_stm32f1xx.o: Infrastructure\system_stm32f1xx.c
 foc_mini_board\system_stm32f1xx.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h
 foc_mini_board\system_stm32f1xx.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h
 foc_mini_board\system_stm32f1xx.o: ../Drivers/CMSIS/Include/core_cm3.h
@@ -8,7 +8,7 @@ foc_mini_board\system_stm32f1xx.o: ../Drivers/CMSIS/Include/cmsis_compiler.h
 foc_mini_board\system_stm32f1xx.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
 foc_mini_board\system_stm32f1xx.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h
 foc_mini_board\system_stm32f1xx.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
-foc_mini_board\system_stm32f1xx.o: ../Inc/stm32f1xx_hal_conf.h
+foc_mini_board\system_stm32f1xx.o: ./Infrastructure/stm32f1xx_hal_conf.h
 foc_mini_board\system_stm32f1xx.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
 foc_mini_board\system_stm32f1xx.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h
 foc_mini_board\system_stm32f1xx.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h

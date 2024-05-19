@@ -16,7 +16,6 @@
                 "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\MDK-ARM\\Hardware",
                 "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\MDK-ARM\\Infrastructure",
                 "D:\\keil\\ARM\\ARMCC\\include",
-                "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\Src",
                 "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\Drivers\\STM32F1xx_HAL_Driver\\Src"
             ],
             "defines": [

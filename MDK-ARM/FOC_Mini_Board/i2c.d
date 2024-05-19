@@ -2,7 +2,7 @@ foc_mini_board\i2c.o: Infrastructure\i2c.c
 foc_mini_board\i2c.o: Infrastructure\i2c.h
 foc_mini_board\i2c.o: Infrastructure\main.h
 foc_mini_board\i2c.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
-foc_mini_board\i2c.o: ../Inc/stm32f1xx_hal_conf.h
+foc_mini_board\i2c.o: ./Infrastructure/stm32f1xx_hal_conf.h
 foc_mini_board\i2c.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
 foc_mini_board\i2c.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h
 foc_mini_board\i2c.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h

@@ -1,8 +1,8 @@
 foc_mini_board\modbus.o: Application\Function\modbus.c
-foc_mini_board\modbus.o: ../Inc/usart.h
-foc_mini_board\modbus.o: ../Inc/main.h
+foc_mini_board\modbus.o: ./Infrastructure/usart.h
+foc_mini_board\modbus.o: ./Infrastructure/main.h
 foc_mini_board\modbus.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
-foc_mini_board\modbus.o: ../Inc/stm32f1xx_hal_conf.h
+foc_mini_board\modbus.o: ./Infrastructure/stm32f1xx_hal_conf.h
 foc_mini_board\modbus.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
 foc_mini_board\modbus.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h
 foc_mini_board\modbus.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h
