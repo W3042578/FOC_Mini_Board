@@ -17,26 +17,20 @@
 
 //底层配置
 //底层初始化配置
-uint32_t ADC_Data[2];	//同步常规采样参数
 void STM32_Infrastructure_Init(void)
 {
-	//校准ADC采样
-	//同步注入采样中需将adc模式设置为连续采样模式才可以使用，仍需对规则组进行部分配置，如规则采样触发，采样数，数据对齐方式
+	//校准ADC采样,校准完成后仍保持adc使能
 	//同步注入采样中adc1为主采样器，adc2为从配置器，因此触发adc1即可触发adc2
 	HAL_ADCEx_Calibration_Start(&hadc1);
 	HAL_ADCEx_Calibration_Start(&hadc2);
 
-	//开启规则组常规采样
-	HAL_ADC_Start(&hadc2); 
-	HAL_ADC_Start(&hadc1);
 
   	//开启注入组采样，注意注入采样控制中断的处理函数中会关闭注入中断使能位
-	HAL_ADCEx_InjectedStart(&hadc1);
-	HAL_ADCEx_InjectedStart_IT(&hadc2);
+	//adc使能打开仍需要HAL_ADCEx_InjectedStart函数开始注入采样
+	HAL_ADCEx_InjectedStart(&hadc2);
+	HAL_ADCEx_InjectedStart_IT(&hadc1);
 
- 	 //同步dual模式为多模式采样，同步规则采样需要开启DMA，注入采样建立在同步采样基础上
-	HAL_ADCEx_MultiModeStart_DMA(&hadc1,ADC_Data,2);
-	
+
 	//开启cc4比较通道触发adc注入采样
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
 
@@ -66,8 +60,8 @@ void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
 //获取两相电流采样修正值  包含偏置电压
 void ADC_Current_Offest(FOC_Motor *motor)
 {
-	uint32_t	Add_ADC_Offect_U,Add_ADC_Offect_V;
-	uint16_t	Number_ADC_Offect;
+	int32_t	Add_ADC_Offect_U,Add_ADC_Offect_V;
+	int16_t	Number_ADC_Offect;
 	Work_Status.bits.Offest_Current = 1;
 	Add_ADC_Offect_U = Add_ADC_Offect_V = 0;
 	Number_ADC_Offect = 32;
@@ -76,16 +70,16 @@ void ADC_Current_Offest(FOC_Motor *motor)
 
 	HAL_Delay(1000);
 	//平均减小误差
-	for(uint8_t i = 1;i<=Number_ADC_Offect;i++)
+	for(uint8_t i = 0;i<Number_ADC_Offect;i++)
 	{
 		//累加考虑到电流获取负号，负负得正
-		Add_ADC_Offect_U = Add_ADC_Offect_U - motor->Ia;
-		Add_ADC_Offect_V = Add_ADC_Offect_V - motor->Ib;
+		Add_ADC_Offect_U = Add_ADC_Offect_U + (Motor1.Uadc - 2048);
+		Add_ADC_Offect_V = Add_ADC_Offect_V + (Motor1.Vadc - 2048);
 		HAL_Delay(2);//延迟2ms 62.5us获取一次电流采样值，确保2ms内采样值至少更新一次
 	}
-	motor->Ia_Offect = Add_ADC_Offect_U >> 5;
-	motor->Ib_Offect = Add_ADC_Offect_V >> 5;
-	motor->Ia = motor->Ib =0;	
+	motor->Ia_Offect = 2048 + (Add_ADC_Offect_U >> 5);
+	motor->Ib_Offect = 2048 + (Add_ADC_Offect_V >> 5);
+	motor->Ia = motor->Ib = 0;	
 }
 
 //编码器&角度
@@ -354,9 +348,9 @@ uint8_t Model_Control(FOC_Motor *motor)
 			{
 				Control_Data.Duty_Model_C = 96;
 			}
-			motor->Ta = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_A) * motor->Ts)) >> 8;
-			motor->Tb = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_B) * motor->Ts)) >> 8;
-			motor->Tc = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_C) * motor->Ts)) >> 8;
+			motor->Ta = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_A) * motor->Ts_Count)) >> 8;
+			motor->Tb = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_B) * motor->Ts_Count)) >> 8;
+			motor->Tc = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_C) * motor->Ts_Count)) >> 8;
 		break;
 		
 		//电压开环模式：按照设置的Uq、Ud电压开环控制

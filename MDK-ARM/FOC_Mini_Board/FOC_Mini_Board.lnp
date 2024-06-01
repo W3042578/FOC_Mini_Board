@@ -18,7 +18,7 @@
 "foc_mini_board\stm32f1xx_hal_tim.o"
 "foc_mini_board\stm32f1xx_hal_tim_ex.o"
 "foc_mini_board\stm32f1xx_hal_uart.o"
-"foc_mini_board\startup_stm32f103xb.o"
+"foc_mini_board\startup_stm32f103xb_1.o"
 "foc_mini_board\encoder.o"
 "foc_mini_board\basic_function.o"
 "foc_mini_board\modbus.o"

@@ -16,11 +16,12 @@ typedef struct _FOC_MOTOR
 	int16_t 	Ud,Uq;
 	int16_t 	Ualph,Ubeta;
 	int16_t 	Ia,Ib;
+	uint16_t	Uadc,Vadc;
 	int16_t 	Ia_Offect,Ib_Offect;
 	int16_t 	Ialph,Ibeta;
 	int16_t 	Id,Iq;
 	uint16_t 	Umax;			//pwm输出无法实现100%占空比
-	uint16_t 	Ts;				//拟合SVPWM电压参考矢量周期
+	uint16_t 	Ts_Count;				//拟合SVPWM电压参考矢量周期
 	uint16_t	Mechanical_Angle;	//机械角度
 	uint16_t 	Elecrical_Angle;	//电气角度
 	uint32_t 	Initial_Angle_Offset;	//零位修正角，对齐alpha轴
@@ -29,14 +30,28 @@ typedef struct _FOC_MOTOR
 	int16_t 	Sin_Angle;			//电角度sin、cos值
 	int16_t 	Cos_Angle;
 	uint16_t 	Ta,Tb,Tc;			//三相分配上桥打开时间（1：上桥打开，下桥关闭，0：下桥打开，上桥关闭）
-	uint16_t	Td;			//死区时间对应计数值
+	uint16_t	Td_Count;					//死区时间对应计数值
 	
 	uint8_t 	Direction;			//电机工作方向
 	uint8_t		Offest_Direction;	//电机修正方向
 }FOC_Motor;
 
-//电机结构体变量
-extern FOC_Motor Motor1;
+
+typedef struct _FOC_Driver
+{
+	//采样电路
+	uint16_t	ADC_Scale;				//adc采样运放比例
+	uint16_t	ADC_Resistance;			//adc采样电阻 单位：毫欧
+
+
+	//驱动电路
+	uint16_t	Dead_Time;				//驱动管死区时间，单位0.01us
+
+}FOC_Driver;
+
+
+extern FOC_Motor Motor1;		//电机控制变量
+extern FOC_Driver Driver1;		//驱动版变量
 
 
 void Clark_Transform(FOC_Motor *motor);

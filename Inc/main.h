@@ -59,8 +59,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define Test2_Pin GPIO_PIN_1
 #define Test2_GPIO_Port GPIOA
-#define Fault_Check_Pin GPIO_PIN_2
-#define Fault_Check_GPIO_Port GPIOA
+#define Fault_Pin GPIO_PIN_2
+#define Fault_GPIO_Port GPIOA
 #define Test1_Pin GPIO_PIN_3
 #define Test1_GPIO_Port GPIOA
 #define SPI_CS_Pin GPIO_PIN_4

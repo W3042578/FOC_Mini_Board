@@ -43,7 +43,7 @@ typedef  struct
 	uint8_t		Duty_Model_A;			//占空比模式三相输入值
 	uint8_t		Duty_Model_B;
 	uint8_t		Duty_Model_C;
-	
+
 }_Control_Data;
 
 union _Error_Message
@@ -101,8 +101,6 @@ void Error_Message_Init(union _Error_Message *Message);//控制字初始化
 void Work_Status_Init(union _Work_Status *Status);//错误状态初始化
 void Parameter_Init(void);		//上层参数初始化
 
-//输入浮点数转换整形
-int16_t _Data_16_Transfer(float * data_in);
 
 //标志位处理
 void _SET(uint8_t * data,uint8_t bit);

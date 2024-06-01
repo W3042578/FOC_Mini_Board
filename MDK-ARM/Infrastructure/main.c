@@ -205,13 +205,16 @@ void SystemClock_Config(void)
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	
-	HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_SET);//环路执行周期测试
+//	HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_SET);//环路执行周期测试
 
 	//获取a,b相电流采样值  开环给零电压测试 离开电机方向为负因此电流计算取符号
-	Motor1.Ia = -(HAL_ADCEx_InjectedGetValue(&hadc1,ADC_INJECTED_RANK_1) - Motor1.Ia_Offect);
-	Motor1.Ib = -(HAL_ADCEx_InjectedGetValue(&hadc2,ADC_INJECTED_RANK_1) - Motor1.Ib_Offect);
+	Motor1.Uadc = HAL_ADCEx_InjectedGetValue(&hadc1,ADC_INJECTED_RANK_1);
+	Motor1.Vadc = HAL_ADCEx_InjectedGetValue(&hadc2,ADC_INJECTED_RANK_1);
+	Transfer1[0] = Motor1.Uadc;
+	Transfer1[1] = Motor1.Vadc;
+	Motor1.Ia = -(Motor1.Uadc - Motor1.Ia_Offect);
+	Motor1.Ib = -(Motor1.Vadc - Motor1.Ib_Offect);
 	
-
 	//PWM使能控制
 	Enable_Logic_Control();
 	
@@ -227,7 +230,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
 	//在同步注入中断回调中hal库默认关闭该中断使能，因此在执行完注入中断后再次打开中断使能
 	__HAL_ADC_ENABLE_IT(&hadc1, ADC_IT_JEOC);
 	
-	HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_RESET); //环路执行周期测试
+//	HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_RESET); //环路执行周期测试
 
 }
 //定时器中断回调函数 

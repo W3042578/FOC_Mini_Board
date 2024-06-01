@@ -27,6 +27,7 @@
 #include "foc.h"
 #include "modbus.h"
 #include "hal_my.h"
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2023 STMicroelectronics.
+  * Copyright (c) 2024 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -59,8 +59,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define Test2_Pin GPIO_PIN_1
 #define Test2_GPIO_Port GPIOA
-#define Fault_Check_Pin GPIO_PIN_2
-#define Fault_Check_GPIO_Port GPIOA
+#define Fault_Pin GPIO_PIN_2
+#define Fault_GPIO_Port GPIOA
 #define Test1_Pin GPIO_PIN_3
 #define Test1_GPIO_Port GPIOA
 #define SPI_CS_Pin GPIO_PIN_4
@@ -95,9 +95,6 @@ void Error_Handler(void);
 #define Key_4_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
-void uart_idleback(UART_HandleTypeDef *huart);	//串口空闲回调中断函数 具体定义放在usart.c
-
 
 /* USER CODE END Private defines */
 

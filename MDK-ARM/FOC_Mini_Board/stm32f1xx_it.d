@@ -38,3 +38,4 @@ foc_mini_board\stm32f1xx_it.o: Infrastructure\adc.h
 foc_mini_board\stm32f1xx_it.o: ./Algorithm/foc.h
 foc_mini_board\stm32f1xx_it.o: ./Application/Function/modbus.h
 foc_mini_board\stm32f1xx_it.o: Infrastructure\hal_my.h
+foc_mini_board\stm32f1xx_it.o: Infrastructure\usart.h

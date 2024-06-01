@@ -7,6 +7,7 @@
 
 //定义电机结构体Motor1
 FOC_Motor Motor1;		
+FOC_Driver Driver1;
 // uint16_t test1,test2,test3;
 //编码器输入数据统一为16位，进行查表
 //电流12位采样
@@ -103,13 +104,13 @@ void SVPWM(FOC_Motor *motor)
 		break;
 	}
 	
-	//使用Ts计数值表示满占空比
-	time_lead = ((uint32_t)(SQRT3 * u_lead * motor->Ts / motor->Udc)) >> _INIT_SCALE;
-	time_backward = ((uint32_t)(SQRT3 * u_backward * motor->Ts /motor->Udc)) >> _INIT_SCALE;
+	//使用Ts_Count计数值表示满占空比
+	time_lead = ((uint32_t)(SQRT3 * u_lead * motor->Ts_Count / motor->Udc)) >> _INIT_SCALE;
+	time_backward = ((uint32_t)(SQRT3 * u_backward * motor->Ts_Count /motor->Udc)) >> _INIT_SCALE;
 
 	//两相邻矢量作用时间限制，过调制限制或者弱磁MTPA
 	uint16_t time_all = time_backward + time_lead;
-	uint16_t time_limit = 0.96 * motor->Ts;
+	uint16_t time_limit = 0.96 * motor->Ts_Count;
 	if(time_all > time_limit)//限制满输出，留出采样时间,超出缩放
 	{
 		time_lead = time_limit * time_lead  / time_all;
@@ -122,39 +123,39 @@ void SVPWM(FOC_Motor *motor)
 	switch(sector)
 	{
 		case 1:
-			motor->Ta = (motor->Ts - time_lead - time_backward)>>1;//长
-			motor->Tb = (motor->Ts + time_lead - time_backward)>>1;//中
-			motor->Tc = (motor->Ts + time_lead + time_backward)>>1;//短
+			motor->Ta = (motor->Ts_Count - time_lead - time_backward)>>1;//长
+			motor->Tb = (motor->Ts_Count + time_lead - time_backward)>>1;//中
+			motor->Tc = (motor->Ts_Count + time_lead + time_backward)>>1;//短
 		break;
 		case 2:
-			motor->Ta = (motor->Ts + time_lead - time_backward)>>1;//中
-			motor->Tb = (motor->Ts - time_lead - time_backward)>>1;//长
-			motor->Tc = (motor->Ts + time_lead + time_backward)>>1;//短
+			motor->Ta = (motor->Ts_Count + time_lead - time_backward)>>1;//中
+			motor->Tb = (motor->Ts_Count - time_lead - time_backward)>>1;//长
+			motor->Tc = (motor->Ts_Count + time_lead + time_backward)>>1;//短
 		break;
 		case 3:
-			motor->Ta = (motor->Ts + time_lead + time_backward)>>1;//短
-			motor->Tb = (motor->Ts - time_lead - time_backward)>>1;//长
-			motor->Tc = (motor->Ts + time_lead - time_backward)>>1;//中
+			motor->Ta = (motor->Ts_Count + time_lead + time_backward)>>1;//短
+			motor->Tb = (motor->Ts_Count - time_lead - time_backward)>>1;//长
+			motor->Tc = (motor->Ts_Count + time_lead - time_backward)>>1;//中
 		break;
 		case 4:
-			motor->Ta = (motor->Ts + time_lead + time_backward)>>1;//短
-			motor->Tb = (motor->Ts + time_lead - time_backward)>>1;//中
-			motor->Tc = (motor->Ts - time_lead - time_backward)>>1;//长
+			motor->Ta = (motor->Ts_Count + time_lead + time_backward)>>1;//短
+			motor->Tb = (motor->Ts_Count + time_lead - time_backward)>>1;//中
+			motor->Tc = (motor->Ts_Count - time_lead - time_backward)>>1;//长
 		break;
 		case 5:
-			motor->Ta = (motor->Ts + time_lead - time_backward)>>1;//中
-			motor->Tb = (motor->Ts + time_lead + time_backward)>>1;//短
-			motor->Tc = (motor->Ts - time_lead - time_backward)>>1;//长
+			motor->Ta = (motor->Ts_Count + time_lead - time_backward)>>1;//中
+			motor->Tb = (motor->Ts_Count + time_lead + time_backward)>>1;//短
+			motor->Tc = (motor->Ts_Count - time_lead - time_backward)>>1;//长
 		break;
 		case 6:
-			motor->Ta = (motor->Ts - time_lead - time_backward)>>1;//长
-			motor->Tb = (motor->Ts + time_lead + time_backward)>>1;//短
-			motor->Tc = (motor->Ts + time_lead - time_backward)>>1;//中
+			motor->Ta = (motor->Ts_Count - time_lead - time_backward)>>1;//长
+			motor->Tb = (motor->Ts_Count + time_lead + time_backward)>>1;//短
+			motor->Tc = (motor->Ts_Count + time_lead - time_backward)>>1;//中
 		break;
 		default:
-			motor->Ta = motor->Ts >>1;//默认输出50%占空比
-			motor->Tb = motor->Ts >>1;
-			motor->Tc = motor->Ts >>1;
+			motor->Ta = motor->Ts_Count >>1;//默认输出50%占空比
+			motor->Tb = motor->Ts_Count >>1;
+			motor->Tc = motor->Ts_Count >>1;
 		break;
 	}
 	
@@ -164,9 +165,9 @@ void SVPWM(FOC_Motor *motor)
 	//未输出状态避免死区补偿影响
 	// if((sector == 0) || (sector == 7))
 	// {
-	// 	motor->Ta = motor->Ts >>1;//默认输出50%占空比
-	// 	motor->Tb = motor->Ts >>1;
-	// 	motor->Tc = motor->Ts >>1;	
+	// 	motor->Ta = motor->Ts_Count >>1;//默认输出50%占空比
+	// 	motor->Tb = motor->Ts_Count >>1;
+	// 	motor->Tc = motor->Ts_Count >>1;	
 	// }
 	
 
@@ -240,39 +241,39 @@ void Dead_Time_Compensate(FOC_Motor *motor)
 			dead_sector = 3;
 	}
 	//死区时间小于三相占空比才作用
-	if((motor->Ta > motor->Td) && (motor->Tb > motor->Td) && (motor->Tc > motor->Td))
+	if((motor->Ta > motor->Td_Count) && (motor->Tb > motor->Td_Count) && (motor->Tc > motor->Td_Count))
 	{
 		switch(dead_sector)
 		{
 		case 1:
-			motor->Ta = motor->Ta + (motor->Td >> 1);
-			motor->Tb = motor->Tb - (motor->Td >> 1);
-			motor->Tc = motor->Tc - (motor->Td >> 1);
+			motor->Ta = motor->Ta + (motor->Ts_Count >> 1);
+			motor->Tb = motor->Tb - (motor->Td_Count >> 1);
+			motor->Tc = motor->Tc - (motor->Td_Count >> 1);
 		break;
 		case 2:
-			motor->Ta = motor->Ta + (motor->Td >> 1);
-			motor->Tb = motor->Tb + (motor->Td >> 1);
-			motor->Tc = motor->Tc - (motor->Td >> 1);
+			motor->Ta = motor->Ta + (motor->Td_Count >> 1);
+			motor->Tb = motor->Tb + (motor->Td_Count >> 1);
+			motor->Tc = motor->Tc - (motor->Td_Count >> 1);
 		break;
 		case 3:
-			motor->Ta = motor->Ta - (motor->Td >> 1);
-			motor->Tb = motor->Tb + (motor->Td >> 1);
-			motor->Tc = motor->Tc - (motor->Td >> 1);
+			motor->Ta = motor->Ta - (motor->Td_Count >> 1);
+			motor->Tb = motor->Tb + (motor->Td_Count >> 1);
+			motor->Tc = motor->Tc - (motor->Td_Count >> 1);
 		break;
 		case 4:
-			motor->Ta = motor->Ta - (motor->Td >> 1);
-			motor->Tb = motor->Tb + (motor->Td >> 1);
-			motor->Tc = motor->Tc + (motor->Td >> 1);
+			motor->Ta = motor->Ta - (motor->Td_Count >> 1);
+			motor->Tb = motor->Tb + (motor->Td_Count >> 1);
+			motor->Tc = motor->Tc + (motor->Td_Count >> 1);
 		break;
 		case 5:
-			motor->Ta = motor->Ta - (motor->Td >> 1);
-			motor->Tb = motor->Tb - (motor->Td >> 1);
-			motor->Tc = motor->Tc + (motor->Td >> 1);
+			motor->Ta = motor->Ta - (motor->Td_Count >> 1);
+			motor->Tb = motor->Tb - (motor->Td_Count >> 1);
+			motor->Tc = motor->Tc + (motor->Td_Count >> 1);
 		break;
 		case 6:
-			motor->Ta = motor->Ta + (motor->Td >> 1);
-			motor->Tb = motor->Tb - (motor->Td >> 1);
-			motor->Tc = motor->Tc + (motor->Td >> 1);
+			motor->Ta = motor->Ta + (motor->Td_Count >> 1);
+			motor->Tb = motor->Tb - (motor->Td_Count >> 1);
+			motor->Tc = motor->Tc + (motor->Td_Count >> 1);
 		break;
 		default:
 			

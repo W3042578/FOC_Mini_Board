@@ -13,21 +13,25 @@ _Control_Data Control_Data;				//控制变量定义
 
 int16_t Number_Encoder_Direction;		//待定
 
-#define Motor1_Dead_Time	0.5		//电机死区时间 单位us
 //硬件参数初始化
 void Hardware_Init(void)
 {
 	//MCU配置
-	//设置工作时间Ts = 2*(2+1)*(1499+1)/72M = 125us  中心对齐模式x2  f103 72M主频
-	Motor1.Ts = 2249;//16k频率下定时器计数值  满额2249  
+	//设置工作时间Ts_Count = 2*(2+1)*(1499+1)/72M = 125us  中心对齐模式x2  f103 72M主频
+	Motor1.Ts_Count = 2249;//16k频率下定时器计数值  满额2249  
 	
 	//电机
 	Motor1.Polar = 11;
 	Motor1.Udc = 12;			//母线电压为 12V
-	//此处Td为16位数据，最大值65536，Motor1_Dead_Time不能超过3.5us,否则数据会溢出导致计算错误
-	Motor1.Td = (uint16_t)(8.192 * Motor1_Dead_Time * (Motor1.Ts + 1))>> 9;
-	
-	
+
+	//驱动板
+	Driver1.Dead_Time = 50;		//0.5us
+	Driver1.ADC_Scale = 20;		//运放放大20
+	Driver1.ADC_Resistance = 75;		//75毫欧
+
+	//死区时间转换为比较值 后续考虑载波频率
+	Motor1.Td_Count = (Driver1.Dead_Time * (Motor1.Ts_Count + 1)) / 6250;
+
 }
 
 
@@ -39,7 +43,7 @@ void Control_Word_Init(union _Control_Word *Word)
 	Word->bits.Encoder_Type = MT6813;
 }
 
-//控制字初始化
+//控制数据初始化
 void Control_Data_Init(_Control_Data *Data)
 {
 	Data->Open_Loop_Voltage = 2;		//开环电压置零
@@ -96,14 +100,6 @@ void Parameter_Init(void)
 	Encoder_Init(&Encoder1);
 }
 
-//Q7数据格式：int16位数据、1符号位、8整数位、7小数位
-//表示范围-256.9921875 ~ +256.9921875
-int16_t _Data_16_Transfer(float * data_in)
-{
-	int16_t data_out;
-	data_out = *data_in * (1<<8);
-	return data_out;
-}
 
 //状态位操作
 void _SET(uint8_t * data,uint8_t bit)
