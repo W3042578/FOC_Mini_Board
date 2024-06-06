@@ -224,7 +224,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
 	//STM32 HAL 三相PWM比较值设置
 	STM32_HAL_PWM_SET_Compare(&Motor1);
 	
-	//初始角校准,累加求和
+	//初始角校准,累加求和  
 	Get_Initial_Angle_Offest(&Motor1);
 	
 	//在同步注入中断回调中hal库默认关闭该中断使能，因此在执行完注入中断后再次打开中断使能

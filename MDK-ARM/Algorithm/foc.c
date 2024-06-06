@@ -2,6 +2,7 @@
 #include "foc.h"
 #include "basic_function.h"
 #include "parameter.h"
+#include "control_loop.h"
 
 
 
@@ -192,11 +193,28 @@ void FOC_Control(FOC_Motor *motor)
 	
 	//模式处理
 	model = Model_Control(motor);
+
+	//三环控制
+	if(Loop_Count & 0x04 == 0)
+	{
+		Position_Loop_Control(&Position_Loop);
+	}
+	if(Loop_Count & 0x02 == 0)
+	{
+		Speed_Loop_Control(&Speed_Loop);
+	}
+	Current_Loop_Control(&Current_Q_Loop);
+	Current_Loop_Control(&Current_D_Loop);
+	
 	if(model != 0x02)//占空比模式不使用反park变换和SVPWM计算三相占空比
 	{
 		Inverse_Park_Transform(motor);
 		SVPWM(motor);
 	}
+
+	Loop_Count ++;			//环路计数
+	if(Loop_Count > 252)	//计数循环
+		Loop_Count = 1;
 }	
 
 //应用算法

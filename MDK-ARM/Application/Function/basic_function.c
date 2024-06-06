@@ -258,13 +258,18 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 
 //应用层功能
 //工作模式控制
-#define		EOCODER_OFFEST		0x01
-#define		DUTY_CONTROL		0x02
-#define		OPEN_VOLATGE		0x03
-#define		NORMAL_CURRENT		0x04
-#define		NORMAL_SPEED		0x05
-#define		NORMAL_POSITION		0x06
-#define		PHASE_LOCK			0x07
+enum Motor_Work_Model
+{
+	Wait_Work = 0,
+	EOCODER_OFFEST = 1,
+	DUTY_CONTROL,
+	OPEN_VOLATGE,
+	NORMAL_CURRENT,
+	NORMAL_SPEED,
+	NORMAL_POSITION,
+	PHASE_LOCK
+};
+
 Motor_Status Motor_Status1;		//电机状态参数
 uint8_t Model_Control(FOC_Motor *motor)
 {
@@ -283,7 +288,7 @@ uint8_t Model_Control(FOC_Motor *motor)
 			Current_Q_PID.Integral_Sum = 0;
 			Current_D_PID.Integral_Sum = 0;
 			Speed_PI.Integral_Sum = 0;
-			Position_PI.Integral_Sum = 0;
+			Position_P.Integral_Sum = 0;
 		}
 	}
 	
@@ -428,16 +433,6 @@ uint8_t Model_Control(FOC_Motor *motor)
 	}
 	//保存上一次控制模式
 	Motor_Status1.Last_Work_Model = Control_Word.bits.Work_Model;
-	//环路计数累加
-	Control_Loop.Loop_Count ++;
-	//环路计数到达限制清零
-	if(Control_Loop.Loop_Count > 16)
-	{
-		Control_Loop.Loop_Count = 0;
-		//1ms速度计算
-		Speed_1MS();
-	}
-
 	return work_model;
 }
 
@@ -488,7 +483,7 @@ void Enable_Logic_Control(void)
 
 
 
-//1ms速度计算
+//1ms速度计算 M法测量
 void Speed_1MS(void)
 {
 	int32_t Speed;

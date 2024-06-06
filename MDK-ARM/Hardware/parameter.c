@@ -91,10 +91,13 @@ void Parameter_Init(void)
 	PID_Control_Init(&Current_Q_PID);
 	PID_Control_Init(&Current_D_PID);
 	PID_Control_Init(&Speed_PI);
-	PID_Control_Init(&Position_PI);
+	PID_Control_Init(&Position_P);
 
 	//控制环参数初始化
-	Control_Loop_Init(&Control_Loop);
+	Control_Loop_Init(&Current_Q_Loop);
+	Control_Loop_Init(&Current_D_Loop);
+	Control_Loop_Init(&Speed_Loop);
+	Control_Loop_Init(&Position_Loop);
 
 	//编码器数据初始化
 	Encoder_Init(&Encoder1);

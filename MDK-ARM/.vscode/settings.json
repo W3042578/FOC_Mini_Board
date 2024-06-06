@@ -13,6 +13,9 @@
         "modbus.h": "c",
         "basic_function.h": "c",
         "parameter.h": "c",
-        "table.h": "c"
+        "table.h": "c",
+        "stm32f1xx_hal.h": "c",
+        "stm32f1xx_hal_conf.h": "c",
+        "control_loop.h": "c"
     }
 }
