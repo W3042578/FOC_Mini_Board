@@ -22,6 +22,10 @@ typedef struct _Motor_Status
     uint8_t		Last_PWM_Enable;		//上一次使能状态
     int32_t		Last_Encoder_Position;	//上一次编码器的位置
     int32_t		Last_1MS_Speed;			//上一次1ms编码器位置计算得速度
+    
+    uint8_t     Position_Ins;           //位置环位置来源
+    uint8_t     Speed_Ins;              //速度环速度来源
+    uint8_t     Current_Ins;            //电流环电流来源
 }Motor_Status;
 
 //底层配置
@@ -45,7 +49,7 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor);
 
 //应用层功能
 //工作模式控制
-uint8_t Model_Control(FOC_Motor *motor);
+uint8_t Model_Control(_Control_Data *Data,_Control_Status *Status);
 //PWM逻辑使能控制
 void Enable_Logic_Control(void);
 

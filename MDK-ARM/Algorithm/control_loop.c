@@ -1,6 +1,6 @@
 
 #include "control_loop.h"
-
+#include "string.h"
 
 
 //定义控制环全局结构体
@@ -110,65 +110,19 @@ uint8_t Current_Loop_Model(_Forward *forward)
 {
 
 }
-//PID结构体参数初始化
-void PID_Parameter_Init(_PID_Control *pid)
-{
-	pid->Proportion = 0;
-	pid->Integral = 0;
-	pid->Difference = 0;
-	
-	pid->Error = 0;
-	pid->Last_Error = 0;
-	pid->Feedback = 0;
-	pid->Expect = 0;
-	
-	pid->Proportion_Sum = 0;
-	pid->Integral_Sum = 0;
-	pid->Difference_Sum = 0;
-	pid->Output_Sum = 0;
-	
-	pid->Proportion_Limit = 0;
-	pid->Integral_Limit = 0;
-	pid->Difference_Limit = 0;
-}
 
 //环路参数初始化
 void Control_Loop_Init(_Control_Loop *loop)
 {
-
+	loop->Word.ALL = 0;
+	loop->Back = 0;
+	loop->Input_Target = 0;
+	loop->Output_Result = 0;
+	memcpy(&loop->Loop_PID,0,sizeof(loop->Loop_PID));
+	memcpy(&loop->Forward,0,sizeof(loop->Forward));
 }
 
-//1ms中断更新控制环参数
-void Control_Loop_Update(void)
-{
-	//电流Iq PID
-	// Current_Q_PID.Proportion = Control_Loop.Current_Q_Proportion;
-	// Current_Q_PID.Integral = Control_Loop.Current_Q_Integral;
-	// Current_Q_PID.Difference = Control_Loop.Current_Q_Difference;
-	// Current_Q_PID.Integral_Limit = Control_Loop.Current_Q_Output_Limit;
-	// Current_Q_PID.Proportion_Limit = Control_Loop.Current_Q_Output_Limit;
-	// Current_Q_PID.Difference_Limit = Control_Loop.Current_Q_Output_Limit>>1;
-	// //电流Id PID
-	// Current_D_PID.Proportion = Control_Loop.Current_D_Proportion;
-	// Current_D_PID.Integral = Control_Loop.Current_D_Integral;
-	// Current_D_PID.Difference = Control_Loop.Current_D_Difference;
-	// Current_D_PID.Integral_Limit = Control_Loop.Current_D_Output_Limit;
-	// Current_D_PID.Proportion_Limit = Control_Loop.Current_D_Output_Limit;
-	// Current_D_PID.Difference_Limit = Control_Loop.Current_D_Output_Limit>>1;
-	
-	// //速度环 PI
-	// Speed_PI.Proportion = Control_Loop.Speed_Proportion;
-	// Speed_PI.Integral = Control_Loop.Speed_Integral;
-	// Speed_PI.Integral_Limit = Control_Loop.Speed_Output_Limit;
-	// Speed_PI.Proportion_Limit = Control_Loop.Speed_Output_Limit;
-	
-	// //位置环 PI+前馈
-	// Position_PI.Proportion = Control_Loop.Position_Proportion;
-	// Position_PI.Integral = Control_Loop.Position_Integral;
-	// Position_PI.Integral_Limit = Control_Loop.Position_Output_Limit;
-	// Position_PI.Proportion_Limit = Control_Loop.Position_Output_Limit;
-	// Position_PI.Feedforward = Control_Loop.Position_Feedforward;
-}
+
 
 
 

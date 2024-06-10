@@ -1,4 +1,3 @@
-
 #include "usart.h"
 #include "adc.h"
 #include "tim.h"
@@ -16,35 +15,23 @@
 //主要存放出于功能层需要对底层修改的函数
 
 //底层配置
-//底层初始化配置
-void STM32_Infrastructure_Init(void)
+void STM32_Infrastructure_Init(void)	//底层初始化配置
 {
-	//校准ADC采样,校准完成后仍保持adc使能
-	//同步注入采样中adc1为主采样器，adc2为从配置器，因此触发adc1即可触发adc2
-	HAL_ADCEx_Calibration_Start(&hadc1);
-	HAL_ADCEx_Calibration_Start(&hadc2);
+	HAL_ADCEx_Calibration_Start(&hadc1);	//校准ADC采样,校准完成后仍保持adc使能
+	HAL_ADCEx_Calibration_Start(&hadc2);	//同步注入采样中adc1为主采样器，adc2为从配置器，因此触发adc1即可触发adc2
 
+	HAL_ADCEx_InjectedStart(&hadc2);	//开启注入组采样，注意注入采样控制中断的处理函数中会关闭注入中断使能位
+	HAL_ADCEx_InjectedStart_IT(&hadc1);	//adc使能打开仍需要HAL_ADCEx_InjectedStart函数开始注入采样
 
-  	//开启注入组采样，注意注入采样控制中断的处理函数中会关闭注入中断使能位
-	//adc使能打开仍需要HAL_ADCEx_InjectedStart函数开始注入采样
-	HAL_ADCEx_InjectedStart(&hadc2);
-	HAL_ADCEx_InjectedStart_IT(&hadc1);
+	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);	//开启cc4比较通道触发adc注入采样
 
+	HAL_TIM_Base_Start_IT(&htim2);	//定时器2开启1ms中断
 
-	//开启cc4比较通道触发adc注入采样
-	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
+	HAL_UART_Receive_DMA(&huart1,(uint8_t *)&Rx_Data,RX_BUFF_LONG);	//开启串口DMA发送和接受
 
-	//定时器2开启1ms中断
-	HAL_TIM_Base_Start_IT(&htim2);
-
-	//开启串口DMA发送和接受
-	HAL_UART_Receive_DMA(&huart1,(uint8_t *)&Rx_Data,RX_BUFF_LONG);
-
-	//使能串口空闲中断
-	__HAL_UART_ENABLE_IT(&huart1,UART_IT_IDLE);
+	__HAL_UART_ENABLE_IT(&huart1,UART_IT_IDLE);	//使能串口空闲中断
 	
-	//使能驱动模块
-	HAL_GPIO_WritePin(Power_Reset_GPIO_Port,Power_Reset_Pin,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(Power_Reset_GPIO_Port,Power_Reset_Pin,GPIO_PIN_SET);	//使能驱动模块
 	
 }
 
@@ -57,8 +44,7 @@ void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
 }
 
 //电流采样
-//获取两相电流采样修正值  包含偏置电压
-void ADC_Current_Offest(FOC_Motor *motor)
+void ADC_Current_Offest(FOC_Motor *motor)	//获取两相电流采样修正值  包含偏置电压
 {
 	int32_t	Add_ADC_Offect_U,Add_ADC_Offect_V;
 	int16_t	Number_ADC_Offect;
@@ -83,8 +69,7 @@ void ADC_Current_Offest(FOC_Motor *motor)
 }
 
 //编码器&角度
-//获取编码器角度并转换为电角度
-void Encoder_To_Electri_Angle(FOC_Motor *motor)
+void Encoder_To_Electri_Angle(FOC_Motor *motor)	//获取编码器角度并转换为电角度
 {
 	int32_t offest_angle;
 	
@@ -257,28 +242,39 @@ void Get_Initial_Angle_Offest(FOC_Motor *motor)
 }
 
 //应用层功能
-//工作模式控制
-enum Motor_Work_Model
+enum Motor_Work_Model	//工作模式控制
 {
 	Wait_Work = 0,
-	EOCODER_OFFEST = 1,
+	OPEN_LOOP,
+	CURRENT_LOOP,
+	SPEED_LOOP,
+	POSITION_LOOP,
+	SENSELESS
+};
+enum Motor_Sub_Work_Moedel	//工作子模式控制
+{
+	Normal_CONTROL = 0,
+	EOCODER_OFFEST,
 	DUTY_CONTROL,
-	OPEN_VOLATGE,
-	NORMAL_CURRENT,
-	NORMAL_SPEED,
-	NORMAL_POSITION,
-	PHASE_LOCK
+	MTPA_CONTROL,
+	DEBUG_ENGINE
+};
+enum Offest_Model
+{
+	OFFEST_INIT	= 1,		//初始角校正
+	POSITIVE_OFFEST,		//线性正向
+	NEGITIVE_OFFEST			//线性反向
 };
 
-Motor_Status Motor_Status1;		//电机状态参数
-uint8_t Model_Control(FOC_Motor *motor)
+uint8_t Model_Control(_Control_Data *Data,_Control_Status *Status)
 {
-	uint16_t 	virtual_eletri_angle;	//虚拟电角度,编码器线性度校正用
-	uint8_t		work_model;			//电流环工作模式
+	uint16_t 	virtual_eletri_angle;		//虚拟电角度,编码器线性度校正用
+	uint8_t		work_model,sub_work_model;	//工作模式判断
 
-	work_model = Control_Word.bits.Work_Model;
+	work_model = Data->Control_Word.bits.Work_Model;
+	sub_work_model = Data->Control_Word.bits.Sub_Work_Model;
 
-	//模式切换判断
+	//参数更新函数：模式切换判断
 	if(Motor_Status1.Last_Work_Model != Control_Word.bits.Work_Model)
 	{
 		if(Control_Word.bits.PWM_Enable == 1)//PWM使能输出情况下不允许更改工作模式
@@ -295,16 +291,11 @@ uint8_t Model_Control(FOC_Motor *motor)
 	//根据控制字判断工作环
 	switch(work_model)
 	{	
-		//校正模式：初始角度校正和线性补偿
-#define		OFFEST_INIT			0x01	//初始角校正
-#define		POSITIVE_OFFEST		0x02	//线性正向
-#define		NEGITIVE_OFFEST		0x03	//线性反向
-
-		case EOCODER_OFFEST:
+		case EOCODER_OFFEST:	//校正模式：初始角度校正和线性补偿
 			motor->Ud = Control_Data.Angle_Initial_Voltage * (1 << _INIT_SCALE);//Ualph = 3V
 			motor->Uq = 0;
 			//判断进入校正起始
-			if(Work_Status.bits.Angle_Offest == 0)
+			if(Control_Status.Work_Status.bits.Angle_Offest == 0)
 			{
 				//校正模式仅起始进入一次
 				Work_Status.bits.Angle_Offest = 1;
@@ -319,8 +310,7 @@ uint8_t Model_Control(FOC_Motor *motor)
 			}
 
 			//校正内置模式判断
-			//零位校正
-			if(Encoder_Offest1.Offest_Model == OFFEST_INIT)	
+			if(Encoder_Offest1.Offest_Model == OFFEST_INIT)	//零位校正
 			{	
 				//设置零位对应静态坐标电压
 				motor->Sin_Angle = 0;
@@ -337,11 +327,8 @@ uint8_t Model_Control(FOC_Motor *motor)
 				motor->Cos_Angle = SIN_COS_TABLE[((virtual_eletri_angle >> 7)+128) & 0x1ff];
 			}
 		break;
-		
-		//占空比模式：按照设置输出指定单相满额占空比（考虑采样最大98%）
-		case DUTY_CONTROL:
-			//对输入占空比数值作限制
-			if(Control_Data.Duty_Model_A > 96)
+		case DUTY_CONTROL:		//占空比模式：按照设置输出指定单相满额占空比（考虑采样最大98%）
+			if(Control_Data.Duty_Model_A > 96)	//对输入占空比数值作限制
 			{
 				Control_Data.Duty_Model_A = 96;
 			}
@@ -357,9 +344,7 @@ uint8_t Model_Control(FOC_Motor *motor)
 			motor->Tb = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_B) * motor->Ts_Count)) >> 8;
 			motor->Tc = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_C) * motor->Ts_Count)) >> 8;
 		break;
-		
-		//电压开环模式：按照设置的Uq、Ud电压开环控制
-		case OPEN_VOLATGE:
+		case OPEN_VOLATGE:	//电压开环模式：按照设置的Uq、Ud电压开环控制
 			motor->Ud = 0;
 			if(Control_Word.bits.Work_Direction == 0)	//正转
 				motor->Uq = Control_Data.Open_Loop_Voltage * (1 << _INIT_SCALE);
@@ -479,8 +464,6 @@ void Enable_Logic_Control(void)
 		Motor_Status1.Last_PWM_Enable = Control_Word.bits.PWM_Enable;
 	}
 }
-
-
 
 
 //1ms速度计算 M法测量

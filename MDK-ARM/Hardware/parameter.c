@@ -5,13 +5,9 @@
 #include "object_commicate.h"
 #include "control_loop.h"
 
-union _Error_Message Error_Message;		//错误信息指示位
-union _Work_Status Work_Status;			//工作状态指示位
-union _Control_Word Control_Word; 		//通许变量位
 
 _Control_Data Control_Data;				//控制变量定义
-
-int16_t Number_Encoder_Direction;		//待定
+_Control_Status	Control_Status;			//控制状态定义
 
 //硬件参数初始化
 void Hardware_Init(void)
@@ -34,18 +30,11 @@ void Hardware_Init(void)
 
 }
 
-
-
-//控制字初始化
-void Control_Word_Init(union _Control_Word *Word)
-{
-	Word->All = 0;
-	Word->bits.Encoder_Type = MT6813;
-}
-
 //控制数据初始化
 void Control_Data_Init(_Control_Data *Data)
 {
+	Data->Control_Word.All = 0;
+	Data->Control_Word.bits.Encoder_Type = MT6813;	
 	Data->Open_Loop_Voltage = 2;		//开环电压置零
 	Data->Angle_Initial_Voltage = 5;	//编码器线性校正Ud电压
 	Data->Number_Angle_Offest = 5;		//初始角校正累加次数= 2的n次方
@@ -55,52 +44,46 @@ void Control_Data_Init(_Control_Data *Data)
 	Data->Duty_Model_C = 50;
 }
 
-//错误状态初始化
-void Error_Message_Init(union _Error_Message *Message)
+//控制状态初始化
+void Control_Status_Init(_Control_Status *Status)
 {
-	Message->All = 0;
-}	
-
-//工作状态初始化
-void Work_Status_Init(union _Work_Status *Status)
-{
-	Status->All = 0;
+	Status->Work_Status.All = 0;
+	Status->Error_status.All = 0;
 }
 
-//上层参数初始化
+//控制数据更新
+void Control_Data_Update(_Control_Data *Word)
+{
+
+}
+
+//控制状态更新
+void Control_Status_Update(_Control_Status *Status)
+{
+
+}
+
+//参数初始化
 void Parameter_Init(void)
 {
-	//硬件参数初始化
-	Hardware_Init();
-	
-	//modbus通讯数据初始化
-	Commicate_Data_Init();
-	
-	//控制字初始化
-	Control_Word_Init(&Control_Word);
-	//控制变量初始化
-	Control_Data_Init(&Control_Data);
-	
-	//错误状态初始化
-	Error_Message_Init(&Error_Message);
-	
-	//工作状态初始化
-	Work_Status_Init(&Work_Status);
+	Hardware_Init();		//硬件参数初始化
 
-	//各控制环PID参数初始化
-	PID_Control_Init(&Current_Q_PID);
+	Commicate_Data_Init();	//modbus通讯数据初始化
+	
+	Control_Data_Init(&Control_Data);		//控制数据初始化
+	Control_Status_Init(&Control_Status);	//控制状态初始化
+
+	PID_Control_Init(&Current_Q_PID);		//各控制环PID参数初始化
 	PID_Control_Init(&Current_D_PID);
 	PID_Control_Init(&Speed_PI);
 	PID_Control_Init(&Position_P);
 
-	//控制环参数初始化
-	Control_Loop_Init(&Current_Q_Loop);
+	Control_Loop_Init(&Current_Q_Loop);		//控制环参数初始化
 	Control_Loop_Init(&Current_D_Loop);
 	Control_Loop_Init(&Speed_Loop);
 	Control_Loop_Init(&Position_Loop);
 
-	//编码器数据初始化
-	Encoder_Init(&Encoder1);
+	Encoder_Init(&Encoder1);		//编码器数据初始化
 }
 
 

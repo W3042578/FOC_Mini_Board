@@ -2,39 +2,40 @@
 #ifndef __PARAMETER_H
 #define __PARAMETER_H
 
-
 #include "stm32f1xx_hal.h"
  
-
-#define Speed_Transfer	6.5536			//速度转换比例  1rpm -> 1 dec_diff/1ms = 6.5536
-
-#define 	BIT0 		0x01
-#define 	BIT1 		0x02
-#define 	BIT2 		0x04
-#define 	BIT3 		0x08
-#define 	BIT4 		0x10
-#define 	BIT5 		0x20
-#define 	BIT6 		0x40
-#define 	BIT7 		0x80
-
-union _Control_Word
+enum 	//置位定义
 {
-	uint16_t All;
+	BIT0 = 0x01,
+	BIT1 = 0x02,
+	BIT2 = 0x04,
+	BIT3 = 0x08,
+	BIT4 = 0x10,
+	BIT5 = 0x20,
+	BIT6 = 0x40,
+	BIT7 = 0x80
+}BIT_SET;		
+
+typedef union
+{
+	uint32_t All;
 	struct 
 	{
-		uint8_t 	Work_Model:3;		//1:校准  2:占空比  3:电压开环  4:电流环 5:速度环 6:位置环 7:速度环无感 
+		uint8_t 	Work_Model:4;		//工作模式 
+		uint8_t		Sub_Work_Model:4;	//工作子模式
 		uint8_t 	PWM_Enable:1;		//0:PWM关闭使能		1:PWM开始使能				
-		uint8_t 	Energency_Stop:1;	//0：不使用急停 1:触发急停
+		uint8_t 	Energency_Stop:1;	//0:无急停 1:触发急停
 		uint8_t 	Work_Direction:1;	//0:正转		1:反转
 		uint8_t		Clear_Position:1;	//重置当前位置为0
 		uint8_t		MTPA:1;				//电流环MTPA模式控制
 		uint8_t		Current_Forward:1;	//电流环前馈解耦控制
-		uint8_t		Encoder_Type:2;		//编码器类型
+		uint8_t		Encoder_Type:4;		//编码器类型
 	}bits;
-};
+}_Control_Word;
 
 typedef  struct
 {
+	_Control_Word Control_Word;			//控制字
 	uint8_t		Open_Loop_Voltage;		//开环电压
 	uint8_t 	Max_Voltage;			//最大母线电压限制
 	uint8_t		Angle_Initial_Voltage;	//编码器线性校正Ud电压
@@ -46,25 +47,9 @@ typedef  struct
 
 }_Control_Data;
 
-union _Error_Message
+typedef union
 {
-		uint16_t	All;
-		struct
-		{
-			uint8_t		ADC_Error:1;			//电流采样错误
-			uint8_t		Bus_Voltage:1;			//总线电压错误	
-			uint8_t		Encoder_Status:1;		//编码器状态错误
-			uint8_t		Encoder_Offset:1;		//编码器校正错误
-			uint8_t		Modbus_Status:1;		//Modbus通讯状态错误
-			uint8_t		IIC_Status:1;			//IIC通讯状态错误
-			uint8_t		Control_Loop_Error:1;	//控制环路错误
-			uint8_t		Phase_Lose:1;			//相丢失错误  电机没有按照指令正常运动
-		}bits;
-};
-
-union _Work_Status
-{
-		uint16_t All;
+		uint32_t All;
 		struct
 		{
 			uint8_t 	Enable_Status:1;		//PWM使能状态
@@ -81,26 +66,47 @@ union _Work_Status
 			uint8_t		Encoder_Init:1;			//编码器启动计数位置初次操作
 			uint8_t		Interrupt_1MS_Init:1;	//1ms首次进入标志位
 		}bits;	
-};
+}_Work_Status;
+
+typedef union
+{
+		uint32_t	All;
+		struct
+		{
+			uint8_t		ADC_Error:1;			//电流采样错误
+			uint8_t		Bus_Voltage:1;			//总线电压错误	
+			uint8_t		Encoder_Status:1;		//编码器状态错误
+			uint8_t		Encoder_Offset:1;		//编码器校正错误
+			uint8_t		Modbus_Status:1;		//Modbus通讯状态错误
+			uint8_t		IIC_Status:1;			//IIC通讯状态错误
+			uint8_t		Control_Loop_Error:1;	//控制环路错误
+			uint8_t		Phase_Lose:1;			//相丢失错误  电机没有按照指令正常运动
+		}bits;
+}_Error_status;
+
+typedef  struct
+{
+	_Work_Status		Work_Status;			//工作状态
+	_Error_status		Error_status;			//错误状态信息
+
+}_Control_Status;
 
 //控制状态变量
-extern	union _Control_Word Control_Word;  
-extern	union _Error_Message Error_Message;
-extern  union _Work_Status Work_Status;
-
-extern	_Control_Data Control_Data;
-extern int16_t Number_Encoder_Direction;
+extern	_Control_Data	Control_Data;			//控制数据
+extern	_Control_Status	Control_Status;			//控制状态
 
 //变量用于编码器通讯角度获取 测试验证用
 extern uint16_t Transfer1[3];
 
-
 //初始化
-void Hardware_Init(void);//硬件参数初始化
-void Error_Message_Init(union _Error_Message *Message);//控制字初始化
-void Work_Status_Init(union _Work_Status *Status);//错误状态初始化
-void Parameter_Init(void);		//上层参数初始化
+void Parameter_Init(void);							//参数初始化
+void Hardware_Init(void);							//硬件参数初始化
+void Control_Data_Init(_Control_Data *Data);		//控制数据初始化
+void Control_Status_Init(_Control_Status *Status);	//控制状态初始化
 
+//数据更新
+void Control_Data_Update(_Control_Data *Word);		//控制数据更新
+void Control_Status_Update(_Control_Status *Status);//控制状态更新
 
 //标志位处理
 void _SET(uint8_t * data,uint8_t bit);

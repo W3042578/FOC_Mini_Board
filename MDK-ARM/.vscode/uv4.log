@@ -1,46 +1,159 @@
-*** Using Compiler 'V6.18', folder: 'D:\keil\ARM\ARMCLANG\Bin'
+*** Using Compiler 'V6.18', folder: 'C:\Keil_v5\ARM\ARMCLANG\Bin'
 Build target 'FOC_Mini_Board'
-compiling stm32f1xx_hal_adc.c...
-compiling stm32f1xx_hal.c...
-compiling stm32f1xx_hal_adc_ex.c...
-compiling stm32f1xx_hal_rcc.c...
-compiling system_stm32f1xx.c...
-compiling stm32f1xx_hal_gpio_ex.c...
-compiling stm32f1xx_hal_gpio.c...
-compiling stm32f1xx_hal_rcc_ex.c...
-compiling stm32f1xx_hal_cortex.c...
-compiling stm32f1xx_hal_dma.c...
-compiling stm32f1xx_hal_pwr.c...
-compiling stm32f1xx_hal_flash.c...
-compiling stm32f1xx_hal_flash_ex.c...
-compiling stm32f1xx_hal_exti.c...
-compiling stm32f1xx_hal_tim_ex.c...
-compiling stm32f1xx_hal_spi.c...
-compiling encoder.c...
-compiling stm32f1xx_hal_uart.c...
-compiling stm32f1xx_hal_tim.c...
-compiling stm32f1xx_hal_i2c.c...
-compiling basic_function.c...
-compiling modbus.c...
-compiling object_commicate.c...
-compiling filter.c...
+Algorithm/control_loop.c(17): error: redefinition of 'Loop_Count' with a different type: 'uint8_t' (aka 'unsigned char') vs 'uint16_t' (aka 'unsigned short')
+uint8_t                 Loop_Count;             //环路周期计数
+                        ^
+./Algorithm/control_loop.h(74): note: previous declaration is here
+extern  uint16_t                Loop_Count;             
+                                ^
+Algorithm/control_loop.c(104): error: redefinition of 'Current_Loop_Model'
+uint8_t Current_Loop_Model(_Forward *forward)
+        ^
+Algorithm/control_loop.c(99): note: previous definition is here
+uint8_t Current_Loop_Model(_Forward *forward)
+        ^
+2 errors generated.
 compiling control_loop.c...
-compiling foc.c...
-compiling table.c...
-compiling adc.c...
-compiling dma.c...
-compiling gpio.c...
-compiling hal_my.c...
-compiling i2c.c...
-compiling main.c...
-compiling spi.c...
-compiling stm32f1xx_hal_msp.c...
-compiling stm32f1xx_it.c...
-compiling tim.c...
-compiling usart.c...
-compiling parameter.c...
-linking...
-Program Size: Code=32386 RO-data=1302 RW-data=1040 ZI-data=2584  
-FromELF: creating hex file...
-"FOC_Mini_Board\FOC_Mini_Board.axf" - 0 Error(s), 0 Warning(s).
-Build Time Elapsed:  00:00:05
+Application/Function/object_commicate.c(22): error: use of undeclared identifier 'Control_Loop'
+        {0x0008,        0x00,   2,      &Control_Loop.Target_Q_Current,                 65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(24): error: use of undeclared identifier 'Control_Loop'
+        {0x000A,        0x00,   2,      &Control_Loop.Target_Position,                  65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(25): error: use of undeclared identifier 'Control_Loop'
+        {0x000B,        0x00,   2,      &Control_Loop.Current_Q_Proportion,             65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(26): error: use of undeclared identifier 'Control_Loop'
+        {0x000C,        0x00,   2,      &Control_Loop.Current_Q_Integral,               65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(27): error: use of undeclared identifier 'Control_Loop'
+        {0x000D,        0x00,   2,      &Control_Loop.Current_Q_Difference,             65535,  0,      NULL},  
+                                         ^
+Application/Function/object_commicate.c(28): error: use of undeclared identifier 'Control_Loop'
+        {0x000E,        0x00,   2,      &Control_Loop.Current_D_Proportion,             65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(29): error: use of undeclared identifier 'Control_Loop'
+        {0x000F,        0x00,   2,      &Control_Loop.Current_D_Integral,               65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(30): error: use of undeclared identifier 'Control_Loop'
+        {0x0010,        0x00,   2,      &Control_Loop.Current_D_Difference,             65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(31): error: use of undeclared identifier 'Control_Loop'
+        {0x0011,        0x00,   2,      &Control_Loop.Speed_Proportion,                 65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(32): error: use of undeclared identifier 'Control_Loop'
+        {0x0012,        0x00,   2,      &Control_Loop.Speed_Integral,                   65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(33): error: use of undeclared identifier 'Control_Loop'
+        {0x0013,        0x00,   2,      &Control_Loop.Position_Proportion,              65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(34): error: use of undeclared identifier 'Control_Loop'
+        {0x0014,        0x00,   2,      &Control_Loop.Position_Integral,                65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(35): error: use of undeclared identifier 'Control_Loop'
+        {0x0015,        0x00,   2,      &Control_Loop.Position_Output_Limit,    65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(36): error: use of undeclared identifier 'Control_Loop'
+        {0x0016,        0x00,   2,      &Control_Loop.Position_Feedforward,             65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(38): error: use of undeclared identifier 'Control_Loop'
+        {0x0018,        0x00,   2,      &Control_Loop.Current_Q_Output_Limit,   65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(39): error: use of undeclared identifier 'Control_Loop'
+        {0x0019,        0x00,   2,      &Control_Loop.Current_D_Output_Limit,   65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(40): error: use of undeclared identifier 'Control_Loop'
+        {0x001A,        0x00,   2,      &Control_Loop.Speed_Output_Limit,               65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(41): error: use of undeclared identifier 'Control_Loop'
+        {0x001B,        0x00,   2,      &Control_Loop.Speed_Output_Limit,               65535,  0,      NULL},
+                                         ^
+Application/Function/object_commicate.c(42): error: use of undeclared identifier 'Control_Loop'
+        {0x001C,        0x00,   2,      &Control_Loop.Speed_Output_Limit,               65535,  0,      NULL},
+                                         ^
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+20 errors generated.
+compiling object_commicate.c...
+Application/Function/basic_function.c(378): error: use of undeclared identifier 'Control_Loop'
+                        if((Control_Loop.Loop_Count & 0x04) == 0)
+                            ^
+Application/Function/basic_function.c(381): error: use of undeclared identifier 'Position_PI'; did you mean 'Position_P'?
+                                Position_PI.Feedback = Encoder1.Encode_Position;
+                                ^~~~~~~~~~~
+                                Position_P
+./Algorithm\control_loop.h(72): note: 'Position_P' declared here
+extern  _PID_Control    Position_P;
+                        ^
+Application/Function/basic_function.c(383): error: use of undeclared identifier 'Position_PI'; did you mean 'Position_P'?
+                                Position_PI.Feedback = Control_Loop.Target_Position;
+                                ^~~~~~~~~~~
+                                Position_P
+./Algorithm\control_loop.h(72): note: 'Position_P' declared here
+extern  _PID_Control    Position_P;
+                        ^
+Application/Function/basic_function.c(383): error: use of undeclared identifier 'Control_Loop'
+                                Position_PI.Feedback = Control_Loop.Target_Position;
+                                                       ^
+Application/Function/basic_function.c(385): warning: implicit declaration of function 'PID_Control_Deal' is invalid in C99 [-Wimplicit-function-declaration]
+                                PID_Control_Deal(&Position_PI);
+                                ^
+Application/Function/basic_function.c(385): error: use of undeclared identifier 'Position_PI'; did you mean 'Position_P'?
+                                PID_Control_Deal(&Position_PI);
+                                                  ^~~~~~~~~~~
+                                                  Position_P
+./Algorithm\control_loop.h(72): note: 'Position_P' declared here
+extern  _PID_Control    Position_P;
+                        ^
+Application/Function/basic_function.c(387): error: use of undeclared identifier 'Control_Loop'; did you mean 'Control_Word'?
+                                Control_Loop.Target_Speed = Position_PI.Output_Sum;
+                                ^~~~~~~~~~~~
+                                Control_Word
+./Hardware\parameter.h(87): note: 'Control_Word' declared here
+extern  union _Control_Word Control_Word;  
+                            ^
+Application/Function/basic_function.c(387): error: no member named 'Target_Speed' in 'union _Control_Word'
+                                Control_Loop.Target_Speed = Position_PI.Output_Sum;
+                                ~~~~~~~~~~~~ ^
+Application/Function/basic_function.c(387): error: use of undeclared identifier 'Position_PI'; did you mean 'Position_P'?
+                                Control_Loop.Target_Speed = Position_PI.Output_Sum;
+                                                            ^~~~~~~~~~~
+                                                            Position_P
+./Algorithm\control_loop.h(72): note: 'Position_P' declared here
+extern  _PID_Control    Position_P;
+                        ^
+Application/Function/basic_function.c(394): error: use of undeclared identifier 'Control_Loop'
+                        if((Control_Loop.Loop_Count & 0x02) == 0)
+                            ^
+Application/Function/basic_function.c(399): error: use of undeclared identifier 'Control_Loop'
+                                Speed_PI.Feedback = Control_Loop.Target_Speed;
+                                                    ^
+Application/Function/basic_function.c(401): warning: implicit declaration of function 'PID_Control_Deal' is invalid in C99 [-Wimplicit-function-declaration]
+                                PID_Control_Deal(&Speed_PI);
+                                ^
+Application/Function/basic_function.c(403): error: use of undeclared identifier 'Control_Loop'; did you mean 'Control_Word'?
+                                Control_Loop.Target_Q_Current = Speed_PI.Output_Sum;
+                                ^~~~~~~~~~~~
+                                Control_Word
+./Hardware\parameter.h(87): note: 'Control_Word' declared here
+extern  union _Control_Word Control_Word;  
+                            ^
+Application/Function/basic_function.c(403): error: no member named 'Target_Q_Current' in 'union _Control_Word'
+                                Control_Loop.Target_Q_Current = Speed_PI.Output_Sum;
+                                ~~~~~~~~~~~~ ^
+Application/Function/basic_function.c(415): error: use of undeclared identifier 'Control_Loop'
+                        Current_Q_PID.Expect = Control_Loop.Target_Q_Current;
+                                               ^
+Application/Function/basic_function.c(416): error: use of undeclared identifier 'Control_Loop'
+                        Current_D_PID.Expect = Control_Loop.Target_D_Current;
+                                               ^
+Application/Function/basic_function.c(418): warning: implicit declaration of function 'PID_Control_Deal' is invalid in C99 [-Wimplicit-function-declaration]
+                        PID_Control_Deal(&Current_Q_PID);
+                        ^
+Application/Function/basic_function.c(524): warning: implicit declaration of function 'PID_Control_Update' is invalid in C99 [-Wimplicit-function-declaration]
+        PID_Control_Update();
+        ^
+4 warnings and 14 errors generated.
+compiling basic_function.c...
+"FOC_Mini_Board\FOC_Mini_Board.axf" - 35 Error(s), 4 Warning(s).
+Target not created.
+Build Time Elapsed:  00:00:02
