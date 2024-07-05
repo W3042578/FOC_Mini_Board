@@ -36,7 +36,7 @@ void STM32_Infrastructure_Init(void)	//底层初始化配置
 }
 
 //STM32 HAL 三相PWM比较值设置输出
-void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
+void STM32_HAL_PWM_SET_Compare(_FOC_Motor *motor)
 {
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,motor->Ta);
 	__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_2,motor->Tb);
@@ -44,11 +44,11 @@ void STM32_HAL_PWM_SET_Compare(FOC_Motor *motor)
 }
 
 //电流采样
-void ADC_Current_Offest(FOC_Motor *motor)	//获取两相电流采样修正值  包含偏置电压
+void ADC_Current_Offest(_FOC_Motor *motor)	//获取两相电流采样修正值  包含偏置电压
 {
 	int32_t	Add_ADC_Offect_U,Add_ADC_Offect_V;
 	int16_t	Number_ADC_Offect;
-	Work_Status.bits.Offest_Current = 1;
+	Control_Status.Work_Status.bits.Offest_Current = 1;
 	Add_ADC_Offect_U = Add_ADC_Offect_V = 0;
 	Number_ADC_Offect = 32;
 	motor->Ia_Offect = 0;				//校准值置零，避免采样回调函数中修正值影响直接采得的数据
@@ -69,14 +69,14 @@ void ADC_Current_Offest(FOC_Motor *motor)	//获取两相电流采样修正值  �
 }
 
 //编码器&角度
-void Encoder_To_Electri_Angle(FOC_Motor *motor)	//获取编码器角度并转换为电角度
+void Encoder_To_Electri_Angle(_FOC_Motor *motor)	//获取编码器角度并转换为电角度
 {
 	int32_t offest_angle;
+	_Control_Status *status = &Control_Status;
+
+	//角度获取
+	Encoder_Get_Angle(&Encoder1); //获取编码器角度，速度，位置	
 	
-
-	//角度获取与电流采样同周期
-	Encoder_Get_Angle(&Encoder1); //获取编码器角度，速度，位置
-
 	//电机原点位置对齐alpha轴
 	if(Encoder1.Encoder_Pulse < motor->Initial_Angle_Offset)
 		motor->Mechanical_Angle = Encoder1.Encoder_Pulse - motor->Initial_Angle_Offset + 65535;
@@ -98,334 +98,127 @@ void Encoder_To_Electri_Angle(FOC_Motor *motor)	//获取编码器角度并转换
 	{
 		//速度错误
 	}
-	//wang TEST
-//	offest_angle = 16300;
 	//使用与运算快速取余 t % 2`(n) 等价于 t & (2`(n) - 1)
-	//参考https://blog.csdn.net/lonyw/article/details/80519652
-	motor->Elecrical_Angle = (motor->Polar * offest_angle) & 0xFFFE;
+	if(status->Work_Status.bits.Offest_Encoder != 1)	//编码器校准对齐模式下使用虚拟电角度赋值
+		motor->Elecrical_Angle = (motor->Polar * offest_angle) & 0xFFFF;
 	//查表获取电角度对应三角函数值
 	motor->Sin_Angle = SIN_COS_TABLE[(motor->Elecrical_Angle >> 7)];
 	motor->Cos_Angle = SIN_COS_TABLE[((motor->Elecrical_Angle >> 7)+128) & 0x1ff];
 }
 
-//编码器校准 获取编码器对应alpha轴零位修正角度值，判断编码器方向与q轴正方向是否一致
-Encoder_Offest Encoder_Offest1;		//编码器修正参数
-void Get_Initial_Angle_Offest(FOC_Motor *motor)
-{
-	int32_t Offest_Differen;	//编码器实际值与虚拟值偏差
-	//编码器零位校正
-	if(Control_Word.bits.Work_Model == 1 && Control_Word.bits.PWM_Enable == 1)//判断工作模式1且进入PWM使能
-	{
-		if(Encoder_Offest1.Offest_Time_Basic > 0)	//时基延时计数
-			Encoder_Offest1.Offest_Time_Basic --;	//时基值	8kHz = 1:125us	16kHz = 1:62.5us	32kHz = 1:31.25us
-		else	//时基值到达
-		{
-			//校正内置模式判断
-			//校正模式中包含三种模式：1）初始角校正 2）线性正向 3）线性反向
-			switch (Encoder_Offest1.Offest_Model)
-			{
-				case 1:		//零位校正记录
-					//零位校正值累加
-					Encoder_Offest1.Offest_Integral = Encoder_Offest1.Offest_Integral + Encoder1.Encoder_Pulse;
-					//零位每次记录时基值 320*62.5us = 20ms
-					Encoder_Offest1.Offest_Time_Basic = 320;
-					//累加次数结束
-					Encoder_Offest1.Number_Offest_Count ++;
-					//根据累加次数判断是否结束零位校正
-					if(Encoder_Offest1.Number_Offest_Count > (1 << Control_Data.Number_Angle_Offest))
-					{
-						//更新零位修正值
-						motor->Initial_Angle_Offset = Encoder_Offest1.Offest_Integral >> (Control_Data.Number_Angle_Offest);
-						//累加次数清零
-						Encoder_Offest1.Number_Offest_Count = 0;
-						//进入线性正向
-						Encoder_Offest1.Offest_Model = 2;
-						//清零当前位置
-						Encoder1.Encode_Position = 0;
-						//清零线性校正数组计数
-						Encoder_Offest1.Offest_Table_Count = 0;
-						//清零线性校正虚拟角
-						Encoder_Offest1.Virtual_Angle = 0;
-						//清零数组序号
-						Encoder_Offest1.Offest_Table_Count = 0;
-						
-						Encoder_Offest1.Offest_Time_Basic = 4;
-					}
-					break;
-
-				case 2:		//线性正向记录
-					//虚拟角度对256快速取余
-					if((Encoder_Offest1.Virtual_Angle & 0x00ff) == 0)
-					{
-						//获取编码器修正零位后数值
-//						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
-//						Offest_Differen = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset - Virtual_Angle;
-						Offest_Differen = Encoder1.Encoder_Pulse;
-//						Offest_Differen = Virtual_Angle;
-						//偏差值过大判断为电机正方向与编码器方向相反
-						if(Offest_Differen > 256 || Offest_Differen < -256)
-							motor->Offest_Direction = 1;
-						//正向校正时记录偏差	
-						Encoder_Line_Offest_Table[Encoder_Offest1.Offest_Table_Count] = Offest_Differen>>1;
-						//记录数组序号增加
-						Encoder_Offest1.Offest_Table_Count ++;
-					}
-					//8*62.5us = 500us
-					Encoder_Offest1.Offest_Time_Basic = 4;
-					//判断虚拟角度值是否允许增加 ，避免溢出回零
-					if(Encoder_Offest1.Virtual_Angle < 65535)
-					{
-						//虚拟角度值增加
-						Encoder_Offest1.Virtual_Angle ++;
-					}
-					else if(Encoder_Offest1.Virtual_Angle == 65535)
-					{
-						//进入线性反向
-						Encoder_Offest1.Offest_Model = 3;
-						//进入模式3前等待时间 320 * 62.5us = 20ms
-						Encoder_Offest1.Offest_Time_Basic = 4;
-						//数组序号回退一步从255开始
-						Encoder_Offest1.Offest_Table_Count --;
-					}
-					break;
-
-				case 3:		//线性反向记录
-					//虚拟角度对256快速取余
-					if((Encoder_Offest1.Virtual_Angle & 0x00ff) == 0)
-					{
-						//获取编码器修正零位后数值
-//						Offest_Differen = motor->Mechanical_Angle - Virtual_Angle;
-//						Offest_Differen = Encoder1.Encoder_Angle - motor->Initial_Angle_Offset;
-						Offest_Differen = Encoder1.Encoder_Pulse;
-//						Offest_Differen = Virtual_Angle;
-						//偏差值过大判断为电机正方向与编码器方向相反
-						if(Offest_Differen > 256 || Offest_Differen < -256)
-							motor->Offest_Direction = 1;
-						//正向校正时记录偏差	
-//						Encoder_Line_Offest_Table[Offest_Table_Count] = (Offest_Differen + Encoder_Line_Offest_Table[Offest_Table_Count])>>1;
-						Encoder_Line_Offest_Table[Encoder_Offest1.Offest_Table_Count] = (Encoder_Line_Offest_Table[Encoder_Offest1.Offest_Table_Count] + \
-						(Offest_Differen >>1))>>1;
-						if(Encoder_Offest1.Offest_Table_Count > 0)
-						//记录数组序号增加
-						Encoder_Offest1.Offest_Table_Count --;
-					}
-					//8*62.5us = 500us
-					Encoder_Offest1.Offest_Time_Basic = 4;
-					//判断虚拟角度值是否允许减少 ，避免溢出回零
-					if(Encoder_Offest1.Virtual_Angle > 0)
-					{
-						//虚拟角度值增加
-						Encoder_Offest1.Virtual_Angle --;
-					}
-					else if(Encoder_Offest1.Virtual_Angle == 0)	//校正完成
-					{
-						//初始化校正模式
-						Encoder_Offest1.Offest_Model = 1;
-						//清除控制模式
-						Control_Word.bits.Work_Model = 0;
-						//退出校正模式并关闭PWM使能		
-						Control_Word.bits.PWM_Enable = 0;
-						//编码器校正位清零 允许下一次进入零位校准
-						Work_Status.bits.Angle_Offest = 0;
-						//清零Ud Uq
-						motor->Ud = 0;
-						motor->Uq = 0;
-					}
-					break;
-
-				default: 	//校正模式错误
-					Error_Message.bits.Encoder_Offset = 1;
-					break;
-			}
-		}
-	}
-}
-
 //应用层功能
-enum Motor_Work_Model	//工作模式控制
-{
-	Wait_Work = 0,
-	OPEN_LOOP,
-	CURRENT_LOOP,
-	SPEED_LOOP,
-	POSITION_LOOP,
-	SENSELESS
-};
-enum Motor_Sub_Work_Moedel	//工作子模式控制
-{
-	Normal_CONTROL = 0,
-	EOCODER_OFFEST,
-	DUTY_CONTROL,
-	MTPA_CONTROL,
-	DEBUG_ENGINE
-};
-enum Offest_Model
-{
-	OFFEST_INIT	= 1,		//初始角校正
-	POSITIVE_OFFEST,		//线性正向
-	NEGITIVE_OFFEST			//线性反向
-};
 
 uint8_t Model_Control(_Control_Data *Data,_Control_Status *Status)
 {
-	uint16_t 	virtual_eletri_angle;		//虚拟电角度,编码器线性度校正用
 	uint8_t		work_model,sub_work_model;	//工作模式判断
 
-	work_model = Data->Control_Word.bits.Work_Model;
-	sub_work_model = Data->Control_Word.bits.Sub_Work_Model;
-
-	//参数更新函数：模式切换判断
-	if(Motor_Status1.Last_Work_Model != Control_Word.bits.Work_Model)
-	{
-		if(Control_Word.bits.PWM_Enable == 1)//PWM使能输出情况下不允许更改工作模式
-			Control_Word.bits.Work_Model = Motor_Status1.Last_Work_Model;
-		else							//PWM非使能允许模式切换，但需要清零各PID器中的积分量
-		{
-			Current_Q_PID.Integral_Sum = 0;
-			Current_D_PID.Integral_Sum = 0;
-			Speed_PI.Integral_Sum = 0;
-			Position_P.Integral_Sum = 0;
-		}
-	}
+	work_model = Data->Control_Word.bits.Work_Model_Buffer;
+	sub_work_model = Data->Control_Word.bits.Sub_Work_Model_Buffer;
 	
 	//根据控制字判断工作环
 	switch(work_model)
 	{	
-		case EOCODER_OFFEST:	//校正模式：初始角度校正和线性补偿
-			motor->Ud = Control_Data.Angle_Initial_Voltage * (1 << _INIT_SCALE);//Ualph = 3V
-			motor->Uq = 0;
-			//判断进入校正起始
-			if(Control_Status.Work_Status.bits.Angle_Offest == 0)
+		case OPEN_LOOP:		//开环控制
+			Data->Control_Source.Position_Source = NULL_MODEL;
+			Data->Control_Source.Speed_Source = NULL_MODEL;
+			Data->Control_Source.Current_Source = NULL_MODEL;
+			switch (sub_work_model)
 			{
-				//校正模式仅起始进入一次
-				Work_Status.bits.Angle_Offest = 1;
-				//校正内置模式从零位校正开始
-				Encoder_Offest1.Offest_Model = 1;	
-				//清零零位校正角
-				motor->Initial_Angle_Offset = 0;
-				//清零编码器累加值
-				Encoder_Offest1.Offest_Integral = 0;
-				//零位第一次记录时基值 200ms 3200*62.5us 设置大些让电机拖动稳定后再记录
-				Encoder_Offest1.Offest_Time_Basic = 3200;	
-			}
-
-			//校正内置模式判断
-			if(Encoder_Offest1.Offest_Model == OFFEST_INIT)	//零位校正
-			{	
-				//设置零位对应静态坐标电压
-				motor->Sin_Angle = 0;
-				motor->Cos_Angle = 4096;
-			}
-			//线性校正
-			else if ((Encoder_Offest1.Offest_Model == POSITIVE_OFFEST) || \
-			(Encoder_Offest1.Offest_Model == NEGITIVE_OFFEST))
-			{
-				//计算虚拟机械角转虚拟电角度
-				virtual_eletri_angle = (motor->Polar * Encoder_Offest1.Virtual_Angle) & 0xFFFE;
-				//查表获取电角度对应三角函数值
-				motor->Sin_Angle = SIN_COS_TABLE[(virtual_eletri_angle >> 7)];
-				motor->Cos_Angle = SIN_COS_TABLE[((virtual_eletri_angle >> 7)+128) & 0x1ff];
+				case OPEN_VOLTAGE:		//开环电压
+					Data->Control_Source.Voltage_Source = OPEN_VOLTAGE;
+				break;
+				case DUTY_CONTROL:		//占空比控制
+					Data->Control_Source.Voltage_Source = DUTY_CONTROL;
+				break;
+				case EOCODER_OFFEST:	//编码器修正
+					Data->Control_Source.Voltage_Source = EOCODER_OFFEST;
+				break;
+				default:				//默认置空
+					Data->Control_Source.Voltage_Source = NULL_MODEL;
+				break;
 			}
 		break;
-		case DUTY_CONTROL:		//占空比模式：按照设置输出指定单相满额占空比（考虑采样最大98%）
-			if(Control_Data.Duty_Model_A > 96)	//对输入占空比数值作限制
-			{
-				Control_Data.Duty_Model_A = 96;
-			}
-			if(Control_Data.Duty_Model_B > 96)
-			{
-				Control_Data.Duty_Model_B = 96;
-			}
-			if(Control_Data.Duty_Model_C > 96)
-			{
-				Control_Data.Duty_Model_C = 96;
-			}
-			motor->Ta = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_A) * motor->Ts_Count)) >> 8;
-			motor->Tb = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_B) * motor->Ts_Count)) >> 8;
-			motor->Tc = (uint32_t)(2.56 *((100 - Control_Data.Duty_Model_C) * motor->Ts_Count)) >> 8;
-		break;
-		case OPEN_VOLATGE:	//电压开环模式：按照设置的Uq、Ud电压开环控制
-			motor->Ud = 0;
-			if(Control_Word.bits.Work_Direction == 0)	//正转
-				motor->Uq = Control_Data.Open_Loop_Voltage * (1 << _INIT_SCALE);
-			else						//反转
-				motor->Uq = - Control_Data.Open_Loop_Voltage * (1 << _INIT_SCALE);
-		break;
+		case SENSELESS:		//无感控制
 		
-		//速度环模拟无感控制：模拟速度增加控制速度开环输出
-		//锁相环估算速度
-		case PHASE_LOCK:
-			
 		break;
-		
-		//位置环模式：PID控制相对位置闭环输出
-		case NORMAL_POSITION:
-			//快速对4取余，速度环频率为电流环0.25倍
-			if((Control_Loop.Loop_Count & 0x04) == 0)
+		case POSITION_LOOP:	//位置环控制
+			Data->Control_Source.Speed_Source = POSITION_LOOP;
+			Data->Control_Source.Current_Source = POSITION_LOOP;
+			Data->Control_Source.Voltage_Source = POSITION_LOOP;
+			switch (sub_work_model)
 			{
-				//相对位置回馈
-				Position_PI.Feedback = Encoder1.Encode_Position;
-				//目标速度 单位：dec(编码器单个数值单位) 360度对应65536dec
-				Position_PI.Feedback = Control_Loop.Target_Position;
-				//PI计算
-				PID_Control_Deal(&Position_PI);
-				//输出控制电流
-				Control_Loop.Target_Speed = Position_PI.Output_Sum;
+				case NORMAL_CONTROL:		//常规控制
+					Data->Control_Source.Position_Source = NORMAL_CONTROL;
+				break;
+				case DEBUG_ENGINE:			//调试控制
+					Data->Control_Source.Position_Source = DEBUG_ENGINE;
+				break;
+				default:
+					Data->Control_Source.Position_Source = NULL_MODEL;
+				break;
 			}
-		
-
-		//速度环模式：PID控制速度闭环输出
-		case NORMAL_SPEED:
-			//快速对2取余，速度环频率为电流环一半
-			if((Control_Loop.Loop_Count & 0x02) == 0)
-			{
-				//速度回馈
-				// Speed_PI.Feedback = Encoder1.Encoder_1MS_Speed * 1.0923; //1.0923 = 65536/60000 1rpm转1dec/ms
-				//目标速度 单位：rpm
-				Speed_PI.Feedback = Control_Loop.Target_Speed;
-				//PI计算
-				PID_Control_Deal(&Speed_PI);
-				//输出控制电流
-				Control_Loop.Target_Q_Current = Speed_PI.Output_Sum;
-			}
-			
-		//电流环模式：PID控制电流Iq、Id闭环输出
-		case NORMAL_CURRENT:
-			//判断是否进行MTPA控制且控制模式为电流环
-			if((Control_Word.bits.MTPA == 1) && (Control_Word.bits.Work_Model == 4))
-				MTPA_Control(motor);
-			//输入反馈电流
-			Current_Q_PID.Feedback = motor->Iq;
-			Current_D_PID.Feedback = motor->Id;
-			//输入期望电流
-			Current_Q_PID.Expect = Control_Loop.Target_Q_Current;
-			Current_D_PID.Expect = Control_Loop.Target_D_Current;
-			//PID计算
-			PID_Control_Deal(&Current_Q_PID);
-			PID_Control_Deal(&Current_D_PID);
-			//输出控制电压
-			motor->Uq = Current_Q_PID.Output_Sum;
-			motor->Ud = Current_D_PID.Output_Sum;
-			
-			if(Control_Word.bits.Current_Forward == 1)//判断是否进行电流前馈解耦
-				Current_Forward_Feedback(motor);
 		break;
-		
-		//默认0模式，不做输出
+		case SPEED_LOOP:	//速度环控制
+			Data->Control_Source.Position_Source = NULL_MODEL;
+			Data->Control_Source.Current_Source = SPEED_LOOP;
+			Data->Control_Source.Voltage_Source = SPEED_LOOP;
+			switch (sub_work_model)
+			{
+				case NORMAL_CONTROL:		//常规控制
+					Data->Control_Source.Speed_Source = NORMAL_CONTROL;
+				break;
+				case DEBUG_ENGINE:			//调试控制
+					Data->Control_Source.Speed_Source = DEBUG_ENGINE;
+				break;
+				default:
+					Data->Control_Source.Speed_Source = NULL_MODEL;
+				break;
+			}
+		break;
+		case CURRENT_LOOP: //电流环控制
+			Data->Control_Source.Position_Source = NULL_MODEL;
+			Data->Control_Source.Speed_Source = NULL_MODEL;
+			Data->Control_Source.Voltage_Source = CURRENT_LOOP;
+			switch (sub_work_model)
+			{
+				case NORMAL_CONTROL:		//常规控制
+					Data->Control_Source.Current_Source = NORMAL_CONTROL;
+				break;
+				case MTPA_CONTROL:			//最大转矩比控制
+					Data->Control_Source.Current_Source = MTPA_CONTROL;
+				break;
+				case DEBUG_ENGINE:			//调试控制
+					Data->Control_Source.Current_Source = DEBUG_ENGINE;
+				break;
+				default:
+					Data->Control_Source.Current_Source = NULL_MODEL;
+				break;
+			}
+		break;
 		default:
-			// Error_Message.bits.Control_Loop_Error = 1;
+			Data->Control_Source.Position_Source = NULL_MODEL;
+			Data->Control_Source.Speed_Source = NULL_MODEL;
+			Data->Control_Source.Current_Source = NULL_MODEL;
+			Data->Control_Source.Voltage_Source = NULL_MODEL;
 		break;
 	}
-	//保存上一次控制模式
-	Motor_Status1.Last_Work_Model = Control_Word.bits.Work_Model;
-	return work_model;
+	if(Control_Status.Work_Status.bits.Enable_Status == 0)	//非使能条件下
+	{
+		if((Control_Data.Control_Word.bits.Work_Model_Buffer != Control_Data.Control_Word.bits.Work_Model) || \
+		(Control_Data.Control_Word.bits.Sub_Work_Model_Buffer != Control_Data.Control_Word.bits.Sub_Work_Model))
+		{	//控制模式变更
+			Control_Data.Control_Word.bits.Work_Model_Buffer = Control_Data.Control_Word.bits.Work_Model;	//保存上一次控制模式
+			Control_Data.Control_Word.bits.Sub_Work_Model_Buffer = Control_Data.Control_Word.bits.Sub_Work_Model;
+		}
+	}
+	return work_model;	
 }
 
 //PWM逻辑使能控制
 void Enable_Logic_Control(void)
 {
 	//触发紧急停止不再考虑PWM使能状态是否改变，立即停止
-	if(Control_Word.bits.Energency_Stop == 1)
+	if(Control_Data.Control_Word.bits.Energency_Stop == 1)
 	{
 		HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_RESET);
 		//关闭三相PWM输出
@@ -433,12 +226,12 @@ void Enable_Logic_Control(void)
 		HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
 		HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_3);
 		//PWM使能状态置0
-		Work_Status.bits.Enable_Status = 0;
+		Control_Status.Work_Status.bits.Enable_Status = 0;
 	}
 	//非紧急停止情况下，判断当前使能状态是否改变
-	else if(Motor_Status1.Last_PWM_Enable != Control_Word.bits.PWM_Enable)
+	else if(Control_Status.Work_Status.bits.Enable_Status != Control_Data.Control_Word.bits.PWM_Enable)
 	{
-		if(Control_Word.bits.PWM_Enable == 1)
+		if(Control_Data.Control_Word.bits.PWM_Enable == 1)
 		{
 			//开启三相PWM输出
 			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
@@ -447,7 +240,7 @@ void Enable_Logic_Control(void)
 			//打开驱动模块PWM接受
 			HAL_GPIO_WritePin(PWM_EN_GPIO_Port,PWM_EN_Pin,GPIO_PIN_SET);
 			//PWM使能状态置1
-			Work_Status.bits.Enable_Status = 1;
+			Control_Status.Work_Status.bits.Enable_Status = 1;
 		}
 		else
 		{
@@ -458,10 +251,8 @@ void Enable_Logic_Control(void)
 			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_2);
 			HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_3);
 			//PWM使能状态置0
-			Work_Status.bits.Enable_Status = 0;
+			Control_Status.Work_Status.bits.Enable_Status = 0;
 		}
-		//更新当前PWM使能状态
-		Motor_Status1.Last_PWM_Enable = Control_Word.bits.PWM_Enable;
 	}
 }
 
@@ -470,42 +261,42 @@ void Enable_Logic_Control(void)
 void Speed_1MS(void)
 {
 	int32_t Speed;
-	//判断是否首次进入1ms中断
-	if(Work_Status.bits.Interrupt_1MS_Init == 0)
-	{
-		Work_Status.bits.Interrupt_1MS_Init = 1;
-		//令过去位置对于当前位置，避免起步错误速度
-		Motor_Status1.Last_Encoder_Position = Encoder1.Encode_Position;
-	}
-	//1ms速度等于 当前位置 - 1ms前位置
-	Speed = Encoder1.Encode_Position - Motor_Status1.Last_Encoder_Position;
-	//对单次速度变化作限制
-	if(Motor_Status1.Last_1MS_Speed - Speed > 250)
-		Speed = Motor_Status1.Last_1MS_Speed;
-	if(Speed - Motor_Status1.Last_1MS_Speed > 250)
-		Speed = Motor_Status1.Last_1MS_Speed;
+	// //判断是否首次进入1ms中断
+	// if(Work_Status.bits.Interrupt_1MS_Init == 0)
+	// {
+	// 	Work_Status.bits.Interrupt_1MS_Init = 1;
+	// 	//令过去位置对于当前位置，避免起步错误速度
+	// 	Motor_Status1.Last_Encoder_Position = Encoder1.Encode_Position;
+	// }
+	// //1ms速度等于 当前位置 - 1ms前位置
+	// Speed = Encoder1.Encode_Position - Motor_Status1.Last_Encoder_Position;
+	// //对单次速度变化作限制
+	// if(Motor_Status1.Last_1MS_Speed - Speed > 250)
+	// 	Speed = Motor_Status1.Last_1MS_Speed;
+	// if(Speed - Motor_Status1.Last_1MS_Speed > 250)
+	// 	Speed = Motor_Status1.Last_1MS_Speed;
 
-	//编码器速度范围限制,超出限制以上一次速度代替
-	if((Speed > 32763) || (Speed < -32763))
-		Speed = Motor_Status1.Last_1MS_Speed;
+	// //编码器速度范围限制,超出限制以上一次速度代替
+	// if((Speed > 32763) || (Speed < -32763))
+	// 	Speed = Motor_Status1.Last_1MS_Speed;
 	
-	//更新过去1ms时间编码器位置、1ms编码器速度
-	Motor_Status1.Last_Encoder_Position = Encoder1.Encode_Position;
-	Motor_Status1.Last_1MS_Speed = Speed;
+	// //更新过去1ms时间编码器位置、1ms编码器速度
+	// Motor_Status1.Last_Encoder_Position = Encoder1.Encode_Position;
+	// Motor_Status1.Last_1MS_Speed = Speed;
 	
-	//输出直接编码器速度
-	// Encoder1.Encoder_1MS_Speed = Speed;
+	// //输出直接编码器速度
+	// // Encoder1.Encoder_1MS_Speed = Speed;
 
-	//1ms速度计算1个电流环周期机械角速度并乘2
-	//乘3因为当前周期获取得的速度为上一个周期发送指令获取得，在下一周期生效
-	Motor1.Speed_Angle = (3 * Speed) >> 4;
+	// //1ms速度计算1个电流环周期机械角速度并乘2
+	// //乘3因为当前周期获取得的速度为上一个周期发送指令获取得，在下一周期生效
+	// Motor1.Speed_Angle = (3 * Speed) >> 4;
 }
 
 //外部输入输出数据、温度保护、电机状态保护、速度计算处理
 void Interrupt_1MS(void)
 {
 	
-	PID_Control_Update();
+
 }
 
 

@@ -4,15 +4,15 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
         {
-            "name": "Cortex Debug",
             "cwd": "${workspaceFolder}",
-            "executable": "./bin/executable.elf",
+            "executable": "./MDK-ARM/FOC_Mini_Board/FOC_Mini_Board.axf",
+            "name": "Debug with ST-Link",
             "request": "launch",
             "type": "cortex-debug",
             "runToEntryPoint": "main",
-            "servertype": "jlink"
+            "showDevDebugOutput": "none",
+            "servertype": "stlink"
         }
     ]
 }

@@ -56,13 +56,20 @@ enum Loop_Control_Word		//环路控制字枚举
 	FORWARD_FILTER	= 3,	//PID结果结合前馈结果滤波
 };
 	
-void Parallel_PID(_PID_Control *pid_control);	//抗饱和并联PID
-void Control_Loop_Init(_Control_Loop *loop);	//PID控制环具体参数初始化
-void Current_Loop_Control(_Control_Loop *loop);	//三环控制
-void Speed_Loop_Control(_Control_Loop *loop);
-void Position_Loop_Control(_Control_Loop *loop);
+void Open_Voltage_Control(uint8_t *source,_Control_Loop *loop);	//电压开环
+void Parallel_PID(_PID_Control *pid_control);					//抗饱和并联PID
+void Current_Loop_Control(uint8_t *source,_Control_Loop *loop);	//三环控制
+void Speed_Loop_Control(uint8_t *source,_Control_Loop *loop);
+void Position_Loop_Control(uint8_t *source,_Control_Loop *loop);
+void Control_Loop_Init(_Control_Loop *loop);					//PID控制环具体参数初始化
+void Control_Loop_Update(_Control_Loop *loop);
+uint8_t Current_Loop_Model(_Forward *forward);
+uint8_t Speed_Loop_Model(_Forward *forward);
+uint8_t Position_Loop_Model(_Forward *forward);
+
 
 //全局变量
+extern	_Control_Loop	Open_Voltage_Loop;
 extern  _Control_Loop	Current_Q_Loop;
 extern  _Control_Loop	Current_D_Loop;
 extern	_Control_Loop 	Speed_Loop;
@@ -71,7 +78,7 @@ extern	_PID_Control 	Current_Q_PID;
 extern	_PID_Control 	Current_D_PID;
 extern	_PID_Control 	Speed_PI;
 extern	_PID_Control 	Position_P;
-extern	uint16_t		Loop_Count;	
+extern	uint8_t			Loop_Count;	
 
 #endif
 

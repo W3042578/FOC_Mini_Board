@@ -18,7 +18,7 @@ void Hardware_Init(void)
 	
 	//电机
 	Motor1.Polar = 11;
-	Motor1.Udc = 12;			//母线电压为 12V
+	Motor1.Udc = 12;			//母线工作电压为 12V
 
 	//驱动板
 	Driver1.Dead_Time = 50;		//0.5us
@@ -34,14 +34,14 @@ void Hardware_Init(void)
 void Control_Data_Init(_Control_Data *Data)
 {
 	Data->Control_Word.All = 0;
-	Data->Control_Word.bits.Encoder_Type = MT6813;	
+	Data->Control_Word.bits.Encoder_Type = KTH7812;	
 	Data->Open_Loop_Voltage = 2;		//开环电压置零
-	Data->Angle_Initial_Voltage = 5;	//编码器线性校正Ud电压
-	Data->Number_Angle_Offest = 5;		//初始角校正累加次数= 2的n次方
+	Data->Encoder_Offest.Angle_Initial_Voltage = 4;	//编码器线性校正Ud电压
+	Data->Encoder_Offest.Number_Angle_Offest = 5;		//初始角校正累加次数= 2的n次方
 	Data->Max_Voltage = 12;				//最大母线电压限制
-	Data->Duty_Model_A = 50;			//占空比模式三相输入值
-	Data->Duty_Model_B = 50;
-	Data->Duty_Model_C = 50;
+	Data->Duty_Data.Phase_A = 50;			//占空比模式三相输入值
+	Data->Duty_Data.Phase_B = 50;
+	Data->Duty_Data.Phase_C = 50;
 }
 
 //控制状态初始化
@@ -73,11 +73,6 @@ void Parameter_Init(void)
 	Control_Data_Init(&Control_Data);		//控制数据初始化
 	Control_Status_Init(&Control_Status);	//控制状态初始化
 
-	PID_Control_Init(&Current_Q_PID);		//各控制环PID参数初始化
-	PID_Control_Init(&Current_D_PID);
-	PID_Control_Init(&Speed_PI);
-	PID_Control_Init(&Position_P);
-
 	Control_Loop_Init(&Current_Q_Loop);		//控制环参数初始化
 	Control_Loop_Init(&Current_D_Loop);
 	Control_Loop_Init(&Speed_Loop);
@@ -98,7 +93,7 @@ void _CLEAN(uint8_t * data,uint8_t bit)
 }
 uint8_t _TEST(uint8_t * data,uint8_t bit)
 {
-	if((*data) & bit != 0)
+	if(((*data) & bit) != 0)
 	{
 		return 1;
 	}

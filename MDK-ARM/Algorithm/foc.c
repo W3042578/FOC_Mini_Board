@@ -4,25 +4,21 @@
 #include "parameter.h"
 #include "control_loop.h"
 
-
-
 //定义电机结构体Motor1
-FOC_Motor Motor1;		
-FOC_Driver Driver1;
+_FOC_Motor Motor1;		
+_FOC_Driver Driver1;
 // uint16_t test1,test2,test3;
 //编码器输入数据统一为16位，进行查表
 //电流12位采样
-#define SQRT3		1.73206
-#define SQRT3_2		0.86603
-#define SQRT3_3		0.57735
-void Clark_Transform(FOC_Motor *motor)
+
+void Clark_Transform(_FOC_Motor *motor)
 {
 	motor->Ialph = motor->Ia;
 	motor->Ibeta = SQRT3_3 * motor->Ia + (motor->Ib >> 1);
 }
 
 //电流Park变换
-void Park_Transform(FOC_Motor *motor)
+void Park_Transform(_FOC_Motor *motor)
 {
 	//除以4096因为角度值是乘以4096后的整数值
 	motor->Iq = (motor->Ibeta * motor->Cos_Angle - motor->Ialph * motor->Sin_Angle)>>12;
@@ -30,7 +26,7 @@ void Park_Transform(FOC_Motor *motor)
 } 	
 
 //电压Inverse Park变换
-void Inverse_Park_Transform(FOC_Motor *motor)
+void Inverse_Park_Transform(_FOC_Motor *motor)
 {
 	//除以4096因为角度值是乘以4096后的整数值
 	motor->Ualph = (motor->Ud * motor->Cos_Angle - motor->Uq * motor->Sin_Angle)>>12; 
@@ -39,7 +35,7 @@ void Inverse_Park_Transform(FOC_Motor *motor)
 
 //SVPWM计算三相PWM时间计数
 //载波频率 = 开关管打开关闭频率（SVPWM 7段式）  基波频率 = 电机转速/（60/极对数）  一般载波频率：基波频率 = 10 ：1
-void SVPWM(FOC_Motor *motor)
+void SVPWM(_FOC_Motor *motor)
 {
 	
 	int16_t 	u1,u2,u3;			//SVPWM扇区判断电压
@@ -105,7 +101,7 @@ void SVPWM(FOC_Motor *motor)
 		break;
 	}
 	
-	//使用Ts_Count计数值表示满占空比
+	//使用Ts_Count计数值表示满占空比  _INIT_SCALE 输入数据放大比例
 	time_lead = ((uint32_t)(SQRT3 * u_lead * motor->Ts_Count / motor->Udc)) >> _INIT_SCALE;
 	time_backward = ((uint32_t)(SQRT3 * u_backward * motor->Ts_Count /motor->Udc)) >> _INIT_SCALE;
 
@@ -180,53 +176,54 @@ void SVPWM(FOC_Motor *motor)
 	if(motor->Tc == 0)
 		motor->Tc = 1;
 }
-//基本FOC控制
-void FOC_Control(FOC_Motor *motor)
+//主循环
+void FOC_Control(_FOC_Motor *motor)
 { 
-	uint8_t model;
-	//获取电角度
-	Encoder_To_Electri_Angle(motor);
-	//获取反馈电流Iq,Id
-	Clark_Transform(motor);
-	//换算获取Iq,Id
-	Park_Transform(motor);
+	_Control_Data * Data = &Control_Data;//获取控制数据
 	
 	//模式处理
-	model = Model_Control(motor);
+	Model_Control(&Control_Data,&Control_Status);
 
 	//三环控制
-	if(Loop_Count & 0x04 == 0)
+	if((Loop_Count & 0x04) == 0)//位置环
 	{
-		Position_Loop_Control(&Position_Loop);
+		Position_Loop_Control(&Control_Data.Control_Source.Position_Source,&Position_Loop);
 	}
-	if(Loop_Count & 0x02 == 0)
+	if((Loop_Count & 0x02) == 0)//速度环
 	{
-		Speed_Loop_Control(&Speed_Loop);
+		Speed_Loop_Control(&Control_Data.Control_Source.Speed_Source,&Speed_Loop);
 	}
-	Current_Loop_Control(&Current_Q_Loop);
-	Current_Loop_Control(&Current_D_Loop);
+
+	Current_Loop_Control(&Control_Data.Control_Source.Current_Source,&Current_Q_Loop);//电流环
+	Current_Loop_Control(&Control_Data.Control_Source.Current_Source,&Current_D_Loop);
+	Open_Voltage_Control(&Control_Data.Control_Source.Voltage_Source,&Open_Voltage_Loop);//电压开环
 	
-	if(model != 0x02)//占空比模式不使用反park变换和SVPWM计算三相占空比
+	if(Control_Data.Control_Source.Voltage_Source != DUTY_CONTROL)	//非占空比模式
 	{
 		Inverse_Park_Transform(motor);
 		SVPWM(motor);
 	}
+	else	//占空比模式不使用反park变换和SVPWM计算三相占空比
+	{
+		motor->Ta = (uint32_t)(2.56 *((100 - Data->Duty_Data.Phase_A) * motor->Ts_Count)) >> 8;
+		motor->Tb = (uint32_t)(2.56 *((100 - Data->Duty_Data.Phase_B) * motor->Ts_Count)) >> 8;
+		motor->Tc = (uint32_t)(2.56 *((100 - Data->Duty_Data.Phase_C) * motor->Ts_Count)) >> 8;
+	}
 
 	Loop_Count ++;			//环路计数
-	if(Loop_Count > 252)	//计数循环
-		Loop_Count = 1;
+	Loop_Count %= 8;
 }	
 
 //应用算法
 //最大转矩比控制MTPA
-void MTPA_Control(FOC_Motor *motor)
+void MTPA_Control(_FOC_Motor *motor)
 {
 	//根据输入合成电流Is,已知Ld、Lq和永磁体磁链计算最大力矩输出对应Id、Iq
 	
 }
 
 //电流前馈解耦 根据上一次Iq、Id电流计算当前Uq、Ud前馈量,提升响应
-void Current_Forward_Feedback(FOC_Motor *motor)
+void Current_Forward_Feedback(_FOC_Motor *motor)
 {
 	//此处Id、Iq为上一次电流采样转换获得
 	motor->Uq = motor->Uq + motor->Elecrical_Speed * (motor->Flux_Linkage + motor->Ld * motor->Id);
@@ -234,7 +231,7 @@ void Current_Forward_Feedback(FOC_Motor *motor)
 }
 
 //电机控制死区补偿
-void Dead_Time_Compensate(FOC_Motor *motor)
+void Dead_Time_Compensate(_FOC_Motor *motor)
 {
 	//计算合成电流Is在静态坐标下离alpha轴角度，根据角度判断三相电流极性，再根据极性设置补偿时间增减
 	//电流极性扇区判断

@@ -5,7 +5,10 @@
 
 //为避免整形数据相除带小数部分丢失，进行数据比例放大 1:2^(_INIT_SCALE)
 #define		_INIT_SCALE		12 
-typedef struct _FOC_MOTOR
+#define SQRT3		1.73206
+#define SQRT3_2		0.86603
+#define SQRT3_3		0.57735
+typedef struct 
 {
 //电机参数
 	uint8_t	 	Polar;			//极对数
@@ -20,7 +23,6 @@ typedef struct _FOC_MOTOR
 	int16_t 	Ia_Offect,Ib_Offect;
 	int16_t 	Ialph,Ibeta;
 	int16_t 	Id,Iq;
-	uint16_t 	Umax;			//pwm输出无法实现100%占空比
 	uint16_t 	Ts_Count;				//拟合SVPWM电压参考矢量周期
 	uint16_t	Mechanical_Angle;	//机械角度
 	uint16_t 	Elecrical_Angle;	//电气角度
@@ -34,10 +36,10 @@ typedef struct _FOC_MOTOR
 	
 	uint8_t 	Direction;			//电机工作方向
 	uint8_t		Offest_Direction;	//电机修正方向
-}FOC_Motor;
+}_FOC_Motor;
 
 
-typedef struct _FOC_Driver
+typedef struct
 {
 	//采样电路
 	uint16_t	ADC_Scale;				//adc采样运放比例
@@ -47,26 +49,26 @@ typedef struct _FOC_Driver
 	//驱动电路
 	uint16_t	Dead_Time;				//驱动管死区时间，单位0.01us
 
-}FOC_Driver;
+}_FOC_Driver;
 
 
-extern FOC_Motor Motor1;		//电机控制变量
-extern FOC_Driver Driver1;		//驱动版变量
+extern _FOC_Motor Motor1;		//电机控制变量
+extern _FOC_Driver Driver1;		//驱动版变量
 
 
-void Clark_Transform(FOC_Motor *motor);
-void Park_Transform(FOC_Motor *motor);
-void Inverse_Park_Transform(FOC_Motor *motor);
-void SVPWM(FOC_Motor *motor);
-void FOC_Control(FOC_Motor *motor);
+void Clark_Transform(_FOC_Motor *motor);
+void Park_Transform(_FOC_Motor *motor);
+void Inverse_Park_Transform(_FOC_Motor *motor);
+void SVPWM(_FOC_Motor *motor);
+void FOC_Control(_FOC_Motor *motor);
 
 //应用算法
 //最大转矩比控制MTPA
-void MTPA_Control(FOC_Motor *motor);
+void MTPA_Control(_FOC_Motor *motor);
 //电流前馈解耦
-void Current_Forward_Feedback(FOC_Motor *motor);
+void Current_Forward_Feedback(_FOC_Motor *motor);
 //死区补偿
-void Dead_Time_Compensate(FOC_Motor *motor);
+void Dead_Time_Compensate(_FOC_Motor *motor);
 
 
 #endif

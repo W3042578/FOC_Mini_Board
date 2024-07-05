@@ -228,19 +228,19 @@ uint8_t Modbus_Process(uint8_t *data_in,uint8_t length_in,uint8_t *data_out,uint
 						*length_out = 8;
 					return 1;
 					default:
-						Error_Message.bits.Modbus_Status = 1;
+						Control_Status.Error_status.bits.Modbus_Status = 1;
 					return 0;//ID正确、校验正确情况下没有找到对应功能码
 				}
 		}
 		else
 		{
-			Error_Message.bits.Modbus_Status = 1;
+			Control_Status.Error_status.bits.Modbus_Status = 1;
 			return 0;	//校验正确但ID不正确
 		}
 	}
 	else
 	{
-		Error_Message.bits.Modbus_Status = 1;
+		Control_Status.Error_status.bits.Modbus_Status = 1;
 		return 0;		//校验不正确
 	}
 }

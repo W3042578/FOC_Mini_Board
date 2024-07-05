@@ -12,35 +12,35 @@ uint16_t Commicate_Data_All_Number;	//通许数据量
 const commicate_code Commicate_Code[] =
 {
 	{0x0000,	0x00,	1,	&Modbus.Test,							255,	0,	NULL},
-	{0x0001,	0x00,	1,	&Control_Word.All,						255,	0,	NULL},
-	{0x0002,	0x00,	1,	&Control_Data.Number_Angle_Offest,		255,	0,	NULL},//初始角校正累加数
-	{0x0003,	0x00,	1,	&Control_Word.All,						255,	0,	NULL},//0不触发 1:触发
-	{0x0004,	0x00,	1,	&Control_Word.All,						255,	0,	NULL},//0不触发 1:触发
-	{0x0005,	0x00,	1,	&Control_Data.Open_Loop_Voltage,		255,	0,	NULL},
-	{0x0006,	0x00,	1,	&Control_Word.All,						255,	0,	NULL},//0:正		1:反
-	{0x0007,	0x00,	1,	&Control_Data.Max_Voltage,				255,	0,	NULL},
-	{0x0008,	0x00,	2,	&Control_Loop.Target_Q_Current,			65535,	0,	NULL},
-	{0x0009,	0x00,	2,	&Transfer1[0],							65535,	0,	NULL},
-	{0x000A,	0x00,	2,	&Control_Loop.Target_Position,			65535,	0,	NULL},
-	{0x000B,	0x00,	2,	&Control_Loop.Current_Q_Proportion,		65535,	0,	NULL},
-	{0x000C,	0x00,	2,	&Control_Loop.Current_Q_Integral,		65535,	0,	NULL},
-	{0x000D,	0x00,	2,	&Control_Loop.Current_Q_Difference,		65535,	0,	NULL},	
-	{0x000E,	0x00,	2,	&Control_Loop.Current_D_Proportion,		65535,	0,	NULL},
-	{0x000F,	0x00,	2,	&Control_Loop.Current_D_Integral,		65535,	0,	NULL},
-	{0x0010,	0x00,	2,	&Control_Loop.Current_D_Difference,		65535,	0,	NULL},
-	{0x0011,	0x00,	2,	&Control_Loop.Speed_Proportion,			65535,	0,	NULL},
-	{0x0012,	0x00,	2,	&Control_Loop.Speed_Integral,			65535,	0,	NULL},
-	{0x0013,	0x00,	2,	&Control_Loop.Position_Proportion,		65535,	0,	NULL},
-	{0x0014,	0x00,	2,	&Control_Loop.Position_Integral,		65535,	0,	NULL},
-	{0x0015,	0x00,	2,	&Control_Loop.Position_Output_Limit,	65535,	0,	NULL},
-	{0x0016,	0x00,	2,	&Control_Loop.Position_Feedforward,		65535,	0,	NULL},
-	{0x0017,	0x00,	2,	&Error_Message,							65535,	0,	NULL},
-	{0x0018,	0x00,	2,	&Control_Loop.Current_Q_Output_Limit,	65535,	0,	NULL},
-	{0x0019,	0x00,	2,	&Control_Loop.Current_D_Output_Limit,	65535,	0,	NULL},
-	{0x001A,	0x00,	2,	&Control_Loop.Speed_Output_Limit,		65535,	0,	NULL},
-	{0x001B,	0x00,	2,	&Control_Loop.Speed_Output_Limit,		65535,	0,	NULL},
-	{0x001C,	0x00,	2,	&Control_Loop.Speed_Output_Limit,		65535,	0,	NULL},
-	{0x001D,	0x00,	2,	&Control_Loop.Speed_Output_Limit,		65535,	0,	NULL},
+	{0x0001,	0x00,	1,	&Control_Data.Control_Word,				255,	0,	NULL},
+	// {0x0002,	0x00,	1,	&Control_Data,		255,	0,	NULL},//初始角校正累加数
+	// {0x0003,	0x00,	1,	&Control_Word.All,						255,	0,	NULL},//0不触发 1:触发
+	// {0x0004,	0x00,	1,	&Control_Word.All,						255,	0,	NULL},//0不触发 1:触发
+	// {0x0005,	0x00,	1,	&Control_Data.Open_Loop_Voltage,		255,	0,	NULL},
+	// {0x0006,	0x00,	1,	&Control_Word.All,						255,	0,	NULL},//0:正		1:反
+	// {0x0007,	0x00,	1,	&Control_Data.Max_Voltage,				255,	0,	NULL},
+	// {0x0008,	0x00,	2,	&Control_Loop.Target_Q_Current,			65535,	0,	NULL},
+	// {0x0009,	0x00,	2,	&Transfer1[0],							65535,	0,	NULL},
+	// {0x000A,	0x00,	2,	&Control_Loop.Target_Position,			65535,	0,	NULL},
+	// {0x000B,	0x00,	2,	&Control_Loop.Current_Q_Proportion,		65535,	0,	NULL},
+	// {0x000C,	0x00,	2,	&Control_Loop.Current_Q_Integral,		65535,	0,	NULL},
+	// {0x000D,	0x00,	2,	&Control_Loop.Current_Q_Difference,		65535,	0,	NULL},	
+	// {0x000E,	0x00,	2,	&Control_Loop.Current_D_Proportion,		65535,	0,	NULL},
+	// {0x000F,	0x00,	2,	&Control_Loop.Current_D_Integral,		65535,	0,	NULL},
+	// {0x0010,	0x00,	2,	&Control_Loop.Current_D_Difference,		65535,	0,	NULL},
+	// {0x0011,	0x00,	2,	&Control_Loop.Speed_Proportion,			65535,	0,	NULL},
+	// {0x0012,	0x00,	2,	&Control_Loop.Speed_Integral,			65535,	0,	NULL},
+	// {0x0013,	0x00,	2,	&Control_Loop.Position_Proportion,		65535,	0,	NULL},
+	// {0x0014,	0x00,	2,	&Control_Loop.Position_Integral,		65535,	0,	NULL},
+	// {0x0015,	0x00,	2,	&Control_Loop.Position_Output_Limit,	65535,	0,	NULL},
+	// {0x0016,	0x00,	2,	&Control_Loop.Position_Feedforward,		65535,	0,	NULL},
+	// {0x0017,	0x00,	2,	&Error_Message,							65535,	0,	NULL},
+	// {0x0018,	0x00,	2,	&Control_Loop.Current_Q_Output_Limit,	65535,	0,	NULL},
+	// {0x0019,	0x00,	2,	&Control_Loop.Current_D_Output_Limit,	65535,	0,	NULL},
+	// {0x001A,	0x00,	2,	&Control_Loop.Speed_Output_Limit,		65535,	0,	NULL},
+	// {0x001B,	0x00,	2,	&Control_Loop.Speed_Output_Limit,		65535,	0,	NULL},
+	// {0x001C,	0x00,	2,	&Control_Loop.Speed_Output_Limit,		65535,	0,	NULL},
+	// {0x001D,	0x00,	2,	&Control_Loop.Speed_Output_Limit,		65535,	0,	NULL},
 	{0x001E,	0x00,	2,	&Transfer1[2],							65535,	0,	NULL}
 };
 
@@ -61,7 +61,7 @@ uint16_t Get_Communicte_Data_Number(void)
 void Commicate_Data_Init(void)
 {
 	Commicate_Data_All_Number = Get_Communicte_Data_Number();
-	Error_Message.All = 0;
+	Control_Status.Error_status.All = 0;
 }
 
 
