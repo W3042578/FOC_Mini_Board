@@ -28,10 +28,6 @@ enum Encoder_Offest_Model
 	END_Check
 };
 
-//静态全局
-static uint16_t Pulse_Buffer;
-static uint8_t polar;
-
 //抗饱和并联PID
 void Parallel_PID(_PID_Control *pid_control)
 {
@@ -77,13 +73,18 @@ void Parallel_PID(_PID_Control *pid_control)
 //开环控制
 void Open_Voltage_Control(uint8_t *source,_Control_Loop *loop)
 {
+	//静态
+	static uint16_t Pulse_Buffer;
+	static uint8_t 	polar;
+
+	//局部
 	_Control_Data * data = &Control_Data;
 	_Control_Status *status = &Control_Status;
 	_FOC_Motor * motor = &Motor1;
 	_Encoder *encoder = &Encoder1;
-
 	int32_t buffer;
 	uint32_t test;
+	
 	if(data->Control_Word.bits.PWM_Enable == 1)
 	switch (*source)
 	{
