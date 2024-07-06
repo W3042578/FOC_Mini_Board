@@ -161,6 +161,7 @@ void Open_Voltage_Control(uint8_t *source,_Control_Loop *loop)
 							{
 								buffer = data->Encoder_Offest.Differ_Check;
 								data->Encoder_Offest.Differ_Check = encoder->Encoder_Pulse - Pulse_Buffer;
+								Pulse_Buffer = encoder->Encoder_Pulse;
 								if(data->Encoder_Offest.Differ_Check < 0)
 									test = -data->Encoder_Offest.Differ_Check;
 								else
