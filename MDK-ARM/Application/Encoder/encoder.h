@@ -21,7 +21,7 @@ typedef struct _encoder
 	uint32_t		Encoder_Multi_Pulse;	//编码器多圈值
 	uint16_t		Encoder_Pulse_Buffer;	//编码器上一次值
 	uint32_t		Encode_Position;		//编码器多圈位置
-	uint32_t 		Encoder_Deviation;		//编码器坐标零位偏差
+	uint32_t 		Encoder_Deviation;		//编码器静态偏差
 	uint8_t			Encoder_Status;			//编码器状态
 	_Encoder_Com	Encoder_Com;			//编码器通讯数据
 }_Encoder;

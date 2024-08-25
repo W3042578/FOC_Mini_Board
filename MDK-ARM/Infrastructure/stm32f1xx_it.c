@@ -334,18 +334,29 @@ void USART1_IRQHandler(void)
   /* USER CODE BEGIN USART1_IRQn 0 */
 	
   /* USER CODE END USART1_IRQn 0 */
-  HAL_UART_IRQHandler(&huart1);
+//  HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
-
-	//进行空闲中断处理
+  uint32_t isrflags   = READ_REG(huart1.Instance->SR);
+  uint32_t cr1its     = READ_REG(huart1.Instance->CR1);
+	
     if(USART1 == huart1.Instance)// 判断是否是串口1                                
     {		
-	// 判断是否是空闲中断 总线上在一个字节的时间内没有再接收到数据的时候发生 判断数据是否接受结束
-        if(RESET != __HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE))   
-        {	 
-            __HAL_UART_CLEAR_IDLEFLAG(&huart1); // 清除空闲中断标志（否则会一直不断进入中断）                   
-            uart_idleback(&huart1); 		// 调用空闲中断处理函数                      
-        }
+		//空闲中断
+		if(RESET != __HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE))
+		{	 
+		  __HAL_UART_CLEAR_IDLEFLAG(&huart1); // 清除空闲中断标志（否则会一直不断进入中断）                   
+		  uart_idleback(&huart1); 		// 调用空闲中断处理函数                      
+		} 
+		//DMA发送完成中断
+		else if (((isrflags & USART_SR_TC) != RESET) && ((cr1its & USART_CR1_TCIE) != RESET))
+		{
+			/* Disable the UART Transmit Complete Interrupt */
+			__HAL_UART_DISABLE_IT(&huart1, UART_IT_TC);
+
+			/* Tx process is ended, restore huart->gState to Ready */
+			huart1.gState = HAL_UART_STATE_READY;
+			HAL_UART_Tx_End_Callback(&huart1);
+		}
    }
 
   /* USER CODE END USART1_IRQn 1 */

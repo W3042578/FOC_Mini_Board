@@ -66,22 +66,25 @@ void ADC_Current_Offest(_FOC_Motor *motor)	//获取两相电流采样修正值  
 	motor->Ia_Offect = 2048 + (Add_ADC_Offect_U >> 5);
 	motor->Ib_Offect = 2048 + (Add_ADC_Offect_V >> 5);
 	motor->Ia = motor->Ib = 0;	
+
 }
 
 //编码器&角度
 void Encoder_To_Electri_Angle(_FOC_Motor *motor)	//获取编码器角度并转换为电角度
 {
-	int32_t offest_angle;
+	int32_t 	offest_angle;
+	static		uint16_t	angle_sine;
 	_Control_Status *status = &Control_Status;
+	_Control_Data 	*data = &Control_Data;
 
 	//角度获取
 	Encoder_Get_Angle(&Encoder1); //获取编码器角度，速度，位置	
 	
 	//电机原点位置对齐alpha轴
-	if(Encoder1.Encoder_Pulse < motor->Initial_Angle_Offset)
-		motor->Mechanical_Angle = Encoder1.Encoder_Pulse - motor->Initial_Angle_Offset + 65535;
+	if(Encoder1.Encoder_Pulse < motor->Initial_Offset)
+		motor->Mechanical_Angle = Encoder1.Encoder_Pulse - motor->Initial_Offset + 65535;
 	else
-		motor->Mechanical_Angle = Encoder1.Encoder_Pulse - motor->Initial_Angle_Offset;
+		motor->Mechanical_Angle = Encoder1.Encoder_Pulse - motor->Initial_Offset;
 	
 	//电机速度补偿计算用角度
 	// offest_angle = motor->Mechanical_Angle + motor->Speed_Angle;
@@ -101,9 +104,32 @@ void Encoder_To_Electri_Angle(_FOC_Motor *motor)	//获取编码器角度并转�
 	//使用与运算快速取余 t % 2`(n) 等价于 t & (2`(n) - 1)
 	if(status->Work_Status.bits.Offest_Encoder != 1)	//编码器校准对齐模式下使用虚拟电角度赋值
 		motor->Elecrical_Angle = (motor->Polar * offest_angle) & 0xFFFF;
+	else
+		motor->Elecrical_Angle = data->Encoder_Offest.Virtual_Angle;
 	//查表获取电角度对应三角函数值
-	motor->Sin_Angle = SIN_COS_TABLE[(motor->Elecrical_Angle >> 7)];
-	motor->Cos_Angle = SIN_COS_TABLE[((motor->Elecrical_Angle >> 7)+128) & 0x1ff];
+	angle_sine = motor->Elecrical_Angle >> 7;
+	if(angle_sine >= 384)
+ 	{
+		motor->Sin_Angle = -SIN_COS_TABLE[127 - (angle_sine - 384)];
+		motor->Cos_Angle = SIN_COS_TABLE[angle_sine - 384];
+	}
+	else if(angle_sine >= 256)
+	{
+		motor->Sin_Angle = -SIN_COS_TABLE[angle_sine - 256];
+		motor->Cos_Angle = -SIN_COS_TABLE[127 - (angle_sine - 256)];
+	}
+	else if(angle_sine >= 128)
+	{
+		motor->Sin_Angle = SIN_COS_TABLE[127 - (angle_sine - 128)];
+		motor->Cos_Angle = -SIN_COS_TABLE[angle_sine - 128];
+	}
+	else
+	{
+		motor->Sin_Angle = SIN_COS_TABLE[angle_sine];
+		motor->Cos_Angle = SIN_COS_TABLE[127 - angle_sine];
+	}
+	// angle_sine ++;
+	// angle_sine %= 512;
 }
 
 //应用层功能
@@ -141,14 +167,14 @@ uint8_t Model_Control(_Control_Data *Data,_Control_Status *Status)
 		case SENSELESS:		//无感控制
 		
 		break;
-		case POSITION_LOOP:	//位置环控制
-			Data->Control_Source.Speed_Source = POSITION_LOOP;
-			Data->Control_Source.Current_Source = POSITION_LOOP;
-			Data->Control_Source.Voltage_Source = POSITION_LOOP;
+		case P0SITION_LOOP:	//位置环控制
+			Data->Control_Source.Speed_Source = P0SITION_LOOP;
+			Data->Control_Source.Current_Source = P0SITION_LOOP;
+			Data->Control_Source.Voltage_Source = P0SITION_LOOP;
 			switch (sub_work_model)
 			{
-				case NORMAL_CONTROL:		//常规控制
-					Data->Control_Source.Position_Source = NORMAL_CONTROL;
+				case DIRECT_POSITION:		//直接位置
+					Data->Control_Source.Position_Source = DIRECT_POSITION;
 				break;
 				case DEBUG_ENGINE:			//调试控制
 					Data->Control_Source.Position_Source = DEBUG_ENGINE;
@@ -164,8 +190,8 @@ uint8_t Model_Control(_Control_Data *Data,_Control_Status *Status)
 			Data->Control_Source.Voltage_Source = SPEED_LOOP;
 			switch (sub_work_model)
 			{
-				case NORMAL_CONTROL:		//常规控制
-					Data->Control_Source.Speed_Source = NORMAL_CONTROL;
+				case DIRECT_SPEED:			//直接速度
+					Data->Control_Source.Speed_Source = DIRECT_SPEED;
 				break;
 				case DEBUG_ENGINE:			//调试控制
 					Data->Control_Source.Speed_Source = DEBUG_ENGINE;
@@ -181,14 +207,14 @@ uint8_t Model_Control(_Control_Data *Data,_Control_Status *Status)
 			Data->Control_Source.Voltage_Source = CURRENT_LOOP;
 			switch (sub_work_model)
 			{
-				case NORMAL_CONTROL:		//常规控制
-					Data->Control_Source.Current_Source = NORMAL_CONTROL;
+				case DIRECT_CURRENT:		//直接电流
+					Data->Control_Source.Current_Source = DIRECT_CURRENT;
 				break;
-				case MTPA_CONTROL:			//最大转矩比控制
+				case MTPA_CONTROL:			//最大转矩比
 					Data->Control_Source.Current_Source = MTPA_CONTROL;
 				break;
-				case DEBUG_ENGINE:			//调试控制
-					Data->Control_Source.Current_Source = DEBUG_ENGINE;
+				case FIELD_WEAK:			//弱磁
+					Data->Control_Source.Current_Source = FIELD_WEAK;
 				break;
 				default:
 					Data->Control_Source.Current_Source = NULL_MODEL;
@@ -260,7 +286,7 @@ void Enable_Logic_Control(void)
 //1ms速度计算 M法测量
 void Speed_1MS(void)
 {
-	int32_t Speed;
+//	int32_t Speed;
 	// //判断是否首次进入1ms中断
 	// if(Work_Status.bits.Interrupt_1MS_Init == 0)
 	// {

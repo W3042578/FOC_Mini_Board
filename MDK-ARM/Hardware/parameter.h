@@ -4,7 +4,7 @@
 
 #include "stm32f1xx_hal.h"
  
-//置位定义
+//宏定义
 #define	 BIT0  0x01
 #define	 BIT1  0x02
 #define	 BIT2  0x04	
@@ -13,7 +13,15 @@
 #define	 BIT5  0x20	
 #define	 BIT6  0x40	
 #define	 BIT7  0x80	
-
+//中心对齐模式 time = 2*(分频+1)*(计数+1)/time_base
+#define		TS_COUNT			2249	//周期时间数 2249:16K 
+#define		DEAD_TIME			50		//死区时间 ns
+#define		INIT_SCALE			12		//电压直接输入放大比例位数
+#define		ADC_BIT				12		//adc采样位数
+#define     ADC_MAX_VOLATGE		3.3		//adc最大采样电压 v
+#define     ADC_RESISTANCE		75		//adc采样电阻 mΩ
+#define     ADC_SCALE			20		//adc运放比例值  
+#define     VIRTUAL_INCREMENT	128		//编码器校正虚拟角度增量  
 typedef union
 {
 	uint32_t All;
@@ -36,14 +44,16 @@ typedef union
 typedef  struct
 {
 	_Control_Word Control_Word;			//控制字
-	uint8_t		Open_Loop_Voltage;		//开环电压
+	int8_t		Open_Loop_Voltage;		//开环电压	单位V
+	int8_t		Command_Iq;				//电流环Iq_command 单位0.1A
+	int8_t		Direct_Current_Q;		//电流环iq
 	uint8_t 	Max_Voltage;			//最大母线电压
 
 	struct
 	{
 		int32_t		Position_Pulse;			//累计脉冲值
 		int32_t		Position_Pulse_Buffer;	//累计脉冲值缓冲
-		int32_t		Position_Loop_Increment;//位置环周期位置增量
+		int32_t		Position_Loop_Data_Increment;//位置环周期位置增量
 	}Pulse_Increment;			//脉冲增量
 	
 	struct
@@ -54,6 +64,7 @@ typedef  struct
 		uint32_t	Offest_Integral;		//位置数据累加存储值
 		uint16_t	Virtual_Angle;			//虚拟电角度
 		int32_t		Differ_Check;			//检查角度缓冲数组
+		uint16_t	Virtual_Increment;		//虚拟角度周期增量
 		uint16_t	Offest_Table_Count;		//线性补偿计数
 		uint16_t	Offest_Wait;			//位置数据获取间隔时间 单位：位置环周期
 		uint8_t		Offest_Model;			//校正内置模式 1：零位对齐 2：正向 3：反向
@@ -82,7 +93,6 @@ typedef union
 		struct
 		{
 			uint8_t 	Enable_Status:1;		//PWM使能状态
-			uint8_t 	Angle_Offest:1;			//编码器和电流获取修正值状态
 			uint8_t 	Duty_Model_Status:1;  	//占空比模式状态
 			uint8_t		Offest_Encoder:1;		//编码器零位校准
 			uint8_t		Offest_Current:1;		//电流修正
@@ -101,7 +111,7 @@ typedef union
 		{
 			uint8_t		ADC_Error:1;			//电流采样错误
 			uint8_t		Bus_Voltage:1;			//总线电压错误	
-			uint8_t		Encoder_Status:1;		//编码器状态错误
+			uint8_t		Encoder_Error:1;		//编码器状态错误
 			uint8_t		Encoder_Offset:1;		//编码器校正错误
 			uint8_t		Modbus_Status:1;		//Modbus通讯状态错误
 			uint8_t		IIC_Status:1;			//IIC通讯状态错误
@@ -136,8 +146,9 @@ void Control_Data_Update(_Control_Data *Word);		//控制数据更新
 void Control_Status_Update(_Control_Status *Status);//控制状态更新
 
 //标志位处理
-void _SET(uint8_t * data,uint8_t bit);
-void _CLEAN(uint8_t * data,uint8_t bit);
+void 	_SET(uint8_t * data,uint8_t bit);
+void 	_CLEAN(uint8_t * data,uint8_t bit);
+void	_NEGA(uint8_t * data,uint8_t bit);
 uint8_t _TEST(uint8_t * data,uint8_t bit);
 
 #endif

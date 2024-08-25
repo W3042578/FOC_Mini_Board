@@ -7,7 +7,7 @@
 #include "object_commicate.h"
 
 
-
+#define Slave_ID 0x01    	//定义modbus从机ID
 
 //查表方式实现Modbus校验
 static const uint8_t Modbus_CRC_Hig[] = {

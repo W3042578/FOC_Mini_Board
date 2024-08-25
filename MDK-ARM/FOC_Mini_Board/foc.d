@@ -35,3 +35,5 @@ foc_mini_board\foc.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 foc_mini_board\foc.o: ./Application/Function/basic_function.h
 foc_mini_board\foc.o: ./Hardware/parameter.h
 foc_mini_board\foc.o: Algorithm\control_loop.h
+foc_mini_board\foc.o: ../Inc/usart.h
+foc_mini_board\foc.o: ../Inc/main.h

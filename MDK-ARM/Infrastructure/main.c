@@ -66,22 +66,6 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-//重定向c库函数printf到串口DEBUG_USART，重定向后可使用printf函数
-int fputc(int ch, FILE *f)
-{
-	/* 发送一个字节数据到串口DEBUG_USART */
-	HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 1000);	
-	
-	return (ch);
-}
- 
-//重定向c库函数scanf到串口DEBUG_USART，重写向后可使用scanf、getchar等函数
-int fgetc(FILE *f)
-{		
-	int ch;
-	HAL_UART_Receive(&huart1, (uint8_t *)&ch, 1, 1000);	
-	return (ch);
-}
 /* USER CODE END 0 */
 
 /**
@@ -118,10 +102,11 @@ int main(void)
   MX_ADC2_Init();
   MX_SPI1_Init();
   MX_TIM1_Init();
-  MX_I2C1_Init();
+  // MX_I2C1_Init();  //I2C引脚暂作测试使用
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-	
+	TEST_GPIO_Init();
+
   //底层初始化配置
   STM32_Infrastructure_Init();
 
@@ -133,9 +118,8 @@ int main(void)
 
 	//点灯
 	HAL_GPIO_WritePin(LED_ERR_GPIO_Port, LED_ERR_Pin, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(LED_Status_GPIO_Port, LED_Status_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED_Status_GPIO_Port, LED_Status_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_RUN_GPIO_Port, LED_RUN_Pin, GPIO_PIN_RESET);
-
 
   /* USER CODE END 2 */
 
@@ -204,9 +188,8 @@ void SystemClock_Config(void)
 //ADC注入采样完成回调函数
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	
-//	HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_SET);//环路执行周期测试
-
+	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_SET);//环路执行周期测试
+  // HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_9);//环路执行周期测试
 	//获取a,b相电流采样值  开环给零电压测试 离开电机方向为负因此电流计算取符号
 	Motor1.Uadc = HAL_ADCEx_InjectedGetValue(&hadc1,ADC_INJECTED_RANK_1);
 	Motor1.Vadc = HAL_ADCEx_InjectedGetValue(&hadc2,ADC_INJECTED_RANK_1);
@@ -223,12 +206,12 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
 	
 	//STM32 HAL 三相PWM比较值设置
 	STM32_HAL_PWM_SET_Compare(&Motor1);
-	
+  //串口调试 示波界面
+	Uart_Loop_Debug_Write();
+  //环路执行周期测试 
+  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_RESET); 
 	//在同步注入中断回调中hal库默认关闭该中断使能，因此在执行完注入中断后再次打开中断使能
 	__HAL_ADC_ENABLE_IT(&hadc1, ADC_IT_JEOC);
-	
-//	HAL_GPIO_WritePin(Test1_GPIO_Port,Test1_Pin,GPIO_PIN_RESET); //环路执行周期测试
-
 }
 //定时器中断回调函数 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)

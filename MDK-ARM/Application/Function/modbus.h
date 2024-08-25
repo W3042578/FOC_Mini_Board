@@ -5,8 +5,8 @@
 
 
 #define RX_BUFF_LONG  30 	//接受缓冲区数据长度
-#define TX_BUFF_LONG  30	//发送缓冲区数据长度
-#define Slave_ID 0x01    	//定义从机ID
+#define TX_BUFF_LONG  80	//发送缓冲区数据长度
+
 
 //Modbus协议： ID号--ID   功能码--Function_Code  起始地址——Start_Address   寄存器数——Register_Number  字节数——Byte_Number  读取一个内容——Read_Data   
 //获取的校验码——CRC_RX_Data 自身计算的校验码——CRC_Self_Data	写入一个内容——Write_Data		写入十个内容——Write_TEN_Data[10]

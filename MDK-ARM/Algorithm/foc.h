@@ -3,11 +3,11 @@
 
 #include "stm32f1xx_hal.h"
 
-//为避免整形数据相除带小数部分丢失，进行数据比例放大 1:2^(_INIT_SCALE)
-#define		_INIT_SCALE		12 
-#define SQRT3		1.73206
-#define SQRT3_2		0.86603
-#define SQRT3_3		0.57735
+//宏定义
+#define 	SQRT3			1.73206
+#define 	SQRT3_2			0.86603
+#define 	SQRT3_3			0.57735
+
 typedef struct 
 {
 //电机参数
@@ -23,16 +23,17 @@ typedef struct
 	int16_t 	Ia_Offect,Ib_Offect;
 	int16_t 	Ialph,Ibeta;
 	int16_t 	Id,Iq;
-	uint16_t 	Ts_Count;				//拟合SVPWM电压参考矢量周期
+	uint16_t 	Ts_Count;			//拟合SVPWM电压参考矢量周期
 	uint16_t	Mechanical_Angle;	//机械角度
 	uint16_t 	Elecrical_Angle;	//电气角度
-	uint32_t 	Initial_Angle_Offset;	//零位修正角，对齐alpha轴
+	uint32_t 	Initial_Offset;		//零位修正角，对齐alpha轴
 	int32_t		Speed_Angle;		//机械转速
 	int32_t		Elecrical_Speed;	//电气转速We 单位rad/s
 	int16_t 	Sin_Angle;			//电角度sin、cos值
 	int16_t 	Cos_Angle;
 	uint16_t 	Ta,Tb,Tc;			//三相分配上桥打开时间（1：上桥打开，下桥关闭，0：下桥打开，上桥关闭）
-	uint16_t	Td_Count;					//死区时间对应计数值
+	uint16_t	Td_Count;			//死区时间对应计数值
+	// uint8_t		sector_test;
 	
 	uint8_t 	Direction;			//电机工作方向
 	uint8_t		Offest_Direction;	//电机修正方向
@@ -41,12 +42,10 @@ typedef struct
 
 typedef struct
 {
-	//采样电路
-	uint16_t	ADC_Scale;				//adc采样运放比例
-	uint16_t	ADC_Resistance;			//adc采样电阻 单位：毫欧
+	//电流采样
+	float		Scale_1_10;				//0.1A单位电流对应adc单位值
 
-
-	//驱动电路
+	//驱动死区
 	uint16_t	Dead_Time;				//驱动管死区时间，单位0.01us
 
 }_FOC_Driver;
@@ -61,6 +60,8 @@ void Park_Transform(_FOC_Motor *motor);
 void Inverse_Park_Transform(_FOC_Motor *motor);
 void SVPWM(_FOC_Motor *motor);
 void FOC_Control(_FOC_Motor *motor);
+
+void Uart_Loop_Debug_Write(void);
 
 //应用算法
 //最大转矩比控制MTPA

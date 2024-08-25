@@ -40,6 +40,8 @@ void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
+void TEST_GPIO_Init(void); //测试引脚PB9初始化
+
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

@@ -35,15 +35,23 @@ extern "C" {
 extern UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN Private defines */
-
+union     _Uart_Debug_Buffer
+{
+  uint32_t  un32;
+  int32_t   in32;
+  uint16_t  un16[2];
+  uint8_t   un8[4];
+  float     flo;
+};
 
 /* USER CODE END Private defines */
 
 void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void HAL_UART_Tx_End_Callback(UART_HandleTypeDef *huart);
 void uart_idleback(UART_HandleTypeDef *huart);
+
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

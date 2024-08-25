@@ -3,14 +3,12 @@
 #include "basic_function.h"
 #include "parameter.h"
 #include "control_loop.h"
+#include "usart.h"
 
-//定义电机结构体Motor1
+//全局变量定义
 _FOC_Motor Motor1;		
 _FOC_Driver Driver1;
-// uint16_t test1,test2,test3;
-//编码器输入数据统一为16位，进行查表
-//电流12位采样
-
+uint16_t time_all,time_limit;
 void Clark_Transform(_FOC_Motor *motor)
 {
 	motor->Ialph = motor->Ia;
@@ -101,19 +99,20 @@ void SVPWM(_FOC_Motor *motor)
 		break;
 	}
 	
-	//使用Ts_Count计数值表示满占空比  _INIT_SCALE 输入数据放大比例
-	time_lead = ((uint32_t)(SQRT3 * u_lead * motor->Ts_Count / motor->Udc)) >> _INIT_SCALE;
-	time_backward = ((uint32_t)(SQRT3 * u_backward * motor->Ts_Count /motor->Udc)) >> _INIT_SCALE;
+	//使用Ts_Count计数值表示满占空比  INIT_SCALE 输入数据放大比例
+	time_lead = ((uint32_t)(SQRT3 * u_lead * motor->Ts_Count / motor->Udc)) >> INIT_SCALE;
+	time_backward = ((uint32_t)(SQRT3 * u_backward * motor->Ts_Count /motor->Udc)) >> INIT_SCALE;
 
 	//两相邻矢量作用时间限制，过调制限制或者弱磁MTPA
-	uint16_t time_all = time_backward + time_lead;
-	uint16_t time_limit = 0.96 * motor->Ts_Count;
+	// uint16_t time_all = time_backward + time_lead;
+	// uint16_t time_limit = 0.96 * motor->Ts_Count;
+	time_all = time_backward + time_lead;
+	time_limit = 0.96 * motor->Ts_Count;
 	if(time_all > time_limit)//限制满输出，留出采样时间,超出缩放
 	{
 		time_lead = time_limit * time_lead  / time_all;
 		time_backward = time_limit * time_backward  / time_all;
 	}
-
 	//分配三相PWM计数值
 	//T0不一定需要等于T7，发波方式和谐波成分与THD相关  https://blog.csdn.net/weixin_51553819/article/details/121856985
 	//取T0 = T7 则 （Tx + Ty）/2 必在PWM 50% 输出点上 
@@ -179,24 +178,19 @@ void SVPWM(_FOC_Motor *motor)
 //主循环
 void FOC_Control(_FOC_Motor *motor)
 { 
-	_Control_Data * Data = &Control_Data;//获取控制数据
-	
+	static		uint8_t		Loop_Count = 0;		//环路周期计数
+	_Control_Data	*Data = &Control_Data;		//获取控制数据
 	//模式处理
 	Model_Control(&Control_Data,&Control_Status);
 
 	//三环控制
-	if((Loop_Count & 0x04) == 0)//位置环
+	if((Loop_Count & 0x03) == 0)
 	{
-		Position_Loop_Control(&Control_Data.Control_Source.Position_Source,&Position_Loop);
+		Position_Loop(&Control_Data.Control_Source.Position_Source,&Position_Loop_Data);//位置环	
+		Speed_Loop(&Control_Data.Control_Source.Speed_Source,&Speed_Loop_Data);			//速度环
 	}
-	if((Loop_Count & 0x02) == 0)//速度环
-	{
-		Speed_Loop_Control(&Control_Data.Control_Source.Speed_Source,&Speed_Loop);
-	}
-
-	Current_Loop_Control(&Control_Data.Control_Source.Current_Source,&Current_Q_Loop);//电流环
-	Current_Loop_Control(&Control_Data.Control_Source.Current_Source,&Current_D_Loop);
-	Open_Voltage_Control(&Control_Data.Control_Source.Voltage_Source,&Open_Voltage_Loop);//电压开环
+	Current_Loop(&Control_Data.Control_Source.Current_Source,&Current_Loop_Data);		//电流环
+	Open_Voltage_Loop(&Control_Data.Control_Source.Voltage_Source,&Open_Voltage_Data);	//电压开环
 	
 	if(Control_Data.Control_Source.Voltage_Source != DUTY_CONTROL)	//非占空比模式
 	{
@@ -211,7 +205,7 @@ void FOC_Control(_FOC_Motor *motor)
 	}
 
 	Loop_Count ++;			//环路计数
-	Loop_Count %= 8;
+	Loop_Count %= 16;
 }	
 
 //应用算法

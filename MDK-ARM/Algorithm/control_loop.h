@@ -12,13 +12,14 @@ typedef  struct		//PID参数
 	int32_t		Error,Last_Error,Expect,Feedback;	
 	int32_t		Proportion_Sum;
 	int32_t		Integral_Sum;
+	int32_t		Integral_Data;
 	int32_t		Difference_Sum;
 	int32_t		Output_Sum;
 	
-	uint32_t  	Proportion_Limit;
-	uint32_t	Integral_Limit;
-	uint32_t	Difference_Limit;
-	uint32_t	Output_limit;		//输出限制
+	int32_t  	Proportion_Limit;
+	int32_t		Integral_Limit;
+	int32_t		Difference_Limit;
+	int32_t		Output_limit;		//输出限制
 }_PID_Control;
 
 typedef struct 		//前馈参数
@@ -51,29 +52,26 @@ typedef  struct		//环路控制参数
 enum Loop_Control_Word		//环路控制字枚举
 {
 	NO_USE 			= 0,	//PID结果直接输出
-	PID_FILTER		= 1,	//对PID结果滤波输出
-	FORWARD_CONTROL = 2,	//使用前馈控制
-	FORWARD_FILTER	= 3,	//PID结果结合前馈结果滤波
+	PID_FILTER		= 1,	//PID结果滤波输出
+	FORWARD_CONTROL = 2,	//增加前馈
 };
-	
-void Open_Voltage_Control(uint8_t *source,_Control_Loop *loop);	//电压开环
-void Parallel_PID(_PID_Control *pid_control);					//抗饱和并联PID
-void Current_Loop_Control(uint8_t *source,_Control_Loop *loop);	//三环控制
-void Speed_Loop_Control(uint8_t *source,_Control_Loop *loop);
-void Position_Loop_Control(uint8_t *source,_Control_Loop *loop);
-void Control_Loop_Init(_Control_Loop *loop);					//PID控制环具体参数初始化
-void Control_Loop_Update(_Control_Loop *loop);
-uint8_t Current_Loop_Model(_Forward *forward);
-uint8_t Speed_Loop_Model(_Forward *forward);
-uint8_t Position_Loop_Model(_Forward *forward);
 
+void Loop_Init(void);
+
+void Open_Voltage_Loop(uint8_t *source,_Control_Loop *loop);	//电压开环
+void Current_Loop(uint8_t *source,_Control_Loop *loop);	//三环控制
+void Speed_Loop(uint8_t *source,_Control_Loop *loop);
+void Position_Loop(uint8_t *source,_Control_Loop *loop);
+	
+uint8_t Current_Loop_Model(_Forward *forward);
+uint8_t Speed_Loop_Data_Model(_Forward *forward);
+uint8_t Position_Loop_Data_Model(_Forward *forward);
 
 //全局变量
-extern	_Control_Loop	Open_Voltage_Loop;
-extern  _Control_Loop	Current_Q_Loop;
-extern  _Control_Loop	Current_D_Loop;
-extern	_Control_Loop 	Speed_Loop;
-extern	_Control_Loop 	Position_Loop;
+extern	_Control_Loop	Open_Voltage_Data;
+extern  _Control_Loop	Current_Loop_Data;
+extern	_Control_Loop 	Speed_Loop_Data;
+extern	_Control_Loop 	Position_Loop_Data;
 extern	_PID_Control 	Current_Q_PID;
 extern	_PID_Control 	Current_D_PID;
 extern	_PID_Control 	Speed_PI;

@@ -8,8 +8,7 @@
 //本文件针对不同编码器作输入转换，最终输入给16位绝对值角度、速度、相对多圈位置数据
 
 //编码器状态位
-#define     Encoder_Init_BIT    BIT0        //初始化完成标志
-#define     Encoder_Posi_BIT    BIT1        //编码器反向标志
+#define     Encoder_Posi_BIT    BIT0        //编码器反向标志
 
 _Encoder Encoder1;
 
@@ -20,27 +19,31 @@ _Encoder _MT6813 =
     .Type = MT6813,                 //编码器类型
     .Single_Bit = 14,               //单圈位数
     .Multi_Bit = 0,                 //多圈位数
-    .Encoder_Status = 2,            //编码器反向
+    .Encoder_Deviation = 30,        //静态偏差
+    .Encoder_Status = 0,            //编码器正向
     .Encoder_Com.Tx_Encoder = {0x8300,0x0000},
-    .Encoder_Com.Com_Number =2
+    .Encoder_Com.Com_Number = 2
 };
 _Encoder _MT6816 =
 {
     .Type = MT6816,                 //编码器类型
     .Single_Bit = 17,               //单圈位数
     .Multi_Bit = 8,                 //多圈位数
+    .Encoder_Deviation = 30,        //静态偏差
     .Encoder_Status = 0,            //编码器正向
     .Encoder_Com.Tx_Encoder = {0x8300,0x0000},
-    .Encoder_Com.Com_Number =2
+    .Encoder_Com.Com_Number = 2
+    
 };
 _Encoder _KTH7812 =
 {
     .Type = KTH7812,                //编码器类型
     .Single_Bit = 16,               //单圈位数
     .Multi_Bit = 0,                 //多圈位数
+    .Encoder_Deviation = 50,        //静态偏差
     .Encoder_Status = 0,            //编码器正向
     .Encoder_Com.Tx_Encoder = {0x0000},
-    .Encoder_Com.Com_Number =2
+    .Encoder_Com.Com_Number = 2
 };
 
 //初始化编码器变量
@@ -71,6 +74,7 @@ void Encoder_Get_Angle(_Encoder *encoder)
     uint16_t    *tx_data,*rx_data;
     uint8_t     com_number;
     static uint8_t limit = 0;
+    static uint8_t init = 0;
 
     tx_data = encoder->Encoder_Com.Tx_Encoder;
     rx_data = encoder->Encoder_Com.Rx_Encoder;
@@ -115,17 +119,20 @@ void Encoder_Get_Angle(_Encoder *encoder)
     //多圈位置计算
     if(encoder->Multi_Bit != 0)
     {
-        //多圈编码器绝对位置无需增量式计算
-        angle_multi = angle_multi_transfer * 65536 + angle_single;
+        //多圈编码器绝对位置无需增量式计算 需要判断多圈方向
+        if(!_TEST(&encoder->Encoder_Status,Encoder_Posi_BIT))
+            angle_multi = angle_multi_transfer * 65536 + angle_single;
+        else
+            angle_multi = ((2 << encoder->Multi_Bit) - angle_multi_transfer) * 65536 + angle_single;
     }
     else
     {
         //单圈编码器多圈位置用增量累加计算
         //初始化单圈位置缓冲
-        if(!_TEST(&encoder->Encoder_Status,Encoder_Init_BIT) && (limit != 0))
+        if((init == 0) && (limit != 0))
         {
             encoder->Encoder_Pulse_Buffer = angle_single;
-            _SET(&encoder->Encoder_Status,Encoder_Init_BIT);
+            init = 1;
         }
         
          angle_difference = angle_single - encoder->Encoder_Pulse_Buffer;
@@ -146,7 +153,7 @@ void Encoder_Get_Angle(_Encoder *encoder)
     //SPI通讯拉低片选 开始通讯获取
     HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_RESET);
     HAL_SPI_TransmitReceive_DMA(&hspi1,(uint8_t*)tx_data,(uint8_t*)rx_data,com_number);
-    if(!_TEST(&encoder->Encoder_Status,Encoder_Init_BIT))
+    if(init == 0)
     {
         limit ++;
     }

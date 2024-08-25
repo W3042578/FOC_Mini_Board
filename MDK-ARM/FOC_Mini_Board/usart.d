@@ -34,5 +34,7 @@ foc_mini_board\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h
 foc_mini_board\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 foc_mini_board\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 foc_mini_board\usart.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
+foc_mini_board\usart.o: ./Algorithm/foc.h
 foc_mini_board\usart.o: Infrastructure\usart.h
 foc_mini_board\usart.o: Infrastructure\main.h
+foc_mini_board\usart.o: ./Hardware/parameter.h
