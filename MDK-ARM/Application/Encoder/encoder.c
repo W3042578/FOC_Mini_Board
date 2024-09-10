@@ -11,7 +11,7 @@
 #define     Encoder_Posi_BIT    BIT0        //编码器反向标志
 
 _Encoder Encoder1;
-
+uint16_t	Test1;
 
 //SPI通讯式编码器变量
 _Encoder _MT6813 =
@@ -93,13 +93,14 @@ void Encoder_Get_Angle(_Encoder *encoder)
             angle_single_transfer = *rx_data;
             break;
         default:
-            break;
+            break;	
     }
-    
+    Test1 = angle_single_transfer;
+//			Test1 = SPI_CS_Pin;
 
     //单圈位置计算
     if(encoder->Single_Bit <= 16)
-    {
+    {							
         //判断编码器方向与电机Iq方向是否相反
         if(!_TEST(&encoder->Encoder_Status,Encoder_Posi_BIT))
             angle_single = angle_single_transfer << (16 - encoder->Single_Bit);

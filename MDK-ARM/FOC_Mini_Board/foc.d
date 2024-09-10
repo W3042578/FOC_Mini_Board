@@ -1,7 +1,7 @@
 foc_mini_board\foc.o: Algorithm\foc.c
 foc_mini_board\foc.o: Algorithm\foc.h
 foc_mini_board\foc.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
-foc_mini_board\foc.o: ../Inc/stm32f1xx_hal_conf.h
+foc_mini_board\foc.o: .\Infrastructure\stm32f1xx_hal_conf.h
 foc_mini_board\foc.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h
 foc_mini_board\foc.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h
 foc_mini_board\foc.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h
@@ -35,5 +35,5 @@ foc_mini_board\foc.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
 foc_mini_board\foc.o: ./Application/Function/basic_function.h
 foc_mini_board\foc.o: ./Hardware/parameter.h
 foc_mini_board\foc.o: Algorithm\control_loop.h
-foc_mini_board\foc.o: ../Inc/usart.h
-foc_mini_board\foc.o: ../Inc/main.h
+foc_mini_board\foc.o: .\Infrastructure\usart.h
+foc_mini_board\foc.o: .\Infrastructure\main.h

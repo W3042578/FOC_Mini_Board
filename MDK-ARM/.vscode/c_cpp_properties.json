@@ -3,7 +3,6 @@
         {
             "name": "FOC_Mini_Board",
             "includePath": [
-                "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\Inc",
                 "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\Drivers\\STM32F1xx_HAL_Driver\\Inc",
                 "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\Drivers\\STM32F1xx_HAL_Driver\\Inc\\Legacy",
                 "f:\\STM32\\Code_Generator\\FOC_Mini_Board\\Drivers\\CMSIS\\Device\\ST\\STM32F1xx\\Include",

@@ -32,10 +32,11 @@ void Control_Data_Init(_Control_Data *Data)
 	//工作模式
 	Data->Control_Word.All = 0;
 	Data->Control_Word.bits.Work_Model = 1;
-	Data->Control_Word.bits.Sub_Work_Model = 6;
+	Data->Control_Word.bits.Sub_Work_Model = 8;
 	
 	//编码器
-	Data->Control_Word.bits.Encoder_Type = KTH7812;	
+	// Data->Control_Word.bits.Encoder_Type = KTH7812;	
+	Data->Control_Word.bits.Encoder_Type = MT6813;	
 
 	//电压开环
 	Data->Open_Loop_Voltage = 1;		//开环电压

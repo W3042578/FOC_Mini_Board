@@ -157,25 +157,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>113</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134233302</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>.\Algorithm\foc.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\FOC_Mini_Board\Algorithm/foc.c\113</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
           <LineNumber>3004</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134234580</Address>
+          <Address>134234392</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -203,7 +187,7 @@
         <Ww>
           <count>1</count>
           <WinNumber>2</WinNumber>
-          <ItemText>\\FOC_Mini_Board\Application/Encoder/encoder.c\Encoder1,0x0A</ItemText>
+          <ItemText>\\FOC_Mini_Board\Application/Encoder/encoder.c\Encoder1,0x10</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
@@ -254,6 +238,36 @@
           <count>11</count>
           <WinNumber>2</WinNumber>
           <ItemText>Test_Uart,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>OSC_Turn,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>13</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>SEND_NUMBER,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>14</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>frame_length,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>15</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>OSC_Test,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>16</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>Test1,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>17</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>SPI_CS_Pin</ItemText>
         </Ww>
       </WatchWindow2>
       <MemoryWindow1>

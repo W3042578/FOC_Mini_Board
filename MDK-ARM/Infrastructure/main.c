@@ -188,7 +188,7 @@ void SystemClock_Config(void)
 //ADC注入采样完成回调函数
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_SET);//环路执行周期测试
+//	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_SET);//环路执行周期测试
   // HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_9);//环路执行周期测试
 	//获取a,b相电流采样值  开环给零电压测试 离开电机方向为负因此电流计算取符号
 	Motor1.Uadc = HAL_ADCEx_InjectedGetValue(&hadc1,ADC_INJECTED_RANK_1);
@@ -209,7 +209,7 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)
   //串口调试 示波界面
 	Uart_Loop_Debug_Write();
   //环路执行周期测试 
-  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_RESET); 
+//  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,GPIO_PIN_RESET); 
 	//在同步注入中断回调中hal库默认关闭该中断使能，因此在执行完注入中断后再次打开中断使能
 	__HAL_ADC_ENABLE_IT(&hadc1, ADC_IT_JEOC);
 }

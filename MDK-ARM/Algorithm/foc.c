@@ -103,9 +103,7 @@ void SVPWM(_FOC_Motor *motor)
 	time_lead = ((uint32_t)(SQRT3 * u_lead * motor->Ts_Count / motor->Udc)) >> INIT_SCALE;
 	time_backward = ((uint32_t)(SQRT3 * u_backward * motor->Ts_Count /motor->Udc)) >> INIT_SCALE;
 
-	//两相邻矢量作用时间限制，过调制限制或者弱磁MTPA
-	// uint16_t time_all = time_backward + time_lead;
-	// uint16_t time_limit = 0.96 * motor->Ts_Count;
+	//两相邻矢量作用时间限制，调制限制
 	time_all = time_backward + time_lead;
 	time_limit = 0.96 * motor->Ts_Count;
 	if(time_all > time_limit)//限制满输出，留出采样时间,超出缩放
@@ -205,7 +203,7 @@ void FOC_Control(_FOC_Motor *motor)
 	}
 
 	Loop_Count ++;			//环路计数
-	Loop_Count %= 16;
+	Loop_Count &= 0x1F;
 }	
 
 //应用算法
