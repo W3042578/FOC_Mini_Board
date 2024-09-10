@@ -38,6 +38,8 @@ Hardware包含硬件和底层的参数配置
 
 Infrastructure包含底层文件配置，从CubeMx中底层代码生成后部分修改拷贝过来
 
+硬件原理图：https://oshwhub.com/wjz-wind/low_power_driver_motor_board_copy
+
 ------------------------------------------------------------------------------
 
 8010 gimbal motor FOC control program
@@ -73,3 +75,5 @@ Application includes encoder SPI communication, serial port modbus communication
 Hardware includes hardware and underlying parameter configurations
 
 Infrastructure includes underlying file configurations, which are partially modified and copied from CubeMx after generating the underlying code
+
+Hardware schematic diagram：https://oshwhub.com/wjz-wind/low_power_driver_motor_board_copy
